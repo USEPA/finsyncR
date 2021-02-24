@@ -1,0 +1,152 @@
+---
+title: "Getting Started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GettingStarted}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup}
+##Read in the StreamData R package
+library(StreamData)
+```
+
+# Biodata
+
+Currently, there are two groups of functions in the `StreamData` R package. The first group is the *BioData* set of functions: `getInvertData()`, `getAlgaeData()`, and `getFishData()`. The functions are similar in their parameters, but each has unique aspects that users should be aware of.
+
+Let's start with the `getInvertData()` function. This function retrieves, cleans, and compiles the stream macro-invertebrate BioData from the USGS. Currently, this function corrects for differences in sample splitting that varied by sampling and identification methods. However, there are still some data artifacts that have yet to be worked through, so this data should be considered "preliminary". 
+
+The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `program`, `lifestage`, and `abunMeasure`.
+`dataType` refers to whether the site by taxa matrix should contain abundance (`dataType = "abun"`) or presence/absence (coded as 1/0; `dataType = "occur"`) values.
+`taxonLevel` refers to the taxonomic resolution (Class, Family, etc.) at which the site by taxa matrix will be generated. These values must start with a capital letter. Further, from conversations with USGS employees familiar with these data, we advise setting `taxaLevel` equal to `"Genus"` or higher taxonomic resolution.
+`program` refers to the program database in which the data originated, we recommend keeping this set to the default of `"National Water Quality Assessment"`, because of the standard methodologies employed by this program.
+`lifestage` refers to whether the generated site by taxa matrix should include lifestage information for each of the taxa/individuals collected. If `lifestage = TRUE`, the generated matrix will have separate columns for the various lifestages collected for each taxa.
+`abunMeasure` refers to whether the abundance values in the generated site by taxa matrix are density values (individuals per m^2^; `abunMeasure = "density"`) or sample/identification method-adjusted abundance values (individuals; `abunMeasure = "abundance"`).
+
+```{r Invertebrates}
+
+##This code will generate density estimates at the family level for all samples
+##in the NAWQA database. Lifestage information will be ignored.
+
+Inverts <- getInvertData(dataType = "abun",
+                         taxonLevel = "Family",
+                         program = "National Water Quality Assessment",
+                         lifestage = FALSE,
+                         abunMeasure = "density")
+
+head(Inverts)[,1:35]
+
+```
+
+
+The second function in the *getBioData* group of functions is`getAlgaeData()`. This function retrieves, cleans, and compiles the stream algae BioData from the USGS. This function will retrieve either phytoplankton or periphyton data, not both simultaneously, as abundance/density values are not equivalent for these data (cells per cm^2^ or cells per mL for periphyton and phytoplankton, respectively).
+
+The parameters in the `getAlgaeData()` function are `algType`, `dataType`, `taxonLevel`, and `program`.
+`algType` refers to whether the generated site by taxa matrix should be periphyton (`algType = "peri"`) or phytoplankton (`algType = "phyto"`). 
+`dataType` refers to whether the site by taxa matrix should contain abundance (`dataType = "abun"`) or presence/absence (coded as 1/0; `dataType = "occur"`) values. NOTE: if `algType = "peri"` AND `dataType = "occur"`, the generated site by taxa matrix will include samples from "AQMH" sample types, which are "Periphyton Multiple Habitat" and are samples collected from multiple habitats and provide higher species/taxa counts from the same stream reach, but lack area sampled information. Thus, the `dataType = "occur"` and `dataType = "abun"` will yield different numbers of rows/samples when `algType = "peri"`.
+`taxonLevel` refers to the taxonomic resolution (Class, Family, etc.) at which the site by taxa matrix will be generated. These values must start with a capital letter. Further, from conversations with USGS employees familiar with these data, we advise setting `taxaLevel` equal to `"Genus"` or higher taxonomic resolution.
+`program` refers to the program database in which the data originated, we recommend keeping this set to the default of `"National Water Quality Assessment"`, because of the standard methodologies employed by this program.
+
+Finally, unlike the `getInvertData()` function, the `getAlgaeData()` function lacks the `abunMeasure` parameter, because all abundance counts are densities (cells per cm^2^ or cells per mL for periphyton and phytoplankton, respectively). 
+
+```{r}
+##Get phytoplankton abundance (density) data
+Phytoplankton <- getAlgaeData(algType = "phyto",
+                              dataType = "abun",
+                              taxonLevel = "Family",
+                              program = "National Water Quality Assessment")
+head(Phytoplankton)[,1:35]
+
+##Get periphyton occurrence (presence/absence) data
+Periphyton <- getAlgaeData(algType = "peri",
+                              dataType = "occur",
+                              taxonLevel = "Family",
+                              program = "National Water Quality Assessment")
+head(Periphyton)[,1:35]
+```
+
+
+The last function in the *getBioData* group of functions is `getFishData()`. This function retrieves, cleans, and compiles the stream fish BioData from the USGS. Because there were differences in how fish were sampled (e.g., netting, electroshocking, and snorkeling), sampling methodologies are retained, as it is difficult to combine samples from these disparate methods. However, we provide for the standardization of abundances within sample methods (individuals per unit effort per meter of stream sampled). In the future, we plan to implement a multigear mean standardization (per [Gibson-Reinemer et al. 2017](https://doi.org/10.1139/cjfas-2016-0003)), which will allow for the joining of samples taken with disparate methods into a single sample per site.
+
+The parameters in the `getFishData()` function are `dataType`, `taxonLevel`, `program`, `standardize`.
+`dataType` refers to whether the site by taxa matrix should contain abundance (`dataType = "abun"`) or presence/absence (coded as 1/0; `dataType = "occur"`) values.
+`taxonLevel` refers to the taxonomic resolution (Class, Family, etc.) at which the site by taxa matrix will be generated. These values must start with a capital letter. Further, from conversations with USGS employees familiar with these data, we advise setting `taxaLevel` equal to `"Genus"` or higher taxonomic resolution.
+`program` refers to the program database in which the data originated, we recommend keeping this set to the default of `"National Water Quality Assessment"`, because of the standard methodologies employed by this program.
+`standardize` refers to whether the abundance values in the site by taxa matrix should be standardized by unit effort (individuals per unit effort per meter sampled). Specifically, abundances are divided by the seconds shocked, number of seine hauls, etc. These values are then  divided by the stream length sampled. It is highly recommended that users set `standardize = TRUE` if they are comparing abundance values across sites.
+Note: ~35 samples lacked the required standardization information. Therefore, if you are interested in occurrence (presence/absence) data only, then set `standardize = FALSE` and `dataType = "occur"`. However, be aware that setting `standardize = FALSE` will result in a larger dataset with additional samples/sites than when `standardize = TRUE`.
+
+```{r Fish}
+
+##This code will generate density estimates at the family level for all samples
+##in the NAWQA database.
+
+Fish <- getFishData(dataType = "abun",
+                    taxonLevel = "Family",
+                    program = "National Water Quality Assessment",
+                    standardize = TRUE)
+
+head(Fish)[,1:35]
+
+```
+
+
+# Pesticide Data
+
+Another function in the `StreamData` package is `getCountyPest()`, which provides access to county-level pesticide use estimates for user-specified sites and years. This function returns a site by year dataframe of county-level pesticides use estimates in kilograms.
+
+The parameters in `getCountyPest()` are `data`, `ePest`, `lagTime`, `lagType`, `pestLevel`, and `pestLevelName`.
+`data` is a user-provided dataset that needs to have two columns: `SiteNumber` and `CollectionYear`. The site numbers need to be those found in the USGS/NWIS data and must have a `"USGS-"` prefix. Be aware that there are leading zeros in the USGS/NWIS site numbers, these must be present.
+`ePest` refers to the pesticide use estimate: `"low"` or `"high"`.
+`lagTime` refers to the number of years over which the pesticide use estimates should be summarized. `0` returns pesticide use estimates in the given year(s) only.
+`lagType` specifies whether to take a `"sum"` or a `"mean"` over years. Can only be used if `lagTime` is greater than 0.
+`pestLevel` specifies whether to summarize pesticide use estimates according to `"type"`, `"class"`, or `"compound"`.
+`pestLevelName` specifies the names of the pesticide types, classes, or individual compounds. A list of types, classes, and individual compounds can be found in an internal dataset: `StreamData:::.pest.info`.
+
+Note: Not every county has an estimate for each of the 483 pesticides in every year. We have set `na.rm = TRUE` when means and sums are calculated, so we inherently assume use is 0 when not provided. Seed coats including many neonicotinoids are not included in pesticide use estimates. Pesticide use estimates are based on agriculture alone.
+
+```{r Pesticide Estimate}
+
+## from site number "05276005" from 1997-1999 (2 year lag) for "insecticide",
+## "herbicide", and "synthetic_fungicide".
+
+dat <- data.frame(SiteNumber = "USGS-05276005",
+                 CollectionYear = 1999)
+
+getCountyPest(data=dat,
+              ePest = "high",
+              lagType = "sum",
+              lagTime = 2,
+              pestLevel = "type",
+              pestLevelName = c("insecticide",
+                                "herbicide",
+                                "synthetic_fungicide"))
+
+
+## from site number "05276005" for 1999 and 2010 for "insecticide",
+## "herbicide", and "synthetic_fungicide".
+
+dat2 <- data.frame(SiteNumber = c("USGS-05276005",
+                                  "USGS-05276005"), 
+                 CollectionYear = c(1999,
+                                    2010))
+
+getCountyPest(data=dat2,
+              ePest = "low",
+              lagType = "sum",
+              lagTime = 0,
+              pestLevel = "type",
+              pestLevelName = c("insecticide",
+                                "herbicide",
+                                "synthetic_fungicide"))
+  
+
+## See what compounds, classes, and types of pesticides are available.
+
+pestinfo <- StreamData:::.pest.info
+head(pestinfo)
+
+```
+
+If you have any questions or any issues with these functions, please reach out to Samantha Rumschlag (<srumschl@nd.edu>) or Michael Mahon (<mmahon4@nd.edu>).
