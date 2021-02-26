@@ -7,8 +7,9 @@
 
 <!-- badges: end -->
 
-The goal of StreamData is to provide easy access to USGS stream BioData,
-water quality data (to be included in the future), and pesticide data.
+The goal of StreamData is to provide easy access and automated data
+management to USGS stream BioData, pesticide county use estimates, and
+measured water quality data.
 
 ## Installation
 
@@ -30,8 +31,8 @@ You can install the released version of `StreamData` from
 
 ## Example
 
-This is a basic example which shows you how to use one of the getBioData
-set of functions to access the fish dataset.
+This is a basic example which shows you how to use one of the
+*getBioData* set of functions to access the fish dataset.
 
 ``` r
 library(StreamData)
