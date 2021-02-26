@@ -103,7 +103,6 @@ getFishData <- function(dataType = "abun",
                   PublishedTaxonNameLevel, PublishedTaxonName, Superclass, Class,
                   Subclass, Superorder, Order, Superfamily, Family, Subfamily,
                   Genus, Species, Subspecies) %>%
-<<<<<<< HEAD
     tidyr::unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
     tidyr::unite(SampleID, c("SIDNO",
                       "SiteNumber",
@@ -114,29 +113,13 @@ getFishData <- function(dataType = "abun",
     dplyr::mutate(SumAbundance = sum(Abundance, na.rm = TRUE)) %>%
     dplyr::ungroup() %>%
     dplyr::select(-SampleID, -Abundance)
-=======
-    unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
-    unite(SampleID, c("SIDNO",
-                      "SiteNumber",
-                      "CollectionDate",
-                      "PublishedTaxonName"), remove = FALSE) %>%
-    mutate(CollectionDate = as.Date(CollectionDate)) %>%
-    group_by(SampleID) %>%
-    mutate(SumAbundance = sum(Abundance, na.rm = TRUE)) %>%
-    ungroup() %>%
-    select(-SampleID, -Abundance)
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   ##Need to get Lat, Long, HUC, Drainage Area
   site <- utils::read.csv(system.file("extdata",
                                "20201217.0745.SiteInfo.csv",
                                package = "StreamData"),
                    colClasses = c("SiteNumber" = "character")) %>%
-<<<<<<< HEAD
     dplyr::select(SiteNumber, Latitude_dd, Longitude_dd,
-=======
-    select(SiteNumber, Latitude_dd, Longitude_dd,
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
            CoordinateDatum,
            HUCCode, DrainageArea_mi2,
            SiteTypeName,
@@ -153,11 +136,7 @@ getFishData <- function(dataType = "abun",
   }
 
   sample = sample %>%
-<<<<<<< HEAD
     dplyr::select(SIDNO, ReachLengthFished_m)
-=======
-    select(SIDNO, ReachLengthFished_m)
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   samplemethod = utils::read.csv(system.file("extdata",
                                       "20201217.0745.FishMethodAndSubreachInfo.csv",
@@ -168,22 +147,13 @@ getFishData <- function(dataType = "abun",
     colnames(samplemethod)[1] = "SIDNO"
   }
   samplemethod = samplemethod %>%
-<<<<<<< HEAD
     tidyr::unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
     dplyr::select(SIDNO_MethodCode,
-=======
-    unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
-    select(SIDNO_MethodCode,
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
            NumberSeineHauls, NumberStationarySetsKicks, NumberSnorkelingTransects,
            SecondsShockTime)
 
   ##Join the datasets
-<<<<<<< HEAD
   fish_info = dplyr::left_join(dplyr::left_join(dplyr::left_join(fishup,
-=======
-  fish_info = left_join(left_join(left_join(fishup,
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                             site,
                                             by = "SiteNumber"),
                                   sample,
@@ -194,7 +164,6 @@ getFishData <- function(dataType = "abun",
 
 
   fish_comm = fish_info %>%
-<<<<<<< HEAD
     dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
     dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
     tidyr::unite(UNIQUE, c(SIDNO, MethodCode, all_of(taxonLevel)), remove = FALSE) %>%
@@ -206,19 +175,6 @@ getFishData <- function(dataType = "abun",
            -PublishedTaxonNameLevel) %>%
     dplyr::select(-tidyselect::any_of(mycols)) %>%
     tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
-=======
-    filter(PublishedTaxonNameLevel %in% taxcols) %>%
-    filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
-    unite(UNIQUE, c(SIDNO, MethodCode, all_of(taxonLevel)), remove = FALSE) %>%
-    group_by(UNIQUE) %>%
-    mutate(SumAbundance = sum(SumAbundance)) %>%
-    slice(1) %>%
-    ungroup() %>%
-    select(-UNIQUE, -SIDNO_MethodCode, -PublishedTaxonName,
-           -PublishedTaxonNameLevel) %>%
-    select(-any_of(mycols)) %>%
-    pivot_wider(names_from = all_of(taxonLevel),
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                 names_prefix = "tax_",
                 values_from = SumAbundance,
                 values_fill = 0)
@@ -231,24 +187,15 @@ getFishData <- function(dataType = "abun",
     ##For some reason there are some zeros for standardize method
 
     fish_comm2 <- fish_comm %>%
-<<<<<<< HEAD
       dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
                !is.na(NumberStationarySetsKicks) |
                !is.na(NumberSnorkelingTransects)) %>%
       dplyr::filter(!is.na(ReachLengthFished_m))%>%
       dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
-=======
-      filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
-               !is.na(NumberStationarySetsKicks) |
-               !is.na(NumberSnorkelingTransects)) %>%
-      filter(!is.na(ReachLengthFished_m))%>%
-      mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                   "Seine",
                                   ifelse(grepl("Snork", MethodCode, fixed = TRUE),
                                          "Snorkel",
                                          "Shocking"))) %>%
-<<<<<<< HEAD
       dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
       dplyr::group_by(SIDNO, MethodBasic) %>%
       dplyr::mutate(across(contains("tax_"),
@@ -257,45 +204,24 @@ getFishData <- function(dataType = "abun",
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
-=======
-      mutate(MinutesShockTime = SecondsShockTime / 60) %>%
-      group_by(SIDNO, MethodBasic) %>%
-      mutate(across(contains("tax_"),
-                    sum)) %>%
-      mutate(MinutesShockTime = sum(MinutesShockTime, na.rm = TRUE)) %>%
-      slice(1) %>%
-      ungroup() %>%
-      mutate(StandardMethod = ifelse(MethodBasic == "Seine",
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                      rowSums(across(c("NumberSeineHauls",
                                                       "NumberStationarySetsKicks")),
                                              na.rm = TRUE),
                                      ifelse(MethodBasic == "Shocking",
                                             MinutesShockTime,
                                             NumberSnorkelingTransects))) %>%
-<<<<<<< HEAD
       dplyr::relocate(tidyselect::contains("tax_"),
                .after = tidyselect::last_col()) %>%
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-=======
-      relocate(contains("tax_"),
-               .after = last_col()) %>%
-      mutate(across(contains("tax_"),
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                     ~. / StandardMethod / ReachLengthFished_m ))
 
   } else {
     fish_comm2 = fish_comm %>%
-<<<<<<< HEAD
       dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
-=======
-      mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                   "Seine",
                                   ifelse(grepl("Snork", MethodCode, fixed = TRUE),
                                          "Snorkel",
                                          "Shocking"))) %>%
-<<<<<<< HEAD
       dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
       dplyr::group_by(SIDNO, MethodBasic) %>%
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
@@ -303,37 +229,19 @@ getFishData <- function(dataType = "abun",
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
-=======
-      mutate(MinutesShockTime = SecondsShockTime / 60) %>%
-      group_by(SIDNO, MethodBasic) %>%
-      mutate(across(contains("tax_"),
-                    sum)) %>%
-      slice(1) %>%
-      ungroup() %>%
-      mutate(StandardMethod = ifelse(MethodBasic == "Seine",
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                      rowSums(across(c("NumberSeineHauls",
                                                       "NumberStationarySetsKicks")),
                                              na.rm = TRUE),
                                      ifelse(MethodBasic == "Shocking",
                                             MinutesShockTime,
                                             NumberSnorkelingTransects))) %>%
-<<<<<<< HEAD
       dplyr::relocate(tidyselect::contains("tax_"),
                .after = tidyselect::last_col())
-=======
-      relocate(contains("tax_"),
-               .after = last_col())
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
   }
 
   if(dataType == "occur") {
     fish_comm2 = fish_comm2 %>%
-<<<<<<< HEAD
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-=======
-      mutate(across(contains("tax_"),
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                     ~replace(., . > 0, 1)))
   }
 
@@ -342,11 +250,7 @@ getFishData <- function(dataType = "abun",
   fish_comm2 <- fish_comm2 %>%
     dplyr::select(-SecondsShockTime,
                   -SIDNO) %>%
-<<<<<<< HEAD
     dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
-=======
-    relocate(any_of(.ReorderUSGSBioDataColNames))
->>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   return(data.frame(fish_comm2))
 
