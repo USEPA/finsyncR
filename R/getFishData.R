@@ -250,7 +250,7 @@ getFishData <- function(dataType = "abun",
   fish_comm2 <- fish_comm2 %>%
     dplyr::select(-SecondsShockTime,
                   -SIDNO) %>%
-    dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
+    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
 
   return(data.frame(fish_comm2))
 

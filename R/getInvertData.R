@@ -379,7 +379,7 @@ getInvertData <- function(dataType = "abun",
       dplyr::mutate(DatasetPortion = "NonDuplicate_FolsomSampler")),
     SumData)})
 
-  TotalRows <- do.call(rbind,list(Corrected_MixedRatios_FolsomSamplerOnly,
+  TotalRows <- do.call(dplyr::bind_rows,list(Corrected_MixedRatios_FolsomSamplerOnly,
                                   Corrected_Gridded_LLRRemoved,
                                   Corrected_SingleRatios))
 
@@ -544,7 +544,7 @@ getInvertData <- function(dataType = "abun",
                   -SIDNO,
                   -ReleaseCategory,
                   -TotAreaSampled_m2) %>%
-    dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
+    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
 
   return(data.frame(invert_comms1))
 

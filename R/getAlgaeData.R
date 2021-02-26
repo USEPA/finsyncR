@@ -237,7 +237,7 @@ getAlgaeData <- function(algType = "peri",
                   values_fill = 0)
 
   }
-  algae_comm <- rbind(algae_comms1 %>%
+  algae_comm <- dplyr::bind_rows(algae_comms1 %>%
                         dplyr::group_by(SampleGrouping) %>%
                         dplyr::mutate(count = n()) %>%
                         dplyr::filter(count > 1) %>%
@@ -261,7 +261,7 @@ getAlgaeData <- function(algType = "peri",
   algae_comm <- algae_comm %>%
     dplyr::select(-LabProcName,
                   -SampleGrouping) %>%
-    dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
+    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
 
 
 
