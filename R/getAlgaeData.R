@@ -47,7 +47,7 @@ getAlgaeData <- function(algType = "peri",
   if(!(dataType %in% c("abun", "occur"))) {
     stop('dataType must be either "abun" or "occur".')}
 
-  if(!(taxonLevel %in% .TaxLevCols_Algae$AlgalGroup$taxcols)){
+  if(!(taxonLevel %in% StreamData:::.TaxLevCols_Algae$AlgalGroup$taxcols)){
     stop(paste("taxonLevel must be set between ranks 'Phylum' and 'Subspecies'",
                "or 'AlgalGroup'; see 'Details' in ?getAlgaeData."))
   }
@@ -139,8 +139,8 @@ getAlgaeData <- function(algType = "peri",
   algae = dplyr::left_join(algae, algsampinfo, by = "SIDNO")
 
 
-  mycols = .TaxLevCols_Algae[[which(names(.TaxLevCols_Algae) == taxonLevel)]]$mycols
-  taxcols = .TaxLevCols_Algae[[which(names(.TaxLevCols_Algae) == taxonLevel)]]$taxcols
+  mycols = StreamData:::.TaxLevCols_Algae[[which(names(StreamData:::.TaxLevCols_Algae) == taxonLevel)]]$mycols
+  taxcols = StreamData:::.TaxLevCols_Algae[[which(names(StreamData:::.TaxLevCols_Algae) == taxonLevel)]]$taxcols
 
 
   if(algType == "peri"){

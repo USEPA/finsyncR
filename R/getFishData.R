@@ -66,7 +66,7 @@ getFishData <- function(dataType = "abun",
     stop('standardize must be set to either TRUE or FALSE.')
   }
 
-  if(!(taxonLevel %in% .TaxLevCols_Fish$Superclass$taxcols)){
+  if(!(taxonLevel %in% StreamData:::.TaxLevCols_Fish$Superclass$taxcols)){
     stop(paste('taxonLevel must be set between ranks "Superclass" and',
                '"Subspecies"; see "Details" in ?getFishData.'))
   }
@@ -159,8 +159,8 @@ getFishData <- function(dataType = "abun",
                                   sample,
                                   by = "SIDNO"), samplemethod, by = "SIDNO_MethodCode")
 
-  mycols = .TaxLevCols_Fish[[which(names(.TaxLevCols_Fish) == taxonLevel)]]$mycols
-  taxcols = .TaxLevCols_Fish[[which(names(.TaxLevCols_Fish) == taxonLevel)]]$taxcols
+  mycols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$mycols
+  taxcols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$taxcols
 
 
   fish_comm = fish_info %>%

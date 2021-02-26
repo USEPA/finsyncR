@@ -56,7 +56,7 @@ getInvertData <- function(dataType = "abun",
   if(!(dataType %in% c("abun", "occur"))) {
     stop('dataType must be either "abun" or "occur".')}
 
-  if(!(taxonLevel %in% .TaxLevCols_Inverts$Phylum$taxcols)){
+  if(!(taxonLevel %in% StreamData:::.TaxLevCols_Inverts$Phylum$taxcols)){
     stop(paste('taxonLevel must be set between ranks "Phylum" and "Subspecies";',
          'see "Details" in ?getInvertData.'))
   }
@@ -448,8 +448,8 @@ getInvertData <- function(dataType = "abun",
     notAbun <- "Abundance"
     abunMeasure <- "Density_m2"}
 
-  mycols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$mycols
-  taxcols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
+  mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
+  taxcols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
 
 
   ###Need to fix this here with abundance v. density!

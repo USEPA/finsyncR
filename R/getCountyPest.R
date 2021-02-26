@@ -75,7 +75,7 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
   }
 
   #takes input data and links cnty and state FIPS
-  site.dat <- data %>% dplyr::left_join(.site.info, by = "SiteNumber")
+  site.dat <- data %>% dplyr::left_join(StreamData:::.site.info, by = "SiteNumber")
 
   if(lagTime !=0){
     site.dat.nrw = nrow(site.dat)
