@@ -137,8 +137,6 @@ getAlgaeData <- function(algType = "peri",
            StateFIPSCode = sprintf("%02d", StateFIPSCode))
 
   algae = dplyr::left_join(algae, algsampinfo, by = "SIDNO")
-    mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
-           StateFIPSCode = sprintf("%02d", StateFIPSCode))
 
 
   mycols = .TaxLevCols_Algae[[which(names(.TaxLevCols_Algae) == taxonLevel)]]$mycols
