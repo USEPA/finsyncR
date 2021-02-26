@@ -1,0 +1,39 @@
+Package: StreamData
+Type: Package
+Title: R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group
+Version: 0.0.0.9000
+Authors@R:
+    c(person(given = "Samantha",
+           family = "Rumschlag",
+           role = c("aut", "cre"),
+           email = "srumschl@nd.edu"),
+      person(given = "Michael",
+           family = "Mahon",
+           role = c("aut"),
+           email = "mmahon4@nd.edu")
+           )
+Maintainer: Michael Mahon <mmahon4@nd.edu>
+Description: For now, this R package is to be used only by members of the
+    Powell Center working group led by Samantha Rumschlag. This R package
+    provides functions to generate site by taxa matrices for macroinvertebrates,
+    fish, and algae from USGS BioData along with the pertinent sample- and
+    site-level information. Additionally, this R package provides a function to
+    generate county-level pesticide use estimates that correspond to the given
+    BioData sites.
+License: file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: 
+    magrittr,
+    dplyr (>= 1.0.2),
+    tidyr (>= 1.1.2),
+    stringr (>= 1.4.0),
+    utils,
+    tidyselect (>= 1.1.0)
+Depends:
+    R (>= 2.10)
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

@@ -1,0 +1,49 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# StreamData
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of StreamData is to provide easy access and automated data management to USGS stream BioData, pesticide county use estimates, and measured water quality data.
+
+## Installation
+Note: because this package is held within a private repository on GitHub, you will need to use the `auth_token` argument within `install_github()`. Generate a personal access token (PAT) in <https://github.com/settings/tokens> and supply the provided code to this argument.
+
+
+You can install the released version of `StreamData` from [GitHub](https://github.com/StreamData/StreamData) with:
+
+
+```
+library(devtools)
+
+devtools::install_github("StreamData/StreamData",
+                         auth_token = "tokenstring",
+                         build_vignette = TRUE
+                         )
+```
+
+## Example
+
+This is a basic example which shows you how to use one of the *getBioData* set of functions to access the fish dataset.
+
+```{r example}
+library(StreamData)
+
+Fish <- getFishData(taxonLevel = "Family")
+
+head(Fish)[,1:35]
+```

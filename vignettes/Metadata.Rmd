@@ -1,0 +1,201 @@
+---
+title: "Metadata"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Metadata}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Column names are in the order of how they appear in each output dataset.
+    
+## Information shared across datasets
+
+### Sample-level Information
+
+#### ProjectLabel
+Description: Project short name assigned by the project owner
+
+#### ProjectAssignedSampleLabel
+Description: A unique label or code assigned to the Sample by the Project (unique within a Project)
+
+#### NAWQA.SMCOD
+Description: NAWQA sample identification code used to identify each container (and sample)
+
+#### NAWQAStudyUnit
+Description: 4-letter abbreviation for NAWQA study unit
+
+#### CollectionDate
+Description: Date sample was collected (YYYYMMDD)
+
+#### StartTime
+Description: Time sampling activities started in 24-hour format (HH:MM)
+
+#### TimeDatum
+Description: Code that indicates time zone and seasonal time standardization at time of sample collection, such as: CST (Central Standard Time) or CDT (Central Daylight Time)
+
+#### CollectionYear
+Description: Year in which sample was collected (YYYY)
+
+#### CollectionMonth
+Description: Month in which sample was collected (MM)
+
+#### CollectionDayOfYear
+Description: Day-of-year when sample was collected. The number of days since the beginning of the year.
+
+#### ProvisionalData
+Description: Provisional data are data that have not completed the review process. Subsequent review may result in significant revisions. Data users are cautioned to consider carefully the provisional nature of the information before using it.
+
+
+### Site-level Information
+
+#### SiteNumber
+Description: USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected.
+
+Note: Be aware that there are leading zeros in these site numbers. Thus, when working with these data, it is advised that you should either add alphabetical characters in front of the site number (i.e., `paste("USGS-", Invertdata$SiteNumber, sep = "")`) or when reading in a saved dataset, use the `"colClasses = c("SiteNumber" = "character")"` option in `read.csv()`.
+
+#### SiteName
+Description: USGS National Water Information System (NWIS) name for the place where sample was collected.
+
+#### StudyReachName
+Description: Name given to identify the longitudinal section of a stream that was selected for sampling.
+
+#### SiteTypeName
+Description: Name of hydrologic setting of the site such as stream, canal, ditch, lake, wetland, etc.
+
+### StateFIPSCode
+Description: Federal Information Processing Standards (FIPS) code (two digits) for the state in which the site is located.
+
+Note: Be aware that there are leading zeros in these site numbers. Thus, when working with these data, it is advised that you should either add alphabetical characters in front of the site number (i.e., `paste("S-", Invertdata$StateFIPSCode, sep = "")`) or when reading in a saved dataset, use the `colClasses = c("StateFIPSCode" = "character")` option in `read.csv()`.
+
+#### CountyFIPSCode
+Description: Federal Information Processing Standards (FIPS) code (three digits) for the county in which the site is located. 
+
+Note: Be aware that there are leading zeros in these site numbers. Thus, when working with these data, it is advised that you should either add alphabetical characters in front of the FIPS code (i.e., `paste("C-", Invertdata$CountyFIPSCode, sep = "")`) or when reading in a saved dataset, use the `colClasses = c("CountyFIPSCode" = "character")` option in `read.csv()`.
+
+#### Latitude_dd
+Description: Latitude of the site location, in decimal degrees
+
+#### Longitude_dd
+Description: Longitude of the site location, in decimal degrees
+
+#### CoordinateDatum
+Description: Datum of site location coordinates
+
+#### HUCCode
+Description: Hydrologic unit code (HUC) in which the site is located. Hydrologic units are geographic areas representing part or all of a surface drainage basin or distinct hydrologic feature and are delineated on the State Hydrologic Unit Maps. Each hydrologic unit is identified by a unique number (HUC), and a name. Additional information is available from the USGS Hydrologic Unit web site <http://water.usgs.gov/GIS/huc.html>
+
+#### DrainageArea_mi2
+Description: Area enclosed by a topographic divide from which direct surface runoff drains to the site, in square miles.
+
+
+## Dataset specific information
+
+### Inverts
+
+#### SampleTypeCode
+Description: Code indicating the type of sample collected
+Levels:
+
+* IRTH - NAWQA Invertebrate Targeted Habitat
+* BERW - NRSA Invertebrate, wadable, reach-wide benthos
+
+#### IdentificationEntity
+Description: Organization or entity that identified the specimens
+
+#### AreaSampTot_m2
+Description: Total area sampled, in square meters.
+
+#### GeomorphicChannelUnit
+Description: The types of geomorphic channel units where sample was collected.
+
+#### ChannelBoundaries
+Description: General areas within the channel where sample was collected.
+
+#### ChannelFeatures
+Description: Channel feature(s) where sample was taken.
+
+#### ReplicateType
+Description: Code to indicate whether sample is a field-collection replicate
+Levels:
+
+* N - Sample is not a replicate
+* Y - Sample is a replicate
+
+Note: These replicates were maintained in the invert dataset, because they sampled different geomorphic channel units, which might influence the taxa that are present within the sample. For the limited number of samples that are true field replicates, data users will need to use either one of the samples, to take the average of the samples, or to account for the replicate by using a random term in their models, depending on the question being addressed with the data. For all other datasets, averages were taken of replicate samples.
+
+### Fish
+
+#### MethodCode
+Description: Code that identifies method used to collect the specimen(s). Electrofishing MethodCodes indicate gear type used and pass number or subreach (e.g. Backpack-P1).
+
+#### MethodBasic
+Description: Simplified version of `MethodCode`. All electrofishing (boats, backpack, etc.) has been reclassified as "Shocking". All netting has been reclassified as "Seine". Snorkel samples have been classified as "Snorkel".
+
+#### ReachLengthFished_m
+Description: Length of stream covered by fishing activities conducted for this sample. Typically this will be equal to the curvilinear reach length of the assigned study reach.
+
+#### NumberSeineHauls
+Description: Number of times a seine was set and retrieved from the water.
+
+Note: This column will only have non-zero values for seine samples.
+
+#### NumberStationarySetsKicks
+Description: Number of times a stationary kick-seine method was used.
+
+Note: This column will only have non-zero values for kick-seine samples.
+
+#### NumberSnorkelingTransects
+Description: Number of transects snorkeled within a reach.
+
+Note: This column will only have non-zero values for snorkel samples.
+
+#### MinutesShockTime
+Description: Actual time (in minutes) that electrofisher is on; the time electricity is being transmitted to the water.
+
+Note: This column will only have non-zero values for electroshocking samples.
+
+#### StandardMethod
+Description: The value by which the number of individuals of each species is divided to obtain an abundance value that is standardized by unit effort. Specifically, this number is `ReachLengthFished_m` multiplied by the effort (values in one of `NumberSeineHauls`, `NumberStationarySetsKicks`, `NumberSnorkelingTransects`, or `MinutesShockTime`). 
+
+Note: This column will only be present when `standardize = TRUE` in the `getFishData()` function.
+
+
+### Algae
+
+#### SampleTypeCode
+Description: Code indicating the type of sample collected
+Domain:
+
+* Phytoplankton samples    
+    + ARTH - NAWQA Periphyton Richest Targeted Habitat
+    + ADTH - NAWQA Periphyton Depositional Targeted Habitat
+    + AQMH - NAWQA Periphyton Multiple Habitat **These samples only appear when** `AlgType = "Peri"` **AND** `AbunType = "Occur"`
+   
+* Periphyton samples
+    + APHY - NAWQA Phytoplankton
+
+#### SamplingMethodOrDevice
+Description: Method or device for collecting sample. 
+
+#### PeriphytonHabitatsSampled
+Description: The benthic habitat upon which the organisms were attached or loosely associated (Epilithic, Epidendric, Epiphytic, Epipsammic, Epipelic, Artificial substrate).
+
+Note: This column only appears when `AlgType = "Peri"`.
+
+#### SubsurfaceGrabDepth_m
+Description: Depth of subsurface grab sample, in meters.
+
+Note: This column only appears when `AlgType = "Phyto"`.
+
+
+## Information on taxa columns
+Following all of the above columns are an unknown number of columns that code for the unique taxa found in each dataset at the specific taxonomic resolution (phylum through subspecies). The values in these columns will either code for abundance or occurrence (presence/absence, coded as 1/0). These values default to density estimates for each taxa. For inverts, it is individuals per m^2^; for periphyton, it is cells per cm^2^; for phytoplankton, it is cells per mL; and for fish, it is individuals per unit effort per meter(i.e., for electroshocking: individuals per minute shocking per meter). However, these units become raw abundance values when AbunMeasure = "Abundance" in `getInvertData()` only. Further, within `getFishData()`, when standardize = "FALSE", the values become individuals per meter, but using unstandardized data here is not recommended. 
+
+```{r example, warning = FALSE, message = FALSE}
+library(StreamData)
+
+Invertdata = getInvertData(taxonLevel = "Family")
+colnames(Invertdata)[1:32]
+
+```
