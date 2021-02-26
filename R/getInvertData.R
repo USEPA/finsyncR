@@ -98,7 +98,11 @@ getInvertData <- function(dataType = "abun",
 
   SamplingRatio_SamplerType <- .SamplingRatio_SamplerType
 
+<<<<<<< HEAD
   Inverts <- dplyr::left_join(Inverts,
+=======
+  Inverts <- left_join(Inverts,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                        SamplingRatio_SamplerType,
                        by = "LabRecordID")
 
@@ -128,9 +132,15 @@ getInvertData <- function(dataType = "abun",
 
 
   Inverts <- Inverts %>%
+<<<<<<< HEAD
     dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW")) %>%
     dplyr::filter(FieldComponent == "M") %>%
     dplyr::mutate(CollectionDate = as.Date(CollectionDate,
+=======
+    filter(SampleTypeCode %in% c("IRTH", "BERW")) %>%
+    filter(FieldComponent == "M") %>%
+    mutate(CollectionDate = as.Date(CollectionDate,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                     format = "%m/%d/%Y"),
            Identifier = paste(SIDNO,
                               SiteNumber,
@@ -158,17 +168,27 @@ getInvertData <- function(dataType = "abun",
   ### will include 1:1 and other subsampled ratio) on a Gridded tray
   ## So we first filter all sites for those with >= 2 'LabSubsamplingRatio'
   Invert_MixedRatios <- Inverts %>%
+<<<<<<< HEAD
     dplyr::group_by(Identifier) %>%
     dplyr::filter(n_distinct(LabSubsamplingRatio) >= 2) %>%
     dplyr::ungroup()
 
   Invert_SingleRatios <- suppressMessages({dplyr::anti_join(Inverts, Invert_MixedRatios) %>%
       dplyr::mutate(DatasetPortion = "SingleRatios")})
+=======
+    group_by(Identifier) %>%
+    filter(n_distinct(LabSubsamplingRatio) >= 2) %>%
+    ungroup()
+
+  Invert_SingleRatios <- suppressMessages({anti_join(Inverts, Invert_MixedRatios) %>%
+    mutate(DatasetPortion = "SingleRatios")})
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   SingleRatio_Duplicates <-
     Invert_SingleRatios[duplicated(Invert_SingleRatios$SampleGrouping) |
                           duplicated(Invert_SingleRatios$SampleGrouping,
                                      fromLast = TRUE), ] %>%
+<<<<<<< HEAD
     dplyr::group_by(SampleGrouping) %>%
     dplyr::mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
            Ratios = paste(Ratio, collapse = "_")) %>%
@@ -183,6 +203,22 @@ getInvertData <- function(dataType = "abun",
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(Abundance = SummedAbundance,
+=======
+    group_by(SampleGrouping) %>%
+    mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
+           Ratios = paste(Ratio, collapse = "_")) %>%
+    ungroup()
+
+
+  SumSingleRatioData = suppressWarnings({SingleRatio_Duplicates %>%
+    group_by(SampleGrouping) %>%
+    mutate(SummedAbundance = sum(Abundance)) %>%
+    ungroup() %>%
+    group_by(SampleGrouping) %>%
+    slice(1) %>%
+    ungroup() %>%
+    mutate(Abundance = SummedAbundance,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
            Density_m2 = as.numeric("NA"),
            AdjRawCount = as.numeric("NA"),
            RawCount = as.numeric("NA"),
@@ -194,9 +230,15 @@ getInvertData <- function(dataType = "abun",
            DatasetPortion = "SummedAbundance_SingleRatios") %>%
     dplyr::select(-SummedAbundance)})
 
+<<<<<<< HEAD
   Corrected_SingleRatios <- suppressMessages({dplyr::bind_rows((dplyr::anti_join(Invert_SingleRatios,
                                                  SingleRatio_Duplicates) %>%
                                                    dplyr::mutate(DatasetPortion =
+=======
+  Corrected_SingleRatios <- suppressMessages({bind_rows((anti_join(Invert_SingleRatios,
+                                                 SingleRatio_Duplicates) %>%
+                                         mutate(DatasetPortion =
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                                   "NonDuplicate_SingleRatio")),
                                       SumSingleRatioData)})
 
@@ -215,6 +257,7 @@ getInvertData <- function(dataType = "abun",
   ### (CORRECTED: NEED TO SEARCH FOR DUPLICATE LISTINGS IN THIS DATASET AS WELL)
 
   Invert_MixedRatios_GridsAndFS <- Invert_MixedRatios %>%
+<<<<<<< HEAD
     dplyr::group_by(Identifier) %>%
     dplyr::filter(dplyr::n_distinct(SamplerType) == 2) %>%
     dplyr::ungroup()
@@ -224,6 +267,17 @@ getInvertData <- function(dataType = "abun",
     dplyr::filter(SamplerType == "Grid") %>%
     dplyr::ungroup() %>%
     dplyr::mutate(DatasetPortion = "Grid_LRRRemoved")
+=======
+    group_by(Identifier) %>%
+    filter(n_distinct(SamplerType) == 2) %>%
+    ungroup()
+
+  Invert_MixedSamplerType_GridOnly_LLRRemoved <- Invert_MixedRatios_GridsAndFS %>%
+    group_by(Identifier) %>%
+    filter(SamplerType == "Grid") %>%
+    ungroup() %>%
+    mutate(DatasetPortion = "Grid_LRRRemoved")
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   ## Now that we have all the gridded portion of samples
   ## we can check the subsampled gridded samples for any duplicates
@@ -248,11 +302,19 @@ getInvertData <- function(dataType = "abun",
   ### Now we can the 'LabRecord_Labels' and 'Ratio_Labels' to the duplicated data
 
   SumGridLLRData <- Gridded_LLRRemoved_Duplicates %>%
+<<<<<<< HEAD
     dplyr::group_by(SampleGrouping) %>%
     dplyr::mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
            Ratios = paste(Ratio, collapse = "_")) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(DatasetPortion = "Gridded_LLRRemoved_Duplicates")
+=======
+    group_by(SampleGrouping) %>%
+    mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
+           Ratios = paste(Ratio, collapse = "_")) %>%
+    ungroup() %>%
+    mutate(DatasetPortion = "Gridded_LLRRemoved_Duplicates")
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   ## Moving the numeric values of each row to the end of the dataset to better
   ## visualize the changes we're making
@@ -270,6 +332,7 @@ getInvertData <- function(dataType = "abun",
   SumGridLLRData2 = suppressWarnings({SumGridLLRData %>%
     dplyr::select(-"LabRecordID", -"NWQLSubsamplingCode", -"Ratio",
                   -"X", -"NumbEntries") %>%
+<<<<<<< HEAD
       dplyr::group_by(SampleGrouping) %>%
       dplyr::mutate(SummedAbundance = sum(Abundance)) %>%
       dplyr::ungroup() %>%
@@ -277,6 +340,15 @@ getInvertData <- function(dataType = "abun",
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(Abundance = SummedAbundance,
+=======
+    group_by(SampleGrouping) %>%
+    mutate(SummedAbundance = sum(Abundance)) %>%
+    ungroup() %>%
+    group_by(SampleGrouping) %>%
+    slice(1) %>%
+    ungroup() %>%
+    mutate(Abundance = SummedAbundance,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
            Density_m2 = as.numeric("NA"),
            AdjRawCount = as.numeric("NA"),
            RawCount = as.numeric("NA"),
@@ -291,10 +363,17 @@ getInvertData <- function(dataType = "abun",
   ## Now that we have the corrected summed values for the
   ## 'Gridded_LLRRemoved_Duplicates', we need to add these rows to the
   ## non-duplicated rows within the 'SingleRatio' portions
+<<<<<<< HEAD
   Corrected_Gridded_LLRRemoved <- suppressMessages({dplyr::bind_rows(
     (dplyr::anti_join(Invert_MixedSamplerType_GridOnly_LLRRemoved,
                Gridded_LLRRemoved_Duplicates) %>%
        dplyr::mutate(DatasetPortion =
+=======
+  Corrected_Gridded_LLRRemoved <- suppressMessages({bind_rows(
+    (anti_join(Invert_MixedSamplerType_GridOnly_LLRRemoved,
+               Gridded_LLRRemoved_Duplicates) %>%
+       mutate(DatasetPortion =
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                 "NonDuplicate_Gridded_LLRRemoved")),
     SumGridLLRData2)})
 
@@ -313,9 +392,15 @@ getInvertData <- function(dataType = "abun",
   ### each site-by-collection-date-by-biota-by-life-stage combination
 
   Invert_MixedRatios_FolsomSamplerOnly_AntiJoin <- suppressMessages({Inverts %>%
+<<<<<<< HEAD
       dplyr::group_by(SIDNO, SiteNumber, CollectionDate) %>%
       dplyr::filter(n_distinct(LabSubsamplingRatio) >= 2) %>%
       dplyr::anti_join(Invert_MixedRatios_GridsAndFS)})
+=======
+    group_by(SIDNO, SiteNumber, CollectionDate) %>%
+    filter(n_distinct(LabSubsamplingRatio) >= 2) %>%
+    anti_join(Invert_MixedRatios_GridsAndFS)})
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   ## Now we can reduce the dataset to duplicate entries
   ## We will include both "from the first duplicate" and
@@ -336,10 +421,17 @@ getInvertData <- function(dataType = "abun",
 
   Invert_MixedRatios_Folsom_AntiJoin_Duplicates <-
     Invert_MixedRatios_Folsom_AntiJoin_Duplicates  %>%
+<<<<<<< HEAD
     dplyr::group_by(SampleGrouping) %>%
     dplyr::mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
            Ratios = paste(Ratio, collapse = "_")) %>%
     dplyr::ungroup()
+=======
+    group_by(SampleGrouping) %>%
+    mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
+           Ratios = paste(Ratio, collapse = "_")) %>%
+    ungroup()
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   ## Moving the numeric values of each row to the end of the dataset to better
   ## visualize the changes we're making
@@ -355,6 +447,7 @@ getInvertData <- function(dataType = "abun",
   SumData <- suppressWarnings({Invert_MixedRatios_Folsom_AntiJoin_Duplicates %>%
     dplyr::select(-"LabRecordID", -"NWQLSubsamplingCode", -"Ratio",
                   -"X", -"NumbEntries") %>%
+<<<<<<< HEAD
       dplyr::group_by(SampleGrouping) %>%
       dplyr::mutate(SummedAbundance = sum(Abundance)) %>%
       dplyr::ungroup() %>%
@@ -362,6 +455,15 @@ getInvertData <- function(dataType = "abun",
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(Abundance = SummedAbundance,
+=======
+    group_by(SampleGrouping) %>%
+    mutate(SummedAbundance = sum(Abundance)) %>%
+    ungroup() %>%
+    group_by(SampleGrouping) %>%
+    slice(1) %>%
+    ungroup() %>%
+    mutate(Abundance = SummedAbundance,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
            Density_m2 = as.numeric("NA"),
            AdjRawCount = as.numeric("NA"),
            RawCount = as.numeric("NA"),
@@ -372,11 +474,19 @@ getInvertData <- function(dataType = "abun",
            DatasetPortion = "SummedAbundance_FolsomSampler") %>%
     dplyr::select(-SummedAbundance)})
 
+<<<<<<< HEAD
   Corrected_MixedRatios_FolsomSamplerOnly <- suppressMessages({dplyr::bind_rows((
     dplyr::anti_join(Invert_MixedRatios_FolsomSamplerOnly_AntiJoin,
               Invert_MixedRatios_Folsom_AntiJoin_Duplicates,
               by = "SampleGrouping") %>%
       dplyr::mutate(DatasetPortion = "NonDuplicate_FolsomSampler")),
+=======
+  Corrected_MixedRatios_FolsomSamplerOnly <- suppressMessages({bind_rows((
+    anti_join(Invert_MixedRatios_FolsomSamplerOnly_AntiJoin,
+              Invert_MixedRatios_Folsom_AntiJoin_Duplicates,
+              by = "SampleGrouping") %>%
+      mutate(DatasetPortion = "NonDuplicate_FolsomSampler")),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
     SumData)})
 
   TotalRows <- do.call(rbind,list(Corrected_MixedRatios_FolsomSamplerOnly,
@@ -429,16 +539,27 @@ getInvertData <- function(dataType = "abun",
                   CountyFIPSCode,
                   StateFIPSCode)
 
+<<<<<<< HEAD
   invertsampinfo = dplyr::left_join(dplyr::left_join(invertsamp,
+=======
+  invertsampinfo = left_join(left_join(invertsamp,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                        invertsampinv,
                                        by = "SIDNO"),
                              invertsite,
                              by = "SiteNumber") %>%
     dplyr::select(-SiteNumber) %>%
+<<<<<<< HEAD
     dplyr::mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
            StateFIPSCode = sprintf("%02d", StateFIPSCode))
 
   TotalRows = dplyr::left_join(TotalRows,
+=======
+    mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
+           StateFIPSCode = sprintf("%02d", StateFIPSCode))
+
+  TotalRows = left_join(TotalRows,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                         invertsampinfo,
                         by = "SIDNO")
 
@@ -457,6 +578,7 @@ getInvertData <- function(dataType = "abun",
   if(isTRUE(lifestage)) {
     #Lifestage-taxon combinations
     invert_comms1 = TotalRows %>%
+<<<<<<< HEAD
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
       dplyr::filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
       tidyr::unite(UNIQUEID, c(SIDNO, all_of(taxonLevel), Lifestage), sep = "_", remove = FALSE) %>%
@@ -465,6 +587,16 @@ getInvertData <- function(dataType = "abun",
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(Density_m2 = ifelse(is.na(AreaSampTot_m2),
+=======
+      filter(PublishedTaxonNameLevel %in% taxcols) %>%
+      filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
+      unite(UNIQUEID, c(SIDNO, all_of(taxonLevel), Lifestage), sep = "_", remove = FALSE) %>%
+      group_by(UNIQUEID) %>%
+      mutate(Abundance = sum(Abundance)) %>%
+      slice(1) %>%
+      ungroup() %>%
+      mutate(Density_m2 = ifelse(is.na(AreaSampTot_m2),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                  NA,
                                  Abundance / AreaSampTot_m2)) %>%
       dplyr::select(-any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
@@ -486,8 +618,13 @@ getInvertData <- function(dataType = "abun",
                               "ProjectAssignedSampleLabel", "SiteVisitSampleNumber"))) %>%
       dplyr::select(-any_of(mycols),
                     -any_of(notAbun)) %>%
+<<<<<<< HEAD
       tidyr::unite(Taxon_Life, c(all_of(taxonLevel), Lifestage), sep = "_") %>%
       tidyr::pivot_wider(names_from = all_of(Taxon_Life),
+=======
+      unite(Taxon_Life, c(all_of(taxonLevel), Lifestage), sep = "_") %>%
+      pivot_wider(names_from = all_of(Taxon_Life),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                   names_prefix = "tax_",
                   values_from = all_of(abunMeasure),
                   values_fill = 0)
@@ -495,6 +632,7 @@ getInvertData <- function(dataType = "abun",
   } else {
     #All species are one
     invert_comms1 = TotalRows %>%
+<<<<<<< HEAD
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
       dplyr::filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
       tidyr::unite(UNIQUEID, c(SIDNO, all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
@@ -506,6 +644,19 @@ getInvertData <- function(dataType = "abun",
                                  NA,
                                  Abundance / AreaSampTot_m2)) %>%
       dplyr::select(-tidyselect::any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
+=======
+      filter(PublishedTaxonNameLevel %in% taxcols) %>%
+      filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
+      unite(UNIQUEID, c(SIDNO, all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
+      group_by(UNIQUEID) %>%
+      mutate(Abundance = sum(Abundance)) %>%
+      slice(1) %>%
+      ungroup() %>%
+      mutate(Density_m2 = ifelse(is.na(AreaSampTot_m2),
+                                 NA,
+                                 Abundance / AreaSampTot_m2)) %>%
+      dplyr::select(-any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                               "LabComponent", "LabProcName",
                               "TaxonomicResultReviewStatus",
                               "PublishedSortOrder", "BioDataTaxonName", "BioDataShortName",
@@ -521,9 +672,15 @@ getInvertData <- function(dataType = "abun",
                               "Ratio", 'X', "NumbEntries", "SampleGrouping", "LabRecordIDs",
                               "Ratios", "Note", "Lifestage", "UNIQUEID", "PublishedTaxonNameLevel",
                               "SamplerType", "DatasetPortion"))) %>%
+<<<<<<< HEAD
       dplyr::select(-tidyselect::any_of(mycols)) %>%
       dplyr::select(-tidyselect::any_of(notAbun)) %>%
       tidyr::pivot_wider(names_from = all_of(taxonLevel),
+=======
+      dplyr::select(-any_of(mycols)) %>%
+      dplyr::select(-any_of(notAbun)) %>%
+      pivot_wider(names_from = all_of(taxonLevel),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                   names_prefix = "tax_",
                   values_from = all_of(abunMeasure),
                   values_fill = 0)
@@ -531,7 +688,11 @@ getInvertData <- function(dataType = "abun",
 
   if(dataType == "Occur") {
     invert_comms1 = invert_comms1 %>%
+<<<<<<< HEAD
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+=======
+      mutate(across(contains("tax_"),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                     ~replace(., . > 0, 1)))
   }
 
@@ -544,7 +705,11 @@ getInvertData <- function(dataType = "abun",
                   -SIDNO,
                   -ReleaseCategory,
                   -TotAreaSampled_m2) %>%
+<<<<<<< HEAD
     dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
+=======
+    relocate(any_of(.ReorderUSGSBioDataColNames))
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
   return(data.frame(invert_comms1))
 
 }

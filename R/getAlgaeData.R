@@ -127,15 +127,25 @@ getAlgaeData <- function(algType = "peri",
                   CountyFIPSCode,
                   StateFIPSCode)
 
+<<<<<<< HEAD
   algsampinfo = dplyr::left_join(dplyr::left_join(algsamp,
+=======
+  algsampinfo = left_join(left_join(algsamp,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                                     algsampinv,
                                     by = "SIDNO"),
                           algsite,
                           by = "SiteNumber") %>%
     dplyr::select(-SiteNumber) %>%
+<<<<<<< HEAD
     dplyr::mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
            StateFIPSCode = sprintf("%02d", StateFIPSCode))
   algae = dplyr::left_join(algae, algsampinfo, by = "SIDNO")
+=======
+    mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
+           StateFIPSCode = sprintf("%02d", StateFIPSCode))
+  algae = left_join(algae, algsampinfo, by = "SIDNO")
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
   mycols = .TaxLevCols_Algae[[which(names(.TaxLevCols_Algae) == taxonLevel)]]$mycols
   taxcols = .TaxLevCols_Algae[[which(names(.TaxLevCols_Algae) == taxonLevel)]]$taxcols
@@ -153,9 +163,15 @@ getAlgaeData <- function(algType = "peri",
 
   if(algType == "peri"){
   algae_comms1 = algae %>%
+<<<<<<< HEAD
     dplyr::filter(SampleTypeCode %in% perisamp) %>%
     dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
     dplyr::filter(!(is.na(Cells_cm2))) %>%
+=======
+    filter(SampleTypeCode %in% perisamp) %>%
+    filter(PublishedTaxonNameLevel %in% taxcols) %>%
+    filter(!(is.na(Cells_cm2))) %>%
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
     dplyr::select(-Cells_mL, -Biovolume_um3_cm2, -Biovolume_um3_mL,
                   -NumberOfCellsCounted, -NumDiaCellsCounted_LiveOrDead,
                   -ProportionExamined, -NormalizedCellCount, -AdjLabCount,
@@ -164,6 +180,7 @@ getAlgaeData <- function(algType = "peri",
                   -ScientificName, -Group, -Variety, -Form,
                   -TaxonomicResultReviewStatus, -PublishedTaxonName,
                   -SubsurfaceGrabDepth_m) %>%
+<<<<<<< HEAD
     dplyr::select(-tidyselect::any_of(mycols)) %>%
     tidyr::unite(UNIQUE,
           c(SIDNO, SampleTypeCode,
@@ -186,11 +203,39 @@ getAlgaeData <- function(algType = "peri",
     dplyr::slice(1) %>%
     dplyr::ungroup() %>%
     tidyr::unite(SampleGrouping, c(StudyReachName, CollectionDate,
+=======
+    dplyr::select(-any_of(mycols)) %>%
+    unite(UNIQUE,
+          c(SIDNO, SampleTypeCode,
+            all_of(taxonLevel), PeriphytonHabitatSampled),
+          sep = "_", remove = FALSE) %>%
+    group_by(UNIQUE) %>%
+    mutate(sumCells_cm2 = sum(Cells_cm2)) %>%
+    ungroup() %>%
+    group_by(UNIQUE) %>%
+    slice(1) %>%
+    ungroup() %>%
+    unite(UNIQUE2,
+          c(SiteNumber, StudyReachName, CollectionDate,
+            SampleTypeCode, all_of(taxonLevel)),
+          sep = "_", remove = FALSE) %>%
+    group_by(UNIQUE2) %>%
+    mutate(MsumCells_cm2 = mean(sumCells_cm2)) %>%
+    ungroup() %>%
+    group_by(UNIQUE2) %>%
+    slice(1) %>%
+    ungroup() %>%
+    unite(SampleGrouping, c(StudyReachName, CollectionDate,
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                             SampleTypeCode),
           sep = "_", remove = FALSE) %>%
     dplyr::select(-SIDNO, -UNIQUE, -UNIQUE2, -Cells_cm2, -sumCells_cm2,
                   -ReplicateType) %>%
+<<<<<<< HEAD
     tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
+=======
+    pivot_wider(names_from = all_of(taxonLevel),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                 values_from = MsumCells_cm2,
                 names_prefix = "tax_",
                 values_fill = 0,
@@ -199,9 +244,15 @@ getAlgaeData <- function(algType = "peri",
   } else {
 
     algae_comms1 = algae %>%
+<<<<<<< HEAD
       dplyr::filter(SampleTypeCode %in% perisamp) %>%
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols)%>%
       dplyr::filter(!(is.na(Cells_mL))) %>%
+=======
+      filter(SampleTypeCode %in% perisamp) %>%
+      filter(PublishedTaxonNameLevel %in% taxcols)%>%
+      filter(!(is.na(Cells_mL))) %>%
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
       dplyr::select(-Cells_cm2, -Biovolume_um3_cm2, -Biovolume_um3_mL,
                     -NumberOfCellsCounted, -NumDiaCellsCounted_LiveOrDead,
                     -ProportionExamined, -NormalizedCellCount, -AdjLabCount,
@@ -210,6 +261,7 @@ getAlgaeData <- function(algType = "peri",
                     -ScientificName, -Group, -Variety, -Form,
                     -TaxonomicResultReviewStatus, -PublishedTaxonName,
                     -PeriphytonHabitatSampled, -Cells_cm2) %>%
+<<<<<<< HEAD
       dplyr::select(-tidyselect::any_of(mycols)) %>%
       tidyr::unite(UNIQUE, c(SIDNO, tidyselect::all_of(taxonLevel)), remove = FALSE) %>%
       dplyr::group_by(UNIQUE) %>%
@@ -230,12 +282,35 @@ getAlgaeData <- function(algType = "peri",
                     -ReplicateType) %>%
 
       tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
+=======
+      dplyr::select(-any_of(mycols)) %>%
+      unite(UNIQUE, c(SIDNO, all_of(taxonLevel)), remove = FALSE) %>%
+      group_by(UNIQUE) %>%
+      mutate(sumCells_mL = sum(Cells_mL)) %>%
+      ungroup() %>%
+      group_by(UNIQUE) %>%
+      slice(1) %>%
+      ungroup() %>%
+      unite(UNIQUE2, c(StudyReachName, CollectionDate, all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
+      group_by(UNIQUE2) %>%
+      mutate(MsumCells_mL = mean(sumCells_mL)) %>%
+      ungroup() %>%
+      group_by(UNIQUE2) %>%
+      slice(1) %>%
+      ungroup() %>%
+      unite(SampleGrouping, c(StudyReachName, CollectionDate), sep = "_", remove = FALSE) %>%
+      dplyr::select(-SIDNO, -UNIQUE, -UNIQUE2, -Cells_mL, -sumCells_mL,
+                    -ReplicateType) %>%
+
+      pivot_wider(names_from = all_of(taxonLevel),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                   names_prefix = "tax_",
                   values_from = MsumCells_mL,
                   values_fill = 0)
 
   }
   algae_comm <- rbind(algae_comms1 %>%
+<<<<<<< HEAD
                         dplyr::group_by(SampleGrouping) %>%
                         dplyr::mutate(count = n()) %>%
                         dplyr::filter(count > 1) %>%
@@ -248,18 +323,40 @@ getAlgaeData <- function(algType = "peri",
                         dplyr::group_by(SampleGrouping) %>%
                         dplyr::mutate(count = n()) %>%
                         dplyr::filter(count == 1) %>%
+=======
+                        group_by(SampleGrouping) %>%
+                        mutate(count = n()) %>%
+                        filter(count > 1) %>%
+                        mutate(across(contains("tax_"),
+                                      mean)) %>%
+                        slice(1) %>%
+                        ungroup() %>%
+                        dplyr::select(-count),
+                      algae_comms1 %>%
+                        group_by(SampleGrouping) %>%
+                        mutate(count = n()) %>%
+                        filter(count == 1) %>%
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                         dplyr::select(-count))
 
     if(dataType == "occur") {
   algae_comm %>%
+<<<<<<< HEAD
         dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+=======
+    mutate(across(contains("tax_"),
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
                   ~replace(., . > 0, 1)))
   }
 
   algae_comm <- algae_comm %>%
     dplyr::select(-LabProcName,
                   -SampleGrouping) %>%
+<<<<<<< HEAD
     dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
+=======
+    relocate(any_of(.ReorderUSGSBioDataColNames))
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
 
 

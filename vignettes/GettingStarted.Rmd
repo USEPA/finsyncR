@@ -2,7 +2,11 @@
 title: "Getting Started"
 output: rmarkdown::html_vignette
 vignette: >
+<<<<<<< HEAD
   %\VignetteIndexEntry{Getting Started}
+=======
+  %\VignetteIndexEntry{GettingStarted}
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

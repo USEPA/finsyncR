@@ -18,7 +18,11 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
+<<<<<<< HEAD
 The goal of StreamData is to provide easy access and automated data management to USGS stream BioData, pesticide county use estimates, and measured water quality data.
+=======
+The goal of StreamData is to provide easy access to USGS stream BioData, water quality data (to be included in the future), and pesticide data.
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
 ## Installation
 Note: because this package is held within a private repository on GitHub, you will need to use the `auth_token` argument within `install_github()`. Generate a personal access token (PAT) in <https://github.com/settings/tokens> and supply the provided code to this argument.
@@ -38,7 +42,11 @@ devtools::install_github("StreamData/StreamData",
 
 ## Example
 
+<<<<<<< HEAD
 This is a basic example which shows you how to use one of the *getBioData* set of functions to access the fish dataset.
+=======
+This is a basic example which shows you how to use one of the getBioData set of functions to access the fish dataset.
+>>>>>>> f8d3df37c7a32a472e8809cf986b05e0440051b7
 
 ```{r example}
 library(StreamData)
