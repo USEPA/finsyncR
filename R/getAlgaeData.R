@@ -11,7 +11,10 @@
 #' @return A species by sample data frame with site, stream reach, and
 #'   sample information.
 #'
-#' @details \code{program} refers to the Local, regional, or national program project
+#' @details Note: Abundances for taxa from replicate samples taken from the
+#'   same stream reach are averaged.
+#'
+#'   \code{program} refers to the Local, regional, or national program project
 #'   for which data were originally collected. Because the National Water
 #'   Quality Assessment (NAWQA) contains the most standardized sampling methods,
 #'   we recommend using only the NAWQA dataset (set as default) for density and
@@ -23,6 +26,8 @@
 #'   \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
 #'   (for example, \code{program = c("National Water Quality Assessment",
 #'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
+#'
+#'
 #'
 #' @examples
 #' \dontrun{
@@ -248,7 +253,7 @@ getAlgaeData <- function(algType = "peri",
                         dplyr::select(-count),
                       algae_comms1 %>%
                         dplyr::group_by(SampleGrouping) %>%
-                        dplyr::mutate(count = n()) %>%
+                        dplyr::mutate(count = dplyr::n()) %>%
                         dplyr::filter(count == 1) %>%
                         dplyr::select(-count))
 

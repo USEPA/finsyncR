@@ -31,7 +31,10 @@ A species by sample data frame with site, stream reach, and
 Access clean USGS Algae Dataset
 }
 \details{
-\code{program} refers to the Local, regional, or national program project
+Note: Abundances for taxa from replicate samples taken from the
+  same stream reach are averaged.
+
+  \code{program} refers to the Local, regional, or national program project
   for which data were originally collected. Because the National Water
   Quality Assessment (NAWQA) contains the most standardized sampling methods,
   we recommend using only the NAWQA dataset (set as default) for density and

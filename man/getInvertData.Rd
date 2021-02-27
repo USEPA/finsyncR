@@ -42,6 +42,12 @@ Note: There are 81 sampling events (sampling location - collection
   stream habitat sampled, which may be of interest for certain ecological
   questions.
 
+  The function adjusts taxa abundances from samples for lab subsampling
+  ratio. As a result, duplicate taxa were combined (abundances summed)
+  following adjustments for lab subsampling.
+
+  Currently, lab large rares are removed from all samples.
+
   \code{program} refers to the Local, regional, or national program project
   for which data were originally collected. Because the National Water
   Quality Assessment (NAWQA) contains the most standardized sampling methods,
