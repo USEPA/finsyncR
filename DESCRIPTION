@@ -10,7 +10,11 @@ Authors@R:
       person(given = "Michael",
            family = "Mahon",
            role = c("aut"),
-           email = "mmahon4@nd.edu")
+           email = "mmahon4@nd.edu"),
+      person(given = "Devin",
+           family = "Jones",
+           role = c("aut"),
+           email = "devin.k.jones@gmail.com")
            )
 Maintainer: Michael Mahon <mmahon4@nd.edu>
 Description: For now, this R package is to be used only by members of the
