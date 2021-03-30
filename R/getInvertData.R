@@ -102,7 +102,7 @@ getInvertData <- function(dataType = "abun",
                                        dplyr::distinct(ProjectLabel,
                                                        .keep_all = FALSE))[ , "ProjectLabel"])
 
-  SamplingRatio_SamplerType <- .SamplingRatio_SamplerType
+  SamplingRatio_SamplerType <- StreamData:::.SamplingRatio_SamplerType
 
   Inverts <- dplyr::left_join(Inverts,
                        SamplingRatio_SamplerType,
@@ -449,6 +449,7 @@ getInvertData <- function(dataType = "abun",
                         by = "SIDNO")
 
   if(abunMeasure == "abundance"){
+    abunMeasure = "Abundance"
     notAbun <- "Density_m2"
   } else {
     notAbun <- "Abundance"
