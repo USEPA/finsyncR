@@ -4,6 +4,8 @@
 #' @param taxonLevel Level of taxonomic resolution, must be one of:
 #'   \code{"AlgalGroup"}, \code{"Phylum"}, \code{"Class"}, \code{"Order"},
 #'   \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
+#' @param taxonFix How to deal with changes in taxonomy across time, must
+#'   be one of: \code{"none"}, \code{"lump"}, \code{"remove"}.
 #' @param program The program name(s) that should be included in the output
 #'   dataset. See \code{Details} below for more information.
 #' @param lifestage logical. Should the output dataset should include lifestage information for
@@ -26,7 +28,21 @@
 #'
 #'   Currently, lab large rares are removed from all samples.
 #'
-#'   \code{program} refers to the Local, regional, or national program project
+#'   \code{taxonFix} provides ways to handle changes in taxonomy across time,
+#'   especially in instances in which species have been reorganized into new
+#'   genera. \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
+#'   makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
+#'   by giving a unified genera name to all species and genera that have been linked
+#'   through changes in taxonomy (e.g. genera1/genera2/genera3). Note: of 98
+#'   problematic genera that exist throughout all BioData, \code{taxonFix = "lump"}
+#'   results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
+#'   One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
+#'   \code{taxonFix = "drop"} prioritizes accurate identification by dropping
+#'   observations from problematic genera that do not have species identification.
+#'   Without a species-level identification from the bench, there is no way to
+#'   assure correct membership in a updated genera.
+#'
+#'   \code{program} refers to the local, regional, or national program project
 #'   for which data were originally collected. Because the National Water
 #'   Quality Assessment (NAWQA) contains the most standardized sampling methods,
 #'   we recommend using only the NAWQA dataset (set as default) for density and
@@ -40,7 +56,7 @@
 #'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
 #'
 #'   If \code{dataType = "abun"} AND \code{abunMeasure = "density"},
-#'   ~0.5% of samples (22 samples) removed from the dataset, because area
+#'   ~0.5 \% of samples (22 samples) removed from the dataset, because area
 #'   sampled was not provided for these samples.
 #'
 #' @examples
@@ -53,6 +69,7 @@
 
 getInvertData <- function(dataType = "abun",
                           taxonLevel = "Species",
+                          taxonFix = "none",
                           program = "National Water Quality Assessment",
                           lifestage = FALSE,
                           abunMeasure = "density"){
@@ -65,6 +82,9 @@ getInvertData <- function(dataType = "abun",
   if(!(taxonLevel %in% StreamData:::.TaxLevCols_Inverts$Phylum$taxcols)){
     stop(paste('taxonLevel must be set between ranks "Phylum" and "Subspecies";',
          'see "Details" in ?getInvertData.'))
+  }
+  if(!(taxonFix %in% c("none", "lump","remove"))){
+    stop("Provide taxonFix as 'none' (do nothing) or 'lump' (lump genera across years) or 'remove' (remove observations if no species level ID given)")
   }
 
   if(dataType == "abun" && abunMeasure == "density"){
@@ -80,14 +100,16 @@ getInvertData <- function(dataType = "abun",
   Inverts <- utils::read.csv(unzip(system.file("extdata",
                                                "InvertResults.zip",
                                                package = "StreamData")),
-                      colClasses = c("SiteNumber" = "character"))
+                      colClasses = c("SiteNumber" = "character"),
+                      stringsAsFactors = FALSE)
   if(colnames(Inverts)[1] != "SIDNO"){
     colnames(Inverts)[1] = "SIDNO"
   }
   Project <- utils::read.csv(system.file("extdata",
                                     "20201217.0749.Project.csv",
                                     package = "StreamData"),
-                        comment.char="#")
+                        comment.char="#",
+                        stringsAsFactors = FALSE)
   if(program == "ALL") {
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
@@ -116,7 +138,7 @@ getInvertData <- function(dataType = "abun",
   ## entries for a given species at each collection site for a single
   ## 'Abundance' measure
 
-  ## "IRTH" == The RTH theoretically supports the faunistically
+  ## "IRTH" == "Invertebrate Richest Taxa Habitat" theoretically supports the faunistically
   ## richest invertebrate community and is typically represented by a
   ## coarse-grained riffle or a woody snag. The semi-quantitative RTH sample
   ## consists of a series of discrete collections (for example, five Slack
@@ -218,7 +240,6 @@ getInvertData <- function(dataType = "abun",
   ### as part of the gridded tray
   ### *** THIS DATASET IS THE CORRECT GRIDDED SUBSAMPLE INFORMATION WHICH NEEDS
   ### TO BE COMBINED WITH SUMMED FOLSOM SAMPLER DATA***
-  ### (CORRECTED: NEED TO SEARCH FOR DUPLICATE LISTINGS IN THIS DATASET AS WELL)
 
   Invert_MixedRatios_GridsAndFS <- Invert_MixedRatios %>%
     dplyr::group_by(Identifier) %>%
@@ -403,7 +424,8 @@ getInvertData <- function(dataType = "abun",
   invertsamp = utils::read.csv(system.file("extdata",
                                     "20201217.0749.InvertSamp.csv",
                                     package = "StreamData"),
-                        colClasses = c("SiteNumber" = "character")) %>%
+                        colClasses = c("SiteNumber" = "character"),
+                        stringsAsFactors = FALSE) %>%
     dplyr::rename(SIDNO = grep("SIDNO", names(.))) %>%
     dplyr::select(SIDNO,
                   SiteNumber,
@@ -415,7 +437,8 @@ getInvertData <- function(dataType = "abun",
   invertsampinv = utils::read.csv(system.file("extdata",
                                        "20201217.0749.SampleInv.csv",
                                        package = "StreamData"),
-                           colClasses = c("SiteNumber" = "character")) %>%
+                           colClasses = c("SiteNumber" = "character"),
+                           stringsAsFactors = FALSE) %>%
     dplyr::rename(SIDNO = grep("SIDNO", names(.))) %>%
     dplyr::select(SIDNO,
                   ReplicateType)
@@ -424,7 +447,8 @@ getInvertData <- function(dataType = "abun",
   invertsite = utils::read.csv(system.file("extdata",
                                     "20201217.0749.SiteInfo.csv",
                                     package = "StreamData"),
-                        colClasses = c("SiteNumber" = "character")) %>%
+                        colClasses = c("SiteNumber" = "character"),
+                        stringsAsFactors = FALSE) %>%
     dplyr::select(SiteNumber,
                   Latitude_dd,
                   Longitude_dd,
@@ -458,8 +482,30 @@ getInvertData <- function(dataType = "abun",
   mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
   taxcols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
 
+  ##SLR - ADD OPTIONS TO 1) GROUP PROBLEMATIC IDENTIFICATIONS OR 2) THROW OUT PROBLEMATIC OBSERVATION WITH MISSING SPP DATA
 
-  ###Need to fix this here with abundance v. density!
+  #create variable taxonFix = none, lump, remove
+  #none = no change, lump = lump genera through time, remove = remove observation only if spp. level ID does not exist
+  if(taxonFix == "none"){
+
+  }else if(taxonFix == "lump"){
+
+    #create bench genus in TotalRows
+    TotalRows <- TotalRows %>%
+      dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
+
+    #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
+    #else, keep the original Genus label
+    TotalRows$Genus <- ifelse(TotalRows$BenchGenus %in% StreamData:::.clust_labels$genus,
+                              StreamData:::.clust_labels$lump[match(TotalRows$BenchGenus,StreamData:::.clust_labels$genus)],
+                              TotalRows$Genus)
+  }else if(taxonFix == "remove"){
+
+    #filter out rows that have bench genus from problem list & no species ID
+    TotalRows <- TotalRows %>%
+      dplyr::filter(!(Genus %in% StreamData:::.clust_labels$genus & PublishedTaxonNameLevel == "Genus"))
+
+  }
 
   if(isTRUE(lifestage)) {
     #Lifestage-taxon combinations

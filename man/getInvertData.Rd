@@ -7,6 +7,7 @@
 getInvertData(
   dataType = "abun",
   taxonLevel = "Species",
+  taxonFix = "none",
   program = "National Water Quality Assessment",
   lifestage = FALSE,
   abunMeasure = "density"
@@ -18,6 +19,9 @@ getInvertData(
 \item{taxonLevel}{Level of taxonomic resolution, must be one of:
 \code{"AlgalGroup"}, \code{"Phylum"}, \code{"Class"}, \code{"Order"},
 \code{"Family"}, \code{"Genus"}, or \code{"Species"}.}
+
+\item{taxonFix}{How to deal with changes in taxonomy across time, must
+be one of: \code{"none"}, \code{"lump"}, \code{"remove"}.}
 
 \item{program}{The program name(s) that should be included in the output
 dataset. See \code{Details} below for more information.}
@@ -48,7 +52,21 @@ Note: There are 81 sampling events (sampling location - collection
 
   Currently, lab large rares are removed from all samples.
 
-  \code{program} refers to the Local, regional, or national program project
+  \code{taxonFix} provides ways to handle changes in taxonomy across time,
+  especially in instances in which species have been reorganized into new
+  genera. \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
+  makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
+  by giving a unified genera name to all species and genera that have been linked
+  through changes in taxonomy (e.g. genera1/genera2/genera3). Note: of 98
+  problematic genera that exist throughout all BioData, \code{taxonFix = "lump"}
+  results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
+  One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
+  \code{taxonFix = "drop"} prioritizes accurate identification by dropping
+  observations from problematic genera that do not have species identification.
+  Without a species-level identification from the bench, there is no way to
+  assure correct membership in a updated genera.
+
+  \code{program} refers to the local, regional, or national program project
   for which data were originally collected. Because the National Water
   Quality Assessment (NAWQA) contains the most standardized sampling methods,
   we recommend using only the NAWQA dataset (set as default) for density and
@@ -62,7 +80,7 @@ Note: There are 81 sampling events (sampling location - collection
   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
 
   If \code{dataType = "abun"} AND \code{abunMeasure = "density"},
-  ~0.5% of samples (22 samples) removed from the dataset, because area
+  ~0.5 \% of samples (22 samples) removed from the dataset, because area
   sampled was not provided for these samples.
 }
 \examples{

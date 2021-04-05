@@ -125,8 +125,27 @@ taxnamesFISH = c("Superclass", "Class", "Subclass",
                                                "taxcols" = taxnamesFISH[(which(taxnamesFISH == "Subspecies")):length(taxnamesFISH)])
 )
 
-##To build "SamplingRatio_SamplerType", must use datasets found on Michael Mahon's personal computer
-.SamplingRatio_SamplerType = SamplingRatio_SamplerType
+## Load in 'Proprietary' dataset provided by USGS personnel
+##NEED TO GET THIS IN.
+Proprietary <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/StreamData/inst/extdata/Proprietary.csv")
+
+## Create a character ratio to avoid reading in the file and generating decimal ratios
+Proprietary$Ratio <- paste('"', Proprietary$NWQLSubsamplingCode, '"', sep = " ")
+
+## Load in 'Sampler' dataset generated from 'Proprietary' dataset
+## 'Sampler' contains all unique "Ratio" entries
+## Unique "Ratio" entries were assigned a "SamplerType" of FS (Folsom Sampler)
+## or Grid (Gridded Tray) based upon USGS OFR 00-212
+## (Moulton et al. 2000 Methods of analysis by the U.S. Geological Survey
+## National Water Quality Laboratory -- Processing, taxonomy, and quality
+## control of benthic macroinvertebrate samples)
+## 'SamplerType' decided by DKJ
+Sampler <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/StreamData/inst/extdata/Grotheer -- Ratio&SamplerType.csv")
+Sampler$Ratio <- as.character(Sampler$Ratio)
+
+## Combine 'Proprietary' and 'Sampler' using the "Ratio" character
+.SamplingRatio_SamplerType <- left_join(Proprietary, Sampler, by = "Ratio")
+
 
 
 
@@ -171,19 +190,22 @@ taxnamesFISH = c("Superclass", "Class", "Subclass",
                                 "PeriphytonHabitatSampled",
                                 "SubsurfaceGrabDepth_m")
 
-.site.info <- read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/PestDataForRPackageBuild/Biodata_Site_List.csv",
+.site.info <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/OnlineMeetingSpring2021/PestCntyFunction/Biodata_Site_List.csv",
                       colClasses = c("StateFIPSCode" = "character",
                                      "CountyFIPSCode" = "character"))
 
-.pest.info <- read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/PestDataForRPackageBuild/pestclassPANall_22Feb21.csv") %>%
+.pest.info <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/OnlineMeetingSpring2021/PestCntyFunction/pestclassPANall_22Feb21.csv") %>%
   dplyr::mutate(Name = stringr::str_to_lower(Name),
          class = Class,
          type = Type)
 
+.clust_labels = read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/MahonRumschlagPowell/clust_labels.csv",
+                        header=T, stringsAsFactors = FALSE)
 
 usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,
                   .ReorderUSGSBioDataColNames,
                   .site.info,
                   .pest.info,
+                  .clust_labels,
                   internal = TRUE)
