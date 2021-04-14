@@ -63,6 +63,14 @@ getAlgaeData <- function(algType = "peri",
   if(colnames(algae)[1] != "SIDNO"){
     colnames(algae)[1] = "SIDNO"
   }
+  ##Remove the unzipped file from the system
+  if(file.exists(system.file("extdata",
+                             "20201217.0757.AlgResults.csv",
+                             package = "StreamData"))){
+    unlink(system.file("extdata",
+                       "20201217.0757.AlgResults.csv",
+                       package = "StreamData"))
+  }
 
   Project <- utils::read.csv(system.file("extdata",
                                "20201217.0757.Project.csv",

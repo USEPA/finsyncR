@@ -6,11 +6,12 @@
 \usage{
 getInvertData(
   dataType = "abun",
-  taxonLevel = "Species",
+  taxonLevel = "Genus",
   taxonFix = "none",
   program = "National Water Quality Assessment",
   lifestage = FALSE,
-  abunMeasure = "density"
+  abunMeasure = "density",
+  rarefy = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,10 @@ each individual? \code{TRUE} or \code{FALSE}.}
 
 \item{abunMeasure}{Measure of abundance, either \code{"abundance"} or
 \code{"density"}.}
+
+\item{rarefy}{logical. Should samples be standardized by the number of individuals
+identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
+below for more information.}
 }
 \value{
 A species by sample data frame with site, stream reach, and
@@ -82,11 +87,28 @@ Note: There are 81 sampling events (sampling location - collection
   If \code{dataType = "abun"} AND \code{abunMeasure = "density"},
   ~0.5 \% of samples (22 samples) removed from the dataset, because area
   sampled was not provided for these samples.
+
+  If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
+  will be retained. Thus, ~17 \% of samples will be removed, as they have <300
+  individuals sampled. We set the rarefaction threshold at 300, because 1) with
+  every 50 individuals identified, ~1 genera are added to the sample and 2) 82.8 \%
+  of samples have at least 300 individuals identified. Thus, lowering the threshold
+  to 200 individuals removed ~2 genera per sample, but only added an additional
+  7.3 \% of samples included (90.1 \% from 82.8 \%). Similarly, increasing the
+  threshold to 400 individuals added ~2 genera per sample, but reduced samples to
+  30.3 \% of all samples. Use \code{set.seed()} to get consistent output of
+  community data. NOTE: \code{rarefy = TRUE} can be used when wanting
+  occurrence data (presence/absence) OR proportional data (each taxon represents
+  a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
+  the measure that you are interested in using.
 }
 \examples{
 \dontrun{
 Inverts <- getInvertData(taxonLevel = "Family")
 
+set.seed(1)
+RarefyInverts <- getInvertData(taxonLevel = "Genus",
+                               rarefy = TRUE)
 }
 
 }

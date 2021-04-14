@@ -78,7 +78,14 @@ getFishData <- function(dataType = "abun",
   if(colnames(fish)[1] != "SIDNO"){
     colnames(fish)[1] = "SIDNO"
   }
-
+  ##Remove the unzipped file from the system
+  if(file.exists(system.file("extdata",
+                             "20201217.0745.FishResults.csv",
+                             package = "StreamData"))){
+    unlink(system.file("extdata",
+                       "20201217.0745.FishResults.csv",
+                       package = "StreamData"))
+  }
   Project <- utils::read.csv(system.file("extdata",
                                   "20201217.0745.Project.csv",
                                   package = "StreamData"),

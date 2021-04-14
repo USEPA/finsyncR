@@ -67,6 +67,15 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
                                    "COUNTY_FIPS_CODE" = "character"))  %>%
     mutate(compound = stringr::str_to_lower(COMPOUND))
 
+  ##Remove the unzipped file from the system
+  if(file.exists(system.file("extdata",
+                             "pestCountyEstYrs.txt",
+                             package = "StreamData"))){
+    unlink(system.file("extdata",
+                       "pestCountyEstYrs.txt",
+                       package = "StreamData"))
+  }
+
   if(ePest == "low"){
     ePest = "EPEST_LOW_KG"
     dropC = "EPEST_HIGH_KG"
