@@ -822,7 +822,6 @@ getInvertData <- function(dataType = "abun",
         dplyr::mutate(TOTAL = dplyr::n()) %>%
         dplyr::slice(1) %>%
         dplyr::ungroup() %>%
-        dplyr::mutate(TOTAL = TOTAL / 300) %>%
         dplyr::select(-Unique)
     } else {}
     ##Third step:
