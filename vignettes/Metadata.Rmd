@@ -195,7 +195,8 @@ Following all of the above columns are an unknown number of columns that code fo
 ```{r example, warning = FALSE, message = FALSE}
 library(StreamData)
 
-Invertdata = getInvertData(taxonLevel = "Family")
+Invertdata = getInvertData(taxonLevel = "Genus",
+                           rarefy = FALSE)
 colnames(Invertdata)[1:32]
 
 ```

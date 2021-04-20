@@ -128,6 +128,7 @@ taxnamesFISH = c("Superclass", "Class", "Subclass",
 ## Load in 'Proprietary' dataset provided by USGS personnel
 ##NEED TO GET THIS IN.
 Proprietary <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/StreamData/inst/extdata/Proprietary.csv")
+# Proprietary <- read.csv("C:/Users/mikem/Documents/R Package Builds/USGS_Invert_Functions/data/Proprietary.csv")
 
 ## Create a character ratio to avoid reading in the file and generating decimal ratios
 Proprietary$Ratio <- paste('"', Proprietary$NWQLSubsamplingCode, '"', sep = " ")
@@ -141,6 +142,8 @@ Proprietary$Ratio <- paste('"', Proprietary$NWQLSubsamplingCode, '"', sep = " ")
 ## control of benthic macroinvertebrate samples)
 ## 'SamplerType' decided by DKJ
 Sampler <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/StreamData/inst/extdata/Grotheer -- Ratio&SamplerType.csv")
+# Sampler <- read.csv("C:/Users/mikem/Documents/R Package Builds/USGS_Invert_Functions/data/Grotheer -- Ratio&SamplerType.csv")
+
 Sampler$Ratio <- as.character(Sampler$Ratio)
 
 ## Combine 'Proprietary' and 'Sampler' using the "Ratio" character
@@ -159,6 +162,7 @@ Sampler$Ratio <- as.character(Sampler$Ratio)
                                 "CollectionYear",
                                 "CollectionMonth",
                                 "CollectionDayOfYear",
+                                "SiteVisitSampleNumber",
                                 "ProvisionalData",
                                 "SiteNumber",
                                 "SiteName",
@@ -193,14 +197,51 @@ Sampler$Ratio <- as.character(Sampler$Ratio)
 .site.info <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/OnlineMeetingSpring2021/PestCntyFunction/Biodata_Site_List.csv",
                       colClasses = c("StateFIPSCode" = "character",
                                      "CountyFIPSCode" = "character"))
+# .site.info <- read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/PestDataForRPackageBuild/Biodata_Site_List.csv",
+#                        colClasses = c("StateFIPSCode" = "character",
+#                                       "CountyFIPSCode" = "character"))
+
 
 .pest.info <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/OnlineMeetingSpring2021/PestCntyFunction/pestclassPANall_22Feb21.csv") %>%
   dplyr::mutate(Name = stringr::str_to_lower(Name),
          class = Class,
          type = Type)
+# .pest.info <- read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/PestDataForRPackageBuild/pestclassPANall_22Feb21.csv") %>%
+#   dplyr::mutate(Name = stringr::str_to_lower(Name),
+#                 class = Class,
+#                 type = Type)
+
 
 .clust_labels = read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/MahonRumschlagPowell/clust_labels.csv",
                         header=T, stringsAsFactors = FALSE)
+# .clust_labels = read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/MahonRumschlagPowell/clust_labels.csv",
+#                          header=T, stringsAsFactors = FALSE)
+
+
+.switch1to1 <- data.frame(BenchGenus = c("Anisogammarus",
+                                         "Asellus",
+                                         "Asheum",
+                                         "Corophium",
+                                         "Deronectes",
+                                         "Desserobdella",
+                                         "Dina",
+                                         "Mooreobdella",
+                                         "Nephelopsis",
+                                         "Physella",
+                                         "Pristinella",
+                                         "Stelechomyia"),
+                          Genus = c("Ramellogammarus",
+                                    "Caecidotea",
+                                    "Polypedilum",
+                                    "Americorophium",
+                                    "Stictotarsus",
+                                    "Placobdella",
+                                    "Erpobdella",
+                                    "Erpobdella",
+                                    "Erpobdella",
+                                    "Physa",
+                                    "Pristina",
+                                    "Kribiodorum"))
 
 usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,
@@ -208,4 +249,5 @@ usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .site.info,
                   .pest.info,
                   .clust_labels,
+                  .switch1to1,
                   internal = TRUE)

@@ -30,11 +30,13 @@ The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `
 ##This code will generate density estimates at the family level for all samples
 ##in the NAWQA database. Lifestage information will be ignored.
 
-Inverts <- getInvertData(dataType = "abun",
-                         taxonLevel = "Family",
+Inverts <- getInvertData(dataType = "occur",
+                         taxonLevel = "Genus",
                          program = "National Water Quality Assessment",
                          lifestage = FALSE,
-                         abunMeasure = "density")
+                         abunMeasure = "abundance",
+                         rarefy = TRUE,
+                         seed = 11111)
 
 head(Inverts)[,1:35]
 

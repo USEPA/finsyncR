@@ -11,7 +11,9 @@ getInvertData(
   program = "National Water Quality Assessment",
   lifestage = FALSE,
   abunMeasure = "density",
-  rarefy = TRUE
+  rarefy = TRUE,
+  NRSA = FALSE,
+  seed = 0
 )
 }
 \arguments{
@@ -36,6 +38,13 @@ each individual? \code{TRUE} or \code{FALSE}.}
 \item{rarefy}{logical. Should samples be standardized by the number of individuals
 identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 below for more information.}
+
+\item{NRSA}{logical. Should EPA NRSA invertebrate samples be included in the
+output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
+below for more information.}
+
+\item{seed}{numeric. Set seed for \code{rarefy} to get consistent results with every
+iteration of the function.}
 }
 \value{
 A species by sample data frame with site, stream reach, and
@@ -96,19 +105,29 @@ Note: There are 81 sampling events (sampling location - collection
   to 200 individuals removed ~2 genera per sample, but only added an additional
   7.3 \% of samples included (90.1 \% from 82.8 \%). Similarly, increasing the
   threshold to 400 individuals added ~2 genera per sample, but reduced samples to
-  30.3 \% of all samples. Use \code{set.seed()} to get consistent output of
+  30.3 \% of all samples. Use \code{seed = ...} to get consistent output of
   community data. NOTE: \code{rarefy = TRUE} can be used when wanting
   occurrence data (presence/absence) OR proportional data (each taxon represents
   a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
   the measure that you are interested in using.
+
+  If \code{NRSA = TRUE}, then samples from the EPA National Stream and River
+  Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
+  (2000-2004) will be included. Note that from these samples, only moving
+  waters classified as "wadeable" are included and only samples that are
+  "reach-wide" are included. Some information included in the NAWQA dataset
+  are not included in the EPA NRSA datasets, and thus will appear as "NA".
+  Similar to the NAWQA data, there were inherent taxonomic issues with the
+  NRSA data. As such, we have taken the same steps as described above under
+  \code{taxonFix} to address these concerns.
 }
 \examples{
 \dontrun{
 Inverts <- getInvertData(taxonLevel = "Family")
 
-set.seed(1)
 RarefyInverts <- getInvertData(taxonLevel = "Genus",
-                               rarefy = TRUE)
+                               rarefy = TRUE,
+                               seed = 10)
 }
 
 }

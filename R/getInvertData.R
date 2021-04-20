@@ -15,6 +15,12 @@
 #' @param rarefy logical. Should samples be standardized by the number of individuals
 #'   identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 #'   below for more information.
+#' @param seed numeric. Set seed for \code{rarefy} to get consistent results with every
+#'   iteration of the function.
+#' @param NRSA logical. Should EPA NRSA invertebrate samples be included in the
+#'   output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
+#'   below for more information.
+#'
 #'
 #' @return A species by sample data frame with site, stream reach, and
 #'   sample information.
@@ -70,19 +76,29 @@
 #'   to 200 individuals removed ~2 genera per sample, but only added an additional
 #'   7.3 \% of samples included (90.1 \% from 82.8 \%). Similarly, increasing the
 #'   threshold to 400 individuals added ~2 genera per sample, but reduced samples to
-#'   30.3 \% of all samples. Use \code{set.seed()} to get consistent output of
+#'   30.3 \% of all samples. Use \code{seed = ...} to get consistent output of
 #'   community data. NOTE: \code{rarefy = TRUE} can be used when wanting
 #'   occurrence data (presence/absence) OR proportional data (each taxon represents
 #'   a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
 #'   the measure that you are interested in using.
 #'
+#'   If \code{NRSA = TRUE}, then samples from the EPA National Stream and River
+#'   Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
+#'   (2000-2004) will be included. Note that from these samples, only moving
+#'   waters classified as "wadeable" are included and only samples that are
+#'   "reach-wide" are included. Some information included in the NAWQA dataset
+#'   are not included in the EPA NRSA datasets, and thus will appear as "NA".
+#'   Similar to the NAWQA data, there were inherent taxonomic issues with the
+#'   NRSA data. As such, we have taken the same steps as described above under
+#'   \code{taxonFix} to address these concerns.
+#'
 #' @examples
 #' \dontrun{
 #' Inverts <- getInvertData(taxonLevel = "Family")
 #'
-#' set.seed(1)
 #' RarefyInverts <- getInvertData(taxonLevel = "Genus",
-#'                                rarefy = TRUE)
+#'                                rarefy = TRUE,
+#'                                seed = 10)
 #' }
 #'
 #' @export
@@ -93,7 +109,9 @@ getInvertData <- function(dataType = "abun",
                           program = "National Water Quality Assessment",
                           lifestage = FALSE,
                           abunMeasure = "density",
-                          rarefy = TRUE){
+                          rarefy = TRUE,
+                          NRSA = FALSE,
+                          seed = 0){
   if(!(abunMeasure %in% c("density", "abundance"))) {
     stop('abunMeasure must be either "density" or "abundance".')}
 
@@ -124,22 +142,17 @@ getInvertData <- function(dataType = "abun",
     stop('rarefy must be set to either TRUE or FALSE.')
   }
 
-  Inverts <- utils::read.csv(unzip(system.file("extdata",
-                                               "InvertResults.zip",
-                                               package = "StreamData")),
-                      colClasses = c("SiteNumber" = "character"),
-                      stringsAsFactors = FALSE)
+  Inverts <- utils::read.csv(base::unz(base::system.file("extdata",
+                                                         "20201217.0749.InvertResults.zip",
+                                                         package = "StreamData"),
+                                       "20201217.0749.InvertResults.csv"),
+                             colClasses = c("SiteNumber" = "character"),
+                             stringsAsFactors = FALSE)
   if(colnames(Inverts)[1] != "SIDNO"){
     colnames(Inverts)[1] = "SIDNO"
   }
-  if(file.exists(system.file("extdata",
-                             "20201217.0749.InvertResults.csv",
-                             package = "StreamData"))){
-    unlink(system.file("extdata",
-                       "20201217.0749.InvertResults.csv",
-                       package = "StreamData"))
-  }
-  Project <- utils::read.csv(system.file("extdata",
+
+  Project <- utils::read.csv(base::system.file("extdata",
                                     "20201217.0749.Project.csv",
                                     package = "StreamData"),
                         comment.char="#",
@@ -524,17 +537,21 @@ getInvertData <- function(dataType = "abun",
   ###NOTE: NEED TO MOVE THIS AFTER THE RANDOM SAMPLING, BECAUSE IT IS CAUSING SAMPLES TO BE DROPPED
   ##THIS COULD AFFECT SOME THINGS, BUT MIGHT BE REALLY EASY
 
-
   if(isTRUE(rarefy)) {
+    set.seed(seed)
+
     TotalRows = TotalRows %>%
       dplyr::group_by(SIDNO) %>%
       dplyr::mutate(indcounted = sum(RawCount)) %>%
       dplyr::filter(indcounted > 299) %>%
       dplyr::select(-indcounted) %>%
       dplyr::ungroup() %>%
-      dplyr::group_by(SIDNO) %>%
+      dplyr::group_by(SIDNO, PublishedTaxonName) %>%
       dplyr::slice(rep(1:dplyr::n(), times=RawCount)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(SIDNO) %>%
       dplyr::sample_n(size = 300) %>%
+      dplyr::ungroup() %>%
       dplyr::group_by(SIDNO, PublishedTaxonName) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup()
@@ -575,8 +592,8 @@ getInvertData <- function(dataType = "abun",
     #Lifestage-taxon combinations
     invert_comms1 = TotalRows %>%
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
-      dplyr::filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
-      tidyr::unite(UNIQUEID, c(SIDNO, all_of(taxonLevel), Lifestage), sep = "_", remove = FALSE) %>%
+      dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), any_vars(. != "")) %>%
+      tidyr::unite(UNIQUEID, c(SIDNO, tidyselect::all_of(taxonLevel), Lifestage), sep = "_", remove = FALSE) %>%
       dplyr::group_by(UNIQUEID) %>%
       dplyr::mutate(Abundance = sum(Abundance)) %>%
       dplyr::slice(1) %>%
@@ -600,10 +617,10 @@ getInvertData <- function(dataType = "abun",
                               "Ratio", 'X', "NumbEntries", "SampleGrouping", "LabRecordIDs",
                               "Ratios", "Note", "UNIQUEID", "PublishedTaxonNameLevel",
                               "SamplerType", "DatasetPortion", "TotAreaSampled_m2"))) %>%
-      dplyr::select(-any_of(mycols),
-                    -any_of(notAbun)) %>%
-      tidyr::unite(Taxon_Life, c(all_of(taxonLevel), Lifestage), sep = "_") %>%
-      tidyr::pivot_wider(names_from = all_of(Taxon_Life),
+      dplyr::select(-tidyselect::any_of(mycols),
+                    -tidyselect::any_of(notAbun)) %>%
+      tidyr::unite(Taxon_Life, c(tidyselect::all_of(taxonLevel), Lifestage), sep = "_") %>%
+      tidyr::pivot_wider(names_from = tidyselect::all_of(Taxon_Life),
                          names_prefix = "tax_",
                          values_from = all_of(abunMeasure),
                          values_fill = 0)
@@ -612,8 +629,8 @@ getInvertData <- function(dataType = "abun",
     #All species are one
     invert_comms1 = TotalRows %>%
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
-      dplyr::filter_at(vars(all_of(taxonLevel)), any_vars(. != "")) %>%
-      tidyr::unite(UNIQUEID, c(SIDNO, all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
+      dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
+      tidyr::unite(UNIQUEID, c(SIDNO, tidyselect::all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
       dplyr::group_by(UNIQUEID) %>%
       dplyr::mutate(Abundance = sum(Abundance)) %>%
       dplyr::slice(1) %>%
@@ -639,27 +656,375 @@ getInvertData <- function(dataType = "abun",
                                           "SamplerType", "DatasetPortion", "TotAreaSampled_m2"))) %>%
       dplyr::select(-tidyselect::any_of(mycols)) %>%
       dplyr::select(-tidyselect::any_of(notAbun)) %>%
-      tidyr::pivot_wider(names_from = all_of(taxonLevel),
+      tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
                          names_prefix = "tax_",
-                         values_from = all_of(abunMeasure),
+                         values_from = tidyselect::all_of(abunMeasure),
                          values_fill = 0)
   }
 
+  invert_comms1 = invert_comms1 %>%
+    dplyr::select(-Identifier,
+                  -SIDNO,
+                  -ReleaseCategory) %>%
+    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
+
+
+  if(isTRUE(NRSA)){
+
+    ##Read in datasets directly from EPA website
+    NRSA_1314_inverts = read.csv("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_bentcnts_04232019.csv",
+                                 colClasses = c("UID" = "character"),
+                                 stringsAsFactors = FALSE)
+    NRSA_1314_sites = read.csv("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
+                               colClasses = c("UID" = "character",
+                                              "STATECTY" = "character"),
+                               stringsAsFactors = FALSE)
+
+    NRSA_0809_inverts = read.csv("https://www.epa.gov/sites/production/files/2016-11/nrsa0809bentcts.csv",
+                                 colClasses = c("UID" = "character"),
+                                 stringsAsFactors = FALSE)
+    NRSA_0809_inverts_tax = read.csv("https://www.epa.gov/sites/production/files/2016-06/nrsa_0809_benttaxa.csv",
+                                     stringsAsFactors = FALSE)
+
+    NRSA_0809_sites = read.csv("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
+                               colClasses = c("UID" = "character"),
+                               stringsAsFactors = FALSE)
+
+    NRSA_0304_inverts = rbind(read.csv("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part1.csv",
+                                       stringsAsFactors = FALSE),
+                              read.csv("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part2.csv",
+                                       stringsAsFactors = FALSE))
+    NRSA_0304_sites = read.csv("https://www.epa.gov/sites/production/files/2014-10/wsa_siteinfo_ts_final.csv",
+                               stringsAsFactors = FALSE)
+
+    #############
+    ##First step:
+    ##Filter SAMPLE_TYPE to "BERW", "BERWW", or "REACHWIDE" in NRSA_inverts
+    sampletype = c("BERW", "BERWW", "REACHWIDE")
+
+    ##2003/2004
+    NRSA_0304_inverts = NRSA_0304_inverts %>%
+      dplyr::filter(INDEX_SAMPTYPE %in% sampletype) %>%
+      dplyr::select(-DISTINCT, -HABIT, -PTV, -FLAG_PTV, -FFG)
+
+    ##Replace NAs with "", which is consistent with the other NRSA datasets
+    NRSA_0304_inverts$GENUS = ifelse(is.na(NRSA_0304_inverts$GENUS),
+                                     "",
+                                     NRSA_0304_inverts$GENUS)
+    NRSA_0304_inverts$FAMILY = ifelse(is.na(NRSA_0304_inverts$FAMILY),
+                                      "",
+                                      NRSA_0304_inverts$FAMILY)
+    NRSA_0304_inverts$ORDER = ifelse(is.na(NRSA_0304_inverts$ORDER),
+                                     "",
+                                     NRSA_0304_inverts$ORDER)
+    NRSA_0304_inverts$CLASS = ifelse(is.na(NRSA_0304_inverts$CLASS),
+                                     "",
+                                     NRSA_0304_inverts$CLASS)
+
+    ##Use the names directly in Genus, Family, Order, Class, or Phylum
+    ##Some names don't match or are at the subfamily level, which doesn't exist for all
+    ##Datasets
+    NRSA_0304_inverts$TARGET_TAXON <- ifelse(NRSA_0304_inverts$GENUS != "",
+                                             NRSA_0304_inverts$GENUS,
+                                             ifelse(NRSA_0304_inverts$FAMILY != "",
+                                                    NRSA_0304_inverts$FAMILY,
+                                                    ifelse(NRSA_0304_inverts$ORDER != "",
+                                                           NRSA_0304_inverts$ORDER,
+                                                           ifelse(NRSA_0304_inverts$CLASS != "",
+                                                                  NRSA_0304_inverts$CLASS,
+                                                                  NRSA_0304_inverts$PHYLUM
+                                                           )
+                                                    )
+                                             )
+    )
+
+    ##Create UID and update SITE_ID
+    NRSA_0304_inverts$UID <- paste("200304_",
+                                   sub(".*-", "", NRSA_0304_inverts$SITE_ID),
+                                   sep = "")
+    NRSA_0304_inverts$SITE_ID <- sub("\\-.*", "", NRSA_0304_inverts$SITE_ID)
+
+    ##Update column names to match those of 08/09 and 13/14
+    colnames(NRSA_0304_inverts)[c(4,10)] = c("SAMPLE_TYPE", "TOTAL")
+
+    ##Rearrange columns to match those of 08/09 and 13/14
+    NRSA_0304_inverts <- NRSA_0304_inverts %>%
+      dplyr::relocate(any_of(c("UID", "SITE_ID", "YEAR", "VISIT_NO", "SAMPLE_TYPE",
+                        "TARGET_TAXON", "TOTAL", "PHYLUM", "CLASS", "ORDER",
+                        "FAMILY", "GENUS")))
+
+    ##2008/2009
+    ##Filter to BERW; remove columns that are not needed
+    NRSA_0809_inverts = NRSA_0809_inverts %>%
+      dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
+      dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -BENT_COM, -DATE_BENT,
+                    -SAMPLE_CAT, -PUBLICATION_DATE) %>%
+      dplyr::mutate(YEAR = paste("20", stringr::str_sub(DATE_COL, -2,-1), sep = ""),
+             YEAR = as.numeric(YEAR)) %>%
+      dplyr::select(-DATE_COL)
+
+    ##Join the count data to the taxa data to match those of 03/04
+    NRSA_0809_inverts<- NRSA_0809_inverts %>%
+      dplyr::left_join(NRSA_0809_inverts_tax %>%
+                  dplyr::select(TAXA_ID, PHYLUM, CLASS, ORDER, FAMILY, GENUS),
+                by = "TAXA_ID")
+
+    ##Update this weird TARGET_TAXON that is THIENEMANNIMYIA GENUS GR., but does not
+    ##have a genus associated with it; so make genus = "THIENEMANNIMYIA"
+    NRSA_0809_inverts$GENUS = ifelse(grepl("GENUS", NRSA_0809_inverts$TARGET_TAXON),
+                                     "THIENEMANNIMYIA",
+                                     NRSA_0809_inverts$GENUS)
+
+    ##Rearrange columns to match those of 08/09 and 13/14
+    NRSA_0809_inverts <- NRSA_0809_inverts %>%
+      dplyr::relocate(YEAR, .before = SAMPLE_TYPE) %>%
+      dplyr::select(-TAXA_ID)
+
+    ##2013/2014
+        ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
+    ##not available in all datasets, so remove those that are not found across data)
+    NRSA_1314_inverts = NRSA_1314_inverts %>%
+      dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
+      dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -TOTAL300_OE,
+                    -PUBLICATION_DATE, -TRIBE, -SUBFAMILY, -TAXA_ID)
+
+    ##Update this weird TARGET_TAXON that is THIENEMANNIMYIA GENUS GR., but does not
+    ##have a genus associated with it; so make genus = "THIENEMANNIMYIA"
+    NRSA_1314_inverts$GENUS = ifelse(grepl("GENUS", NRSA_1314_inverts$TARGET_TAXON),
+                                     "THIENEMANNIMYIA",
+                                     NRSA_1314_inverts$GENUS)
+    ##Bind all
+    NRSA_inverts <- dplyr::bind_rows(list(NRSA_0304_inverts, NRSA_0809_inverts, NRSA_1314_inverts))
+
+    ##Second step:
+    ##Rarefy samples to 300 in the same manner as the NAQWA data for consistency
+    if(isTRUE(rarefy)) {
+      set.seed(seed)
+      NRSA_inverts <- NRSA_inverts %>%
+        ##Create unique grouping based on UID, SITE_ID, YEAR, and VISIT_NO
+        ##Group by this column
+        ##Take the total individuals counted, remove those that are less than 300
+        tidyr::unite(Unique, c(UID, SITE_ID, YEAR, VISIT_NO), sep = "_", remove = F) %>%
+        dplyr::group_by(Unique) %>%
+        dplyr::mutate(indcounted = sum(TOTAL)) %>%
+        dplyr::filter(indcounted > 299) %>%
+        dplyr::select(-indcounted) %>%
+        dplyr::ungroup() %>%
+        ##Again group by the unique sample column
+        ##Replicate each unique sample and target taxon by the number of individuals
+        ## found in the sample, then take 300 random individuals from these samples
+        dplyr::group_by(Unique, TARGET_TAXON) %>%
+        dplyr::slice(rep(1:dplyr::n(), times=TOTAL)) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(Unique) %>%
+        dplyr::sample_n(size = 300) %>%
+        dplyr::group_by(Unique, TARGET_TAXON) %>%
+        dplyr::mutate(TOTAL = dplyr::n()) %>%
+        dplyr::slice(1) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(TOTAL = TOTAL / 300) %>%
+        dplyr::select(-Unique)
+    } else {}
+    ##Third step:
+    ##FIX ALL TAXONOMIC ISSUES; only needed IF taxonLevel = "Genus"
+    ##NEED TO UPDATE THIS FOR FAMILY
+
+    ##Convert Genera names from all caps to sentence case (GENUS to Genus)
+    NRSA_inverts$GENUS <- stringr::str_to_sentence(NRSA_inverts$GENUS)
+
+    ###NEED TO GET switch1to1 in StreamData env
+    ##Convert those genera that need to be updated
+    NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
+                                 StreamData:::.switch1to1$Genus,
+                                 NRSA_inverts$GENUS)
+
+    ##This is the same code as the NAWQA taxonomy fix
+    if(taxonFix == "none"){
+
+    } else if(taxonFix == "lump"){
+
+      #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
+      #else, keep the original Genus label
+      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.clust_labels$genus,
+                                   StreamData:::.clust_labels$lump[match(NRSA_inverts$GENUS,
+                                                                         StreamData:::.clust_labels$genus)],
+                                   NRSA_inverts$GENUS)
+
+    }else if(taxonFix == "remove"){
+
+      #filter out rows that have bench genus from problem list & no species ID
+      NRSA_inverts <- NRSA_inverts %>%
+        dplyr::filter(!(GENUS %in% StreamData:::.clust_labels$genus))
+    }
+
+
+    ##Fourth step: (can get code from the getInvertData function)
+    ## NOTE: this step is only needed when looking at taxonomic resolutions ABOVE genus
+    ##Join all Target_taxon within each UID (sample)
+
+    ##UPDATE THIS FOR NRSA_MYCOLS
+    mycols = c("TARGET_TAXON",
+               "PHYLUM",
+               "CLASS",
+               "ORDER",
+               "FAMILY")
+
+    ##When "taxonLevel" isn't in all caps (in the function), create a NRSA specific
+    ##taxonLevel that is in all caps
+    taxonLevel.nrsa <- base::toupper(taxonLevel)
+
+    nrsa_comms1 = NRSA_inverts %>%
+      dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel.nrsa)), dplyr::any_vars(. != "")) %>%
+      tidyr::unite(UNIQUEID, c(UID, SITE_ID, YEAR, VISIT_NO, all_of(taxonLevel.nrsa)),
+                   sep = "_", remove = FALSE) %>%
+      dplyr::group_by(UNIQUEID) %>%
+      dplyr::mutate(TOTAL = sum(TOTAL)) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(-UNIQUEID) %>%
+      dplyr::select(-tidyselect::any_of(mycols)) %>%
+      tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel.nrsa),
+                         names_prefix = "tax_",
+                         values_from = TOTAL,
+                         values_fill = 0)
+
+    ##Step 6: join w/ site level data
+
+    ##13/14
+    ##UID, SITE_ID, VISIT_NO, SITETYPE, DATE_COL, PSTL_CODE, LAT_DD83, LON_DD83,
+    ##AG_ECO9, NRS13_Urban, RT_NRSA, US_L3CODE, US_L3NAME,
+    NRSA_1314_sites <- NRSA_1314_sites %>%
+      dplyr::select(UID, SITE_ID, VISIT_NO, SITETYPE, DATE_COL, PSTL_CODE,
+                    LAT_DD83, LON_DD83, AG_ECO9, NRS13_URBN, RT_NRSA,
+                    US_L3CODE, US_L3NAME) %>%
+      dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "?",
+                              "",
+                              RT_NRSA),
+             DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"))
+
+    ##08/09 - MISSING L3 NAME (not a problem)
+    ##UID, SITE_ID, VISIT_NO, SITE_CLASS, DATE_COL, STATE, LAT_DD83, LONG_DD83,
+    ##AGGR_ECO9_2015, URBAN, RT_NRSA, US_L3CODE_2015
+    NRSA_0809_sites <- NRSA_0809_sites %>%
+      dplyr::select(UID, SITE_ID, VISIT_NO, SITE_CLASS, DATE_COL, STATE,
+                    LAT_DD83, LON_DD83, AGGR_ECO9_2015, URBAN, RT_NRSA,
+                    US_L3CODE_2015) %>%
+      dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "R",
+                              "R",
+                              ifelse(RT_NRSA == "S",
+                                     "In",
+                                     ifelse(RT_NRSA == "T",
+                                            "Im",
+                                            "")))) %>%
+      dplyr::mutate(US_L3NAME = "",
+             DATE_COL = as.Date(DATE_COL, format = "%d-%b-%y"))
+
+    ##03/04 - MISSING UID (will create in the same way as above), URBAN
+    ##SITE_ID, VISIT_NO, SITETYPE, DATE_COL, STATE, LAT_DD, LON_DD,
+    ##ECOWSA9, RT_WSA, ECO3, ECO3_NM
+    NRSA_0304_sites <- NRSA_0304_sites %>%
+      dplyr::select(SITE_ID, VISIT_NO, SITETYPE, DATE_COL, STATE, LAT_DD, LON_DD,
+                    ECOWSA9, RT_WSA, ECO3, ECO3_NM) %>%
+      dplyr::mutate(RT_WSA = ifelse(RT_WSA == "R",
+                             "R",
+                             ifelse(RT_WSA == "S",
+                                    "In",
+                                    ifelse(RT_WSA == "T",
+                                           "Im",
+                                           "")))) %>%
+      dplyr::mutate(URBAN = "",
+             UID = paste("200304_", sub(".*-", "", SITE_ID), sep = ""),
+             SITE_ID = sub("\\-.*", "", SITE_ID),
+             DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y")) %>%
+      dplyr::relocate(UID, .before = SITE_ID) %>%
+      dplyr::relocate(URBAN, .before = RT_WSA)
+
+    colnames(NRSA_0304_sites) =
+      colnames(NRSA_0809_sites) =
+      colnames(NRSA_1314_sites)
+
+    NRSA_sites <-  dplyr::bind_rows(list(NRSA_1314_sites, NRSA_0809_sites, NRSA_0304_sites))
+    NRSA_sites$YEAR = lubridate::year(NRSA_sites$DATE_COL)
+
+    ##Join with nrsa_comms1 to get site-level data
+
+    nrsa_comms1 = nrsa_comms1 %>%
+      tidyr::unite(UNIQUEID, c(UID, SITE_ID, YEAR, VISIT_NO),
+                   sep = "_", remove = FALSE) %>%
+      dplyr::left_join(NRSA_sites %>%
+                  tidyr::unite(UNIQUEID, c(UID, SITE_ID, YEAR, VISIT_NO),
+                               sep = "_", remove = T), by = "UNIQUEID") %>%
+      dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
+      dplyr::mutate(ProjectLabel = ifelse(YEAR %in% c(2013, 2014),
+                                   "NRSA1314",
+                                   ifelse(YEAR %in% c(2008, 2009),
+                                          "NRSA0809",
+                                          "WSA")),
+             ProjectAssignedSampleLabel = UID,
+             NAWQA.SMCOD = UNIQUEID,
+             NAWQAStudyUnitCode = SITETYPE,
+             CollectionDate = DATE_COL,
+             StartTime = NA,
+             TimeDatum = NA,
+             CollectionYear = YEAR,
+             CollectionMonth = lubridate::month(DATE_COL),
+             CollectionDayOfYear = lubridate::yday(DATE_COL),
+             SiteVisitSampleNumber = VISIT_NO,
+             ProvisionalData = NA,
+             SiteNumber = SITE_ID,
+             SiteName = SITE_ID,
+             StateFIPSCode = NA,
+             CountyFIPSCode = NA,
+             Latitude_dd = LAT_DD83,
+             Longitude_dd = LON_DD83,
+             CoordinateDatum = "NAD83",
+             HUCCode = NA,
+             DrainageArea_mi2 = NA ,
+             SampleTypeCode = SAMPLE_TYPE,
+             IdentificationEntity = NA,
+             AreaSampTot_m2  = NA,
+             GeomorphicChannelUnit = NA,
+             ChannelBoundaries = NA,
+             ChannelFeatures = NA,
+             ReplicateType  = NA
+             ) %>%
+      dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
+                    -SITE_ID, -UID, -UNIQUEID, -DATE_COL,
+                    -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO) %>%
+      dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
+
+    colnames(nrsa_comms1)[1:43]
+    ##Need to then join this dataset to invert_comms1
+    invert_comms1[setdiff(names(nrsa_comms1), names(invert_comms1))] <- NA
+    nrsa_comms1[setdiff(names(invert_comms1), names(nrsa_comms1))] <- NA
+
+    invert_comms1 <- invert_comms1  %>%
+      dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
+
+    nrsa_comms1 <- nrsa_comms1  %>%
+      dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
+      dplyr::relocate(tidyselect::any_of(colnames(invert_comms1)))
+
+    invert_comms1 <- dplyr::bind_rows(invert_comms1, nrsa_comms1)
+    invert_comms1 = invert_comms1 %>%
+      dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
+                                  ~ifelse(is.na(.x),
+                                          0,
+                                          .x)))
+
+  } else{ }
+
+
   if(dataType == "occur") {
     invert_comms1 = invert_comms1 %>%
-      dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+      dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
                     ~replace(., . > 0, 1)))
   }
 
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
 
 
-  invert_comms1 = invert_comms1 %>%
-    dplyr::select(-SiteVisitSampleNumber,
-                  -Identifier,
-                  -SIDNO,
-                  -ReleaseCategory) %>%
-    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
+
 
   return(data.frame(invert_comms1))
 

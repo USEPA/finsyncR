@@ -8,6 +8,7 @@
 #' @import tidyr
 #' @import stringr
 #' @import tidyselect
+#' @import lubridate
 #' @importFrom utils read.csv
 #' @importFrom utils read.table
 #'

@@ -56,20 +56,14 @@ getAlgaeData <- function(algType = "peri",
     stop(paste("taxonLevel must be set between ranks 'Phylum' and 'Subspecies'",
                "or 'AlgalGroup'; see 'Details' in ?getAlgaeData."))
   }
-  algae = utils::read.csv(unzip(system.file("extdata",
-                                            "AlgaeResults.zip",
-                                            package = "StreamData")),
-                   colClasses = c("SiteNumber" = "character"))
+  algae = utils::read.csv(base::unz(base::system.file("extdata",
+                                                      "20201217.0757.AlgResults.zip",
+                                                      package = "StreamData"),
+                                    "20201217.0757.AlgResults.csv"),
+                          colClasses = c("SiteNumber" = "character"),
+                          stringsAsFactors = FALSE)
   if(colnames(algae)[1] != "SIDNO"){
     colnames(algae)[1] = "SIDNO"
-  }
-  ##Remove the unzipped file from the system
-  if(file.exists(system.file("extdata",
-                             "20201217.0757.AlgResults.csv",
-                             package = "StreamData"))){
-    unlink(system.file("extdata",
-                       "20201217.0757.AlgResults.csv",
-                       package = "StreamData"))
   }
 
   Project <- utils::read.csv(system.file("extdata",

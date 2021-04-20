@@ -71,10 +71,12 @@ getFishData <- function(dataType = "abun",
                '"Subspecies"; see "Details" in ?getFishData.'))
   }
 
-  fish <- utils::read.csv(unzip(system.file("extdata",
-                                            "FishResults.zip",
-                                            package = "StreamData")),
-                   colClasses = c("SiteNumber" = "character"))
+  fish <- utils::read.csv(base::unz(base::system.file("extdata",
+                                                      "20201217.0745.FishResults.zip",
+                                                      package = "StreamData"),
+                                    "20201217.0745.FishResults.csv"),
+                          colClasses = c("SiteNumber" = "character"),
+                          stringsAsFactors = FALSE)
   if(colnames(fish)[1] != "SIDNO"){
     colnames(fish)[1] = "SIDNO"
   }

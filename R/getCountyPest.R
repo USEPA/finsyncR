@@ -59,12 +59,13 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
                           pestLevel, pestLevelName){
   if (lagTime != 0 & !exists("lagType")){stop("Provide lagType as 'sum' (sum across years) or 'mean' (average across years) ")}
 
-  pest.dat <- utils::read.table(unzip(system.file("extdata",
-                                                  "PestEst.zip",
-                                                  package = "StreamData")),
-                    sep = "\t", header= T,
-                    colClasses = c("STATE_FIPS_CODE" = "character",
-                                   "COUNTY_FIPS_CODE" = "character"))  %>%
+  pest.dat <- utils::read.table(base::unz(base::system.file("extdata",
+                                                            "pestCountyEstYrs.zip",
+                                                            package = "StreamData"),
+                                          "pestCountyEstYrs.txt"),
+                                sep = "\t", header= T,
+                                colClasses = c("STATE_FIPS_CODE" = "character",
+                                               "COUNTY_FIPS_CODE" = "character"))  %>%
     mutate(compound = stringr::str_to_lower(COMPOUND))
 
   ##Remove the unzipped file from the system
