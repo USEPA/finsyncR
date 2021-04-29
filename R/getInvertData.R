@@ -738,11 +738,10 @@ getInvertData <- function(dataType = "abun",
                                              )
     )
 
-    ##Create UID and update SITE_ID
+    ##Create UID based on WSA, Site_id, and Visit_no
     NRSA_0304_inverts$UID <- paste("200304_",
-                                   sub(".*-", "", NRSA_0304_inverts$SITE_ID),
-                                   sep = "")
-    NRSA_0304_inverts$SITE_ID <- sub("\\-.*", "", NRSA_0304_inverts$SITE_ID)
+                                   NRSA_0304_inverts$SITE_ID,
+                                   NRSA_0304_inverts$VISIT_NO)
 
     ##Update column names to match those of 08/09 and 13/14
     colnames(NRSA_0304_inverts)[c(4,10)] = c("SAMPLE_TYPE", "TOTAL")
