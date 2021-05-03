@@ -739,9 +739,10 @@ getInvertData <- function(dataType = "abun",
     )
 
     ##Create UID based on WSA, Site_id, and Visit_no
-    NRSA_0304_inverts$UID <- paste("200304_",
+    NRSA_0304_inverts$UID <- paste("200304",
                                    NRSA_0304_inverts$SITE_ID,
-                                   NRSA_0304_inverts$VISIT_NO)
+                                   NRSA_0304_inverts$VISIT_NO,
+                                   sep = "_")
 
     ##Update column names to match those of 08/09 and 13/14
     colnames(NRSA_0304_inverts)[c(4,10)] = c("SAMPLE_TYPE", "TOTAL")
@@ -931,9 +932,9 @@ getInvertData <- function(dataType = "abun",
                                            "Im",
                                            "")))) %>%
       dplyr::mutate(URBAN = "",
-             UID = paste("200304_", sub(".*-", "", SITE_ID), sep = ""),
-             SITE_ID = sub("\\-.*", "", SITE_ID),
-             DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y")) %>%
+                    UID = paste("200304", SITE_ID, VISIT_NO,
+                                sep = "_"),
+                    DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y")) %>%
       dplyr::relocate(UID, .before = SITE_ID) %>%
       dplyr::relocate(URBAN, .before = RT_WSA)
 
