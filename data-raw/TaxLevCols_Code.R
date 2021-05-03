@@ -229,7 +229,12 @@ Sampler$Ratio <- as.character(Sampler$Ratio)
                                          "Nephelopsis",
                                          "Physella",
                                          "Pristinella",
-                                         "Stelechomyia"),
+                                         "Stelechomyia",
+                                         "Macronema",
+                                         "Gloiobdella",
+                                         "Goniobasis",
+                                         "Teutonia",
+                                         "Trasserkidrilus"),
                           Genus = c("Ramellogammarus",
                                     "Caecidotea",
                                     "Polypedilum",
@@ -241,7 +246,12 @@ Sampler$Ratio <- as.character(Sampler$Ratio)
                                     "Erpobdella",
                                     "Physa",
                                     "Pristina",
-                                    "Kribiodorum"))
+                                    "Kribiodorum",
+                                    "Macrostemum",
+                                    "Helobdella",
+                                    "Elimia",
+                                    "Amboakis",
+                                    "Tasserkidrilus"))
 
 usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,
