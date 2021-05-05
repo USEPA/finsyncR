@@ -672,6 +672,13 @@ getInvertData <- function(dataType = "abun",
   if(isTRUE(NRSA)){
 
     ##Read in datasets directly from EPA website
+    NRSA_1819_inverts = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv",
+                                 colClasses = c("UID" = "character"),
+                                 stringsAsFactors = FALSE)
+    NRSA_1819_sites = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_site_information_-_data.csv",
+                               colClasses = c("UID" = "character"),
+                               stringsAsFactors = FALSE)
+
     NRSA_1314_inverts = read.csv("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_bentcnts_04232019.csv",
                                  colClasses = c("UID" = "character"),
                                  stringsAsFactors = FALSE)
@@ -793,8 +800,31 @@ getInvertData <- function(dataType = "abun",
     NRSA_1314_inverts$GENUS = ifelse(grepl("GENUS", NRSA_1314_inverts$TARGET_TAXON),
                                      "THIENEMANNIMYIA",
                                      NRSA_1314_inverts$GENUS)
+
+    ##2018/2019
+
+    ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
+    ##not available in all datasets, so remove those that are not found across data)
+    NRSA_1819_inverts <- NRSA_1819_inverts %>%
+      dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
+      dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -EPA_REG,
+                    -PUBLICATION_DATE, -TRIBE, -SUBFAMILY, -TAXA_ID,
+                    -FFG, -HABIT, -PTV, -AG_ECO9, -NON_TARGET, -SITESAMP,
+                    -STATE, -UNIQUE_ID) %>%
+      dplyr::mutate(YEAR = str_sub(DATE_COL, -4,-1),
+                    YEAR = as.numeric(YEAR)) %>%
+      dplyr::select(-DATE_COL) %>%
+      dplyr::relocate(colnames(NRSA_1314_inverts))
+
+
+    ##Update this weird TARGET_TAXON that is THIENEMANNIMYIA GENUS GR., but does not
+    ##have a genus associated with it; so make genus = "THIENEMANNIMYIA"
+    NRSA_1819_inverts$GENUS = ifelse(grepl("GENUS", NRSA_1819_inverts$TARGET_TAXON),
+                                     "THIENEMANNIMYIA",
+                                     NRSA_1819_inverts$GENUS)
     ##Bind all
-    NRSA_inverts <- dplyr::bind_rows(list(NRSA_0304_inverts, NRSA_0809_inverts, NRSA_1314_inverts))
+    NRSA_inverts <- dplyr::bind_rows(list(NRSA_0304_inverts, NRSA_0809_inverts,
+                                          NRSA_1314_inverts, NRSA_1819_inverts))
 
     ##Second step:
     ##Rarefy samples to 300 in the same manner as the NAQWA data for consistency
@@ -889,6 +919,18 @@ getInvertData <- function(dataType = "abun",
 
     ##Step 6: join w/ site level data
 
+    ##18/19 - MISSING RT_NRSA, will put in ""
+    ##UID, SITE_ID, VISIT_NO, SITETYPE, DATE_COL, PSTL_CODE, LAT_DD83, LON_DD83,
+    ##AG_ECO9, URBN_NRS18, US_L3CODE, US_L3NAME
+    NRSA_1819_sites <- NRSA_1819_sites %>%
+      dplyr::select(UID, SITE_ID, VISIT_NO, SITETYPE, DATE_COL, PSTL_CODE,
+                    LAT_DD83, LON_DD83, AG_ECO9, URBN_NRS18,
+                    US_L3CODE, US_L3NAME) %>%
+      dplyr::mutate(RT_NRSA = "",
+                    DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
+                    VISIT_NO = as.character(VISIT_NO))%>%
+      dplyr::relocate(RT_NRSA, .before = US_L3CODE)
+
     ##13/14
     ##UID, SITE_ID, VISIT_NO, SITETYPE, DATE_COL, PSTL_CODE, LAT_DD83, LON_DD83,
     ##AG_ECO9, NRS13_Urban, RT_NRSA, US_L3CODE, US_L3NAME,
@@ -899,7 +941,8 @@ getInvertData <- function(dataType = "abun",
       dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "?",
                               "",
                               RT_NRSA),
-             DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"))
+             DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
+             VISIT_NO = as.character(VISIT_NO))
 
     ##08/09 - MISSING L3 NAME (not a problem)
     ##UID, SITE_ID, VISIT_NO, SITE_CLASS, DATE_COL, STATE, LAT_DD83, LONG_DD83,
@@ -916,7 +959,8 @@ getInvertData <- function(dataType = "abun",
                                             "Im",
                                             "")))) %>%
       dplyr::mutate(US_L3NAME = "",
-             DATE_COL = as.Date(DATE_COL, format = "%d-%b-%y"))
+             DATE_COL = as.Date(DATE_COL, format = "%d-%b-%y"),
+             VISIT_NO = as.character(VISIT_NO))
 
     ##03/04 - MISSING UID (will create in the same way as above), URBAN
     ##SITE_ID, VISIT_NO, SITETYPE, DATE_COL, STATE, LAT_DD, LON_DD,
@@ -934,15 +978,19 @@ getInvertData <- function(dataType = "abun",
       dplyr::mutate(URBAN = "",
                     UID = paste("200304", SITE_ID, VISIT_NO,
                                 sep = "_"),
-                    DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y")) %>%
+                    DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
+                    VISIT_NO = as.character(VISIT_NO)) %>%
       dplyr::relocate(UID, .before = SITE_ID) %>%
       dplyr::relocate(URBAN, .before = RT_WSA)
 
+    ##Set all column names equal to each other
     colnames(NRSA_0304_sites) =
       colnames(NRSA_0809_sites) =
+      colnames(NRSA_1819_sites)
       colnames(NRSA_1314_sites)
 
-    NRSA_sites <-  dplyr::bind_rows(list(NRSA_1314_sites, NRSA_0809_sites, NRSA_0304_sites))
+    NRSA_sites <-  dplyr::bind_rows(list(NRSA_1819_sites, NRSA_1314_sites,
+                                         NRSA_0809_sites, NRSA_0304_sites))
     NRSA_sites$YEAR = lubridate::year(NRSA_sites$DATE_COL)
 
     ##Join with nrsa_comms1 to get site-level data
@@ -955,10 +1003,12 @@ getInvertData <- function(dataType = "abun",
                                sep = "_", remove = T), by = "UNIQUEID") %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
       dplyr::mutate(ProjectLabel = ifelse(YEAR %in% c(2013, 2014),
-                                   "NRSA1314",
-                                   ifelse(YEAR %in% c(2008, 2009),
-                                          "NRSA0809",
-                                          "WSA")),
+                                          "NRSA1314",
+                                          ifelse(YEAR %in% c(2008, 2009),
+                                                 "NRSA0809",
+                                                 ifelse(YEAR %in% c(2018, 2019),
+                                                        "NRSA1819",
+                                                        "WSA"))),
              ProjectAssignedSampleLabel = UID,
              NAWQA.SMCOD = UNIQUEID,
              NAWQAStudyUnitCode = SITETYPE,
