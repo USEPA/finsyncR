@@ -7,7 +7,7 @@
 getInvertData(
   dataType = "abun",
   taxonLevel = "Genus",
-  taxonFix = "none",
+  taxonFix = "lump",
   program = "National Water Quality Assessment",
   lifestage = FALSE,
   abunMeasure = "density",
@@ -75,10 +75,19 @@ Note: There are 81 sampling events (sampling location - collection
   problematic genera that exist throughout all BioData, \code{taxonFix = "lump"}
   results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
   One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
-  \code{taxonFix = "drop"} prioritizes accurate identification by dropping
+  \code{taxonFix = "remove"} prioritizes accurate identification by dropping
   observations from problematic genera that do not have species identification.
   Without a species-level identification from the bench, there is no way to
-  assure correct membership in a updated genera.
+  assure correct membership in a updated genera. NOTE: "slash" genera that NRSA
+  and NAWQA roll up into family/subfamily are now being included as genera. As
+  a result, there are fewer individual genera, but this results in more data
+  being included at the genus level. When \code{taxonFix = "lump"}, these "slash"
+  genera are rolled into the larger linked genera, as above. \code{taxonFix = "remove"}
+  still prioritizes accurate identifications by dropping all obscure identifications,
+  such that ALL slash genera are dropped; this will result in much less data
+  being included in the final dataset. Finally, \code{taxonFix = "none"}, still
+  generate "slash" genera, but, it does not link these genera to larger linked
+  genera.
 
   \code{program} refers to the local, regional, or national program project
   for which data were originally collected. Because the National Water

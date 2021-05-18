@@ -46,10 +46,19 @@
 #'   problematic genera that exist throughout all BioData, \code{taxonFix = "lump"}
 #'   results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
 #'   One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
-#'   \code{taxonFix = "drop"} prioritizes accurate identification by dropping
+#'   \code{taxonFix = "remove"} prioritizes accurate identification by dropping
 #'   observations from problematic genera that do not have species identification.
 #'   Without a species-level identification from the bench, there is no way to
-#'   assure correct membership in a updated genera.
+#'   assure correct membership in a updated genera. NOTE: "slash" genera that NRSA
+#'   and NAWQA roll up into family/subfamily are now being included as genera. As
+#'   a result, there are fewer individual genera, but this results in more data
+#'   being included at the genus level. When \code{taxonFix = "lump"}, these "slash"
+#'   genera are rolled into the larger linked genera, as above. \code{taxonFix = "remove"}
+#'   still prioritizes accurate identifications by dropping all obscure identifications,
+#'   such that ALL slash genera are dropped; this will result in much less data
+#'   being included in the final dataset. Finally, \code{taxonFix = "none"}, still
+#'   generate "slash" genera, but, it does not link these genera to larger linked
+#'   genera.
 #'
 #'   \code{program} refers to the local, regional, or national program project
 #'   for which data were originally collected. Because the National Water
@@ -105,7 +114,7 @@
 
 getInvertData <- function(dataType = "abun",
                           taxonLevel = "Genus",
-                          taxonFix = "none",
+                          taxonFix = "lump",
                           program = "National Water Quality Assessment",
                           lifestage = FALSE,
                           abunMeasure = "density",
@@ -216,6 +225,31 @@ getInvertData <- function(dataType = "abun",
                                   PublishedTaxonName,
                                   Lifestage,
                                   sep = "_" ))
+
+
+  ##Generate the list of "slash" genera that appear in the NAWQA dataset
+  ##Select those BenchTaxon that have a "/", then remove all that have a space (" ")
+  ## in the string, as this indicates a species level identification, then remove
+  ## those with "idae", as this indicates a family level identification
+
+  slashgen <- unique(Inverts[grepl("/", Inverts$BenchTaxonName),]$BenchTaxonName)
+  slashgen_no_spp <- slashgen[!(grepl(" ", slashgen))]
+  slashgen_fin <- slashgen_no_spp[!(grepl("idae", slashgen_no_spp))]
+
+  ##Rename the Genus column with the slashed genera, if the BenchTaxonName is one
+  ## of the slash genera, otherwise leave it as the current "Genus" designation
+  ##If BenchTaxonName is one of the slash genera, put "PublishedTaxonNameLevel"
+  ## as genus, otherwise leave it as the current designation
+
+  Inverts <- Inverts %>%
+    dplyr::mutate(Genus = ifelse(BenchTaxonName %in% slashgen_fin,
+                                 BenchTaxonName,
+                                 Genus),
+                  PublishedTaxonNameLevel = ifelse(BenchTaxonName %in% slashgen_fin,
+                                                   "Genus",
+                                                   PublishedTaxonNameLevel)
+    )
+
 
   ### *** It is at this stage, we COULD filter for a given 'Lifestage'
   ### ( (blank), L [larvae], P [pupae], A [adult]);
@@ -568,23 +602,130 @@ getInvertData <- function(dataType = "abun",
 
   }else if(taxonFix == "lump"){
 
+
+    ##Generate a list of those individual genera that make up the slash genera
+    slashedgen <- unique(c(sub("\\/.*", "", slashgen_fin),
+                           sub(".*\\/", "", slashgen_fin),
+                           "Neocloeon"))
+
+    cnt = c()
+    hldr = c()
+    gns = c()
+    slashedgen <- slashedgen[order(slashedgen)]
+    for(i in slashedgen){
+      hldr <- grep(i, slashgen_fin, fixed = T)
+      cnt <- c(cnt, hldr)
+      gns = c(gns, rep(i, times = length(hldr)))
+    }
+
+    dat1 = data.frame(Genus = gns,
+                      Slash = slashgen_fin[cnt])
+
+    #If genera that are one of genera in dat1, rename the Genus with the slash
+    #label from dat1, else, keep the original Genus label
+    TotalRows$Genus <- ifelse(TotalRows$Genus %in% dat1$Genus,
+                              dat1$Slash[match(TotalRows$Genus,
+                                               dat1$Genus)],
+                              TotalRows$Genus)
+    #There are some problems here, since there are multiple "slash" genera per
+    #individual genus, so need to lump these
+    #Select those genera that appear in >1 "slash" genera
+    probslash <- dat1 %>%
+      group_by(Genus) %>%
+      mutate(count = n()) %>%
+      filter(count >1) %>%
+      dplyr::select(-count)
+
+    ##Split this dataset
+    probslashl <- split(probslash, probslash$Genus)
+
+    ##Take the unique genera in the "slash" genera and join them into a larger
+    ##lump "slash" genus
+    for(i in 1:length(probslashl)){
+      probslashl[[i]]$Fix <- paste(sort(unique(c(sub("\\/.*",
+                                                     "",
+                                                     probslashl[[i]]$Slash),
+                                                 sub(".*\\/",
+                                                     "",
+                                                     probslashl[[i]]$Slash)))),
+                                   collapse = "/")
+    }
+
+    ##Bind these together
+    fix_slash <- dplyr::bind_rows(probslashl)
+
+    #If genera that are one of problem slash genera, rename the Genus with the lumped
+    #label from fix_slash, else, keep the original Genus label
+    TotalRows$Genus <- ifelse(TotalRows$Genus %in% fix_slash$Slash,
+                              fix_slash$Fix[match(TotalRows$Genus,
+                                                  fix_slash$Slash)],
+                              TotalRows$Genus)
+
+
     #create bench genus in TotalRows
     TotalRows <- TotalRows %>%
       dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
 
+    ##From the genus to slash dataset from above, remove all of those that do not
+    ## appear in the clust_labels dataset
+    ##First, match the group information based on the genera present in both the dat1
+    ## and clust_labels dataset
+    dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
+                                                   StreamData:::.clust_labels$genus),]$group
+
+    ##Remove all observations with an NA for the group in dat1 (does not appear in
+    ## clust_labels); then take 1 observation for each slash genus and generate
+    ## information (this does not matter) to better join this dataset with the
+    ## clust_labels dataset
+    dat1L <- dat1 %>%
+      dplyr::filter(!is.na(group)) %>%
+      dplyr::group_by(Slash) %>%
+      dplyr::slice(1) %>%
+      dplyr::mutate(X = 10.65,
+                    num = 65,
+                    genus = Slash) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(X, num, group, genus)
+
+    dat1L$genus <- ifelse(dat1L$genus %in% fix_slash$Slash,
+                          fix_slash$Fix[match(dat1L$genus,
+                                              fix_slash$Slash)],
+                          dat1L$genus)
+
+    ##Remove replicate genus from the dat1L list
+    dat1L <- dat1L %>%
+      dplyr::group_by(genus) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup()
+
+    ##Third, pull the "lump" information from clust_labels based on the "group"
+    ## from dat1L
+    dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
+                                                   StreamData:::.clust_labels$group),]$lump
+
+    ##Finally, join these datasets, so that all slashes will be successfully pulled
+    ## into the appropriate "lump" group
+    slashlump <- dplyr::bind_rows(list(StreamData:::.clust_labels,
+                                       dat1L))
+
     #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
     #else, keep the original Genus label
-    TotalRows$Genus <- ifelse(TotalRows$BenchGenus %in% StreamData:::.clust_labels$genus,
-                              StreamData:::.clust_labels$lump[match(TotalRows$BenchGenus,StreamData:::.clust_labels$genus)],
+    TotalRows$Genus <- ifelse(TotalRows$BenchGenus %in% slashlump$genus,
+                              slashlump$lump[match(TotalRows$BenchGenus,
+                                                   slashlump$genus)],
                               TotalRows$Genus)
+
     TotalRows <- TotalRows %>%
       dplyr::select(-BenchGenus)
 
   }else if(taxonFix == "remove"){
 
-    #filter out rows that have bench genus from problem list & no species ID
+    #filter out observations that have ambiguous taxa designations
+    ##remove those genera in the slashlump and remove all "/" genera
     TotalRows <- TotalRows %>%
-      dplyr::filter(!(Genus %in% StreamData:::.clust_labels$genus & PublishedTaxonNameLevel == "Genus"))
+      dplyr::filter(!(Genus %in% slashlump$genus &
+                        PublishedTaxonNameLevel == "Genus")) %>%
+      dplyr::filter(!(grepl("/", Genus)))
 
   }
 
@@ -826,6 +967,21 @@ getInvertData <- function(dataType = "abun",
     NRSA_inverts <- dplyr::bind_rows(list(NRSA_0304_inverts, NRSA_0809_inverts,
                                           NRSA_1314_inverts, NRSA_1819_inverts))
 
+
+    ##Catch the "/" genus and make sure it is put in the GENUS column
+    NRSA_inverts <- NRSA_inverts %>%
+      mutate(GENUS = ifelse(grepl("/", TARGET_TAXON),
+                            TARGET_TAXON,
+                            GENUS))
+
+    ##Convert Genera names from all caps to sentence case (GENUS to Genus)
+    NRSA_inverts$GENUS <- stringr::str_to_sentence(NRSA_inverts$GENUS)
+
+    ##Fix issue w/ str_to_sentence that is causing Orthocladius to be lowercase
+    NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS == "Cricotopus/orthocladius",
+                                 "Cricotopus/Orthocladius",
+                                 NRSA_inverts$GENUS)
+
     ##Second step:
     ##Rarefy samples to 300 in the same manner as the NAQWA data for consistency
     if(isTRUE(rarefy)) {
@@ -858,9 +1014,6 @@ getInvertData <- function(dataType = "abun",
     ##FIX ALL TAXONOMIC ISSUES; only needed IF taxonLevel = "Genus"
     ##NEED TO UPDATE THIS FOR FAMILY
 
-    ##Convert Genera names from all caps to sentence case (GENUS to Genus)
-    NRSA_inverts$GENUS <- stringr::str_to_sentence(NRSA_inverts$GENUS)
-
     ###NEED TO GET switch1to1 in StreamData env
     ##Convert those genera that need to be updated
     NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
@@ -871,19 +1024,33 @@ getInvertData <- function(dataType = "abun",
     if(taxonFix == "none"){
 
     } else if(taxonFix == "lump"){
+      #If genera that are one of genera in dat1, rename the Genus with the slash
+      #label from dat1, else, keep the original Genus label
+      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% dat1$Genus,
+                                dat1$Slash[match(NRSA_inverts$GENUS,
+                                                 dat1$Genus)],
+                                NRSA_inverts$GENUS)
+
+      #If genera that are one of problem slash genera, rename the Genus with the lumped
+      #label from fix_slash, else, keep the original Genus label
+      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% fix_slash$Slash,
+                                fix_slash$Fix[match(NRSA_inverts$GENUS,
+                                                    fix_slash$Slash)],
+                                NRSA_inverts$GENUS)
 
       #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
       #else, keep the original Genus label
-      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.clust_labels$genus,
-                                   StreamData:::.clust_labels$lump[match(NRSA_inverts$GENUS,
-                                                                         StreamData:::.clust_labels$genus)],
+      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% slashlump$genus,
+                                   slashlump$lump[match(NRSA_inverts$GENUS,
+                                                        slashlump$genus)],
                                    NRSA_inverts$GENUS)
 
     }else if(taxonFix == "remove"){
 
       #filter out rows that have bench genus from problem list & no species ID
       NRSA_inverts <- NRSA_inverts %>%
-        dplyr::filter(!(GENUS %in% StreamData:::.clust_labels$genus))
+        dplyr::filter(!(GENUS %in% StreamData:::.clust_labels$genus)) %>%
+        dplyr::filter(!(grepl("/", GENUS)))
     }
 
 
