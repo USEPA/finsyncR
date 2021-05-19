@@ -1115,7 +1115,7 @@ getInvertData <- function(dataType = "abun",
     ##UID, SITE_ID, VISIT_NO, SITE_CLASS, DATE_COL, STATE, LAT_DD83, LONG_DD83,
     ##AGGR_ECO9_2015, URBAN, RT_NRSA, US_L3CODE_2015
     NRSA_0809_sites <- NRSA_0809_sites %>%
-      dplyr::select(UID, SITE_ID, VISIT_NO, SITE_CLASS, DATE_COL, STATE,
+      dplyr::select(UID, MASTER_SITEID, VISIT_NO, SITE_CLASS, DATE_COL, STATE,
                     LAT_DD83, LON_DD83, AGGR_ECO9_2015, URBAN, RT_NRSA,
                     US_L3CODE_2015) %>%
       dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "R",

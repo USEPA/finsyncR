@@ -1,7 +1,7 @@
 Package: StreamData
 Type: Package
 Title: R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group
-Version: 0.0.0.9200
+Version: 0.0.0.9201
 Authors@R:
     c(person(given = "Samantha",
            family = "Rumschlag",
