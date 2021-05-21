@@ -1095,8 +1095,10 @@ getInvertData <- function(dataType = "abun",
                     US_L3CODE, US_L3NAME) %>%
       dplyr::mutate(RT_NRSA = "",
                     DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
-                    VISIT_NO = as.character(VISIT_NO))%>%
-      dplyr::relocate(RT_NRSA, .before = US_L3CODE)
+                    VISIT_NO = as.character(VISIT_NO),
+                    MASTER_SITEID = SITE_ID) %>%
+      dplyr::relocate(RT_NRSA, .before = US_L3CODE) %>%
+      dplyr::relocate(MASTER_SITEID, .after = SITE_ID)
 
     ##13/14
     ##UID, SITE_ID, VISIT_NO, SITETYPE, DATE_COL, PSTL_CODE, LAT_DD83, LON_DD83,
@@ -1109,13 +1111,15 @@ getInvertData <- function(dataType = "abun",
                               "",
                               RT_NRSA),
              DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
-             VISIT_NO = as.character(VISIT_NO))
+             VISIT_NO = as.character(VISIT_NO),
+             MASTER_SITEID = SITE_ID) %>%
+      dplyr::relocate(MASTER_SITEID, .after = SITE_ID)
 
     ##08/09 - MISSING L3 NAME (not a problem)
     ##UID, SITE_ID, VISIT_NO, SITE_CLASS, DATE_COL, STATE, LAT_DD83, LONG_DD83,
     ##AGGR_ECO9_2015, URBAN, RT_NRSA, US_L3CODE_2015
     NRSA_0809_sites <- NRSA_0809_sites %>%
-      dplyr::select(UID, MASTER_SITEID, VISIT_NO, SITE_CLASS, DATE_COL, STATE,
+      dplyr::select(UID, SITE_ID, MASTER_SITEID, VISIT_NO, SITE_CLASS, DATE_COL, STATE,
                     LAT_DD83, LON_DD83, AGGR_ECO9_2015, URBAN, RT_NRSA,
                     US_L3CODE_2015) %>%
       dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "R",
@@ -1128,6 +1132,9 @@ getInvertData <- function(dataType = "abun",
       dplyr::mutate(US_L3NAME = "",
              DATE_COL = as.Date(DATE_COL, format = "%d-%b-%y"),
              VISIT_NO = as.character(VISIT_NO))
+
+    ##For some reason, one MASTER_SITEID is missing for one replicate sample, so give it the site id
+    NRSA_0809_sites$MASTER_SITEID[which(NRSA_0809_sites$SITE_ID == "FW08LA004")] = "FW08LA004"
 
     ##03/04 - MISSING UID (will create in the same way as above), URBAN
     ##SITE_ID, VISIT_NO, SITETYPE, DATE_COL, STATE, LAT_DD, LON_DD,
@@ -1146,15 +1153,20 @@ getInvertData <- function(dataType = "abun",
                     UID = paste("200304", SITE_ID, VISIT_NO,
                                 sep = "_"),
                     DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
-                    VISIT_NO = as.character(VISIT_NO)) %>%
+                    VISIT_NO = as.character(VISIT_NO),
+                    MASTER_SITEID = SITE_ID) %>%
       dplyr::relocate(UID, .before = SITE_ID) %>%
-      dplyr::relocate(URBAN, .before = RT_WSA)
+      dplyr::relocate(URBAN, .before = RT_WSA) %>%
+      dplyr::relocate(MASTER_SITEID, .after = SITE_ID)
 
     ##Set all column names equal to each other
     colnames(NRSA_0304_sites) =
       colnames(NRSA_0809_sites) =
-      colnames(NRSA_1819_sites)
+      colnames(NRSA_1819_sites) =
       colnames(NRSA_1314_sites)
+
+    NRSA_0809_sites %>%
+      filter(SITE_ID == "FW08LA004")
 
     NRSA_sites <-  dplyr::bind_rows(list(NRSA_1819_sites, NRSA_1314_sites,
                                          NRSA_0809_sites, NRSA_0304_sites))
@@ -1187,8 +1199,8 @@ getInvertData <- function(dataType = "abun",
              CollectionDayOfYear = lubridate::yday(DATE_COL),
              SiteVisitSampleNumber = VISIT_NO,
              ProvisionalData = NA,
-             SiteNumber = SITE_ID,
-             SiteName = SITE_ID,
+             SiteNumber = MASTER_SITEID,
+             SiteName = MASTER_SITEID,
              StateFIPSCode = NA,
              CountyFIPSCode = NA,
              Latitude_dd = LAT_DD83,
@@ -1205,11 +1217,39 @@ getInvertData <- function(dataType = "abun",
              ReplicateType  = NA
              ) %>%
       dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
-                    -SITE_ID, -UID, -UNIQUEID, -DATE_COL,
+                    -SITE_ID, -MASTER_SITEID, -UID, -UNIQUEID, -DATE_COL,
                     -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO) %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 
-    colnames(nrsa_comms1)[1:43]
+    ##To make sure the NRSA sites are correct crosswalked across sampling rounds
+    # rename the nrsa_comms1$SiteNumber based on the master crosswalk list from
+    # Richard Mitchell (w/ updates to include MASTER_SITEID)
+
+    ##if site number in invert_comms1 is in the SITEID in the master crosswalk list,
+    ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
+    ##else provide an NA
+    invert_comms1$UNIQUE_ID <- ifelse(invert_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$SITE_ID,
+                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(invert_comms1$SiteNumber,
+                                                                    StreamData:::.NRSA_siteIDs$SITE_ID)],
+                            NA)
+
+    ##if site number in invert_comms1 is in the MASTER_SITEID in the master crosswalk list,
+    ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
+    ##else give the current UNIQUE ID
+    invert_comms1$UNIQUE_ID <- ifelse(invert_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$MASTER_SITEID,
+                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(invert_comms1$SiteNumber,
+                                                                                 StreamData:::.NRSA_siteIDs$MASTER_SITEID)],
+                            invert_comms1$UNIQUE_ID)
+
+    ##if there are any NA values in UNIQUE ID, replace these with the SiteNumber
+    invert_comms1$SiteNumber = ifelse(is.na(invert_comms1$UNIQUE_ID),
+                                      invert_comms1$SiteNumber,
+                                      invert_comms1$UNIQUE_ID)
+
+    ##remove the UNIQUEID column, as it is no longer needed
+    invert_comms1 <- invert_comms1 %>%
+      select(-UNIQUE_ID)
+
     ##Need to then join this dataset to invert_comms1
     invert_comms1[setdiff(names(nrsa_comms1), names(invert_comms1))] <- NA
     nrsa_comms1[setdiff(names(invert_comms1), names(nrsa_comms1))] <- NA
@@ -1237,9 +1277,8 @@ getInvertData <- function(dataType = "abun",
                     ~replace(., . > 0, 1)))
   }
 
+  ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
-
-
 
 
   return(data.frame(invert_comms1))

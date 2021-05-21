@@ -257,6 +257,43 @@ Sampler$Ratio <- as.character(Sampler$Ratio)
                                     "Fossaria",
                                     "Hebetoncylus"))
 
+##Code to get crosswalk NRSA site IDs
+NRSA_siteIDs <- read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/MahonRumschlagPowell/NARS_AllSurvey_SITE_ID_CROSSWALK.csv")
+
+#Filter out all other EPA water sampling projects, leaving NRSA
+#select only the columns that we need: site id (sampling round specific) and
+#  unique id (crosses all sampling rounds)
+NRSA_siteIDs = NRSA_siteIDs %>%
+  filter(SURVEY == "NRSA") %>%
+  select(SITE_ID, UNIQUE_ID)
+
+##Read in 0809 sites to match the crosswalk UNIQUE_IDs w/ WSA (MASTER_SITEID)
+NRSA_0809_sites = read.csv("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
+                           colClasses = c("UID" = "character"),
+                           stringsAsFactors = FALSE)
+
+#Select only site and master site ids
+NRSA_0809_sites <- NRSA_0809_sites %>%
+  select(SITE_ID, MASTER_SITEID)
+
+#if the crosswalk site ids are in the 0809 site id dataset, match the site ids and
+# pull the master site ids from the 0809 dataset (have to do it this way, instead
+# of a left_join, because there was a weird error in the dataset)
+NRSA_siteIDs$MASTER_SITEID <- ifelse(NRSA_siteIDs$SITE_ID %in% NRSA_0809_sites$SITE_ID,
+                                     NRSA_0809_sites$MASTER_SITEID[match(NRSA_siteIDs$SITE_ID,
+                                                                         NRSA_0809_sites$SITE_ID)],
+                                     NA)
+
+#If there is no master site id (NA or ""), use the site id
+.NRSA_siteIDs = NRSA_siteIDs %>%
+  mutate(MASTER_SITEID = ifelse(is.na(MASTER_SITEID),
+                                SITE_ID,
+                                MASTER_SITEID),
+         MASTER_SITEID = ifelse(MASTER_SITEID == "",
+                                SITE_ID,
+                                MASTER_SITEID))
+
+
 usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,
                   .ReorderUSGSBioDataColNames,
@@ -264,5 +301,6 @@ usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .pest.info,
                   .clust_labels,
                   .switch1to1,
+                  .NRSA_siteIDs,
                   internal = TRUE,
                   overwrite = TRUE)
