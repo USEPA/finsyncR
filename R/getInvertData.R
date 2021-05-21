@@ -1165,9 +1165,6 @@ getInvertData <- function(dataType = "abun",
       colnames(NRSA_1819_sites) =
       colnames(NRSA_1314_sites)
 
-    NRSA_0809_sites %>%
-      filter(SITE_ID == "FW08LA004")
-
     NRSA_sites <-  dplyr::bind_rows(list(NRSA_1819_sites, NRSA_1314_sites,
                                          NRSA_0809_sites, NRSA_0304_sites))
     NRSA_sites$YEAR = lubridate::year(NRSA_sites$DATE_COL)
@@ -1225,29 +1222,29 @@ getInvertData <- function(dataType = "abun",
     # rename the nrsa_comms1$SiteNumber based on the master crosswalk list from
     # Richard Mitchell (w/ updates to include MASTER_SITEID)
 
-    ##if site number in invert_comms1 is in the SITEID in the master crosswalk list,
+    ##if site number in nrsa_comms1 is in the SITEID in the master crosswalk list,
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else provide an NA
-    invert_comms1$UNIQUE_ID <- ifelse(invert_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$SITE_ID,
-                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(invert_comms1$SiteNumber,
+    nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$SITE_ID,
+                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
                                                                     StreamData:::.NRSA_siteIDs$SITE_ID)],
                             NA)
 
-    ##if site number in invert_comms1 is in the MASTER_SITEID in the master crosswalk list,
+    ##if site number in nrsa_comms1 is in the MASTER_SITEID in the master crosswalk list,
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else give the current UNIQUE ID
-    invert_comms1$UNIQUE_ID <- ifelse(invert_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$MASTER_SITEID,
-                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(invert_comms1$SiteNumber,
+    nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$MASTER_SITEID,
+                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
                                                                                  StreamData:::.NRSA_siteIDs$MASTER_SITEID)],
-                            invert_comms1$UNIQUE_ID)
+                                      nrsa_comms1$UNIQUE_ID)
 
     ##if there are any NA values in UNIQUE ID, replace these with the SiteNumber
-    invert_comms1$SiteNumber = ifelse(is.na(invert_comms1$UNIQUE_ID),
-                                      invert_comms1$SiteNumber,
-                                      invert_comms1$UNIQUE_ID)
+    nrsa_comms1$SiteNumber = ifelse(is.na(nrsa_comms1$UNIQUE_ID),
+                                    nrsa_comms1$SiteNumber,
+                                    nrsa_comms1$UNIQUE_ID)
 
     ##remove the UNIQUEID column, as it is no longer needed
-    invert_comms1 <- invert_comms1 %>%
+    nrsa_comms1 <- nrsa_comms1 %>%
       select(-UNIQUE_ID)
 
     ##Need to then join this dataset to invert_comms1
