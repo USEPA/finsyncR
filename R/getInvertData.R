@@ -597,29 +597,113 @@ getInvertData <- function(dataType = "abun",
 
   #create variable taxonFix = none, lump, remove
   #none = no change, lump = lump genera through time, remove = remove observation only if spp. level ID does not exist
+  ##Generate a list of those individual genera that make up the slash genera
+  slashedgen <- unique(c(sub("\\/.*", "", slashgen_fin),
+                         sub(".*\\/", "", slashgen_fin),
+                         "Neocloeon"))
+
+  cnt = c()
+  hldr = c()
+  gns = c()
+  slashedgen <- slashedgen[order(slashedgen)]
+  for(i in slashedgen){
+    hldr <- grep(i, slashgen_fin, fixed = T)
+    cnt <- c(cnt, hldr)
+    gns = c(gns, rep(i, times = length(hldr)))
+  }
+
+  dat1 = data.frame(Genus = gns,
+                    Slash = slashgen_fin[cnt])
+
+  ##Fix a naming issue. Needs to include "Glyptotendipes"
+  dat1$Slash[grep("Chironomus/Einfeldia", dat1$Slash)] <- "Chironomus/Einfeldia/Glyptotendipes"
+
+  ##From the genus to slash dataset from above, remove all of those that do not
+  ## appear in the clust_labels dataset
+  ##First, match the group information based on the genera present in both the dat1
+  ## and clust_labels dataset
+  dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
+                                                 StreamData:::.clust_labels$genus),]$group
+
+
+
+
+
+  #There are some problems here, since there are multiple "slash" genera per
+  #individual genus, so need to lump these
+  #Select those genera that appear in >1 "slash" genera
+  probslash <- dat1 %>%
+    group_by(Genus) %>%
+    mutate(count = n()) %>%
+    filter(count >1) %>%
+    dplyr::select(-count)
+
+  ##Split this dataset
+  probslashl <- split(probslash, probslash$Genus)
+
+  ##Take the unique genera in the "slash" genera and join them into a larger
+  ##lump "slash" genus
+  for(i in 1:length(probslashl)){
+    probslashl[[i]]$Fix <- paste(sort(unique(c(sub("\\/.*",
+                                                   "",
+                                                   probslashl[[i]]$Slash),
+                                               sub(".*\\/",
+                                                   "",
+                                                   probslashl[[i]]$Slash)))),
+                                 collapse = "/")
+  }
+
+  ##Bind these together
+  fix_slash <- dplyr::bind_rows(probslashl)
+
+  ##Fix a naming issue; going to make sure this is fixed.
+
+
+
+  ##Remove all observations with an NA for the group in dat1 (does not appear in
+  ## clust_labels); then take 1 observation for each slash genus and generate
+  ## information (this does not matter) to better join this dataset with the
+  ## clust_labels dataset
+  dat1L <- dat1 %>%
+    dplyr::filter(!is.na(group)) %>%
+    dplyr::group_by(Slash) %>%
+    dplyr::slice(1) %>%
+    dplyr::mutate(X = 10.65,
+                  num = 65,
+                  genus = Slash) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(X, num, group, genus)
+
+  dat1L$genus <- ifelse(dat1L$genus %in% fix_slash$Slash,
+                        fix_slash$Fix[match(dat1L$genus,
+                                            fix_slash$Slash)],
+                        dat1L$genus)
+
+  ##Remove replicate genus from the dat1L list
+  dat1L <- dat1L %>%
+    dplyr::group_by(genus) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup()
+
+  ##Add "Anafroptilum.Centroptilum.Procloeon" to the fix list
+  dat1L[(nrow(dat1L) + 1),] <- list(10.6, 65, 1, "Anafroptilum.Centroptilum.Procloeon")
+
+    ##Third, pull the "lump" information from clust_labels based on the "group"
+  ## from dat1L
+  dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
+                                                 StreamData:::.clust_labels$group),]$lump
+
+  ##Finally, join these datasets, so that all slashes will be successfully pulled
+  ## into the appropriate "lump" group
+  slashlump <- dplyr::bind_rows(list(StreamData:::.clust_labels,
+                                     dat1L))
+
+  ##Fix a naming issue with "Einfeldia" groups
+  slashlump$lump[grep("Einfeldia/Glyptotendipes", slashlump$lump)] <- "Chironomus/Einfeldia/Glyptotendipes"
 
   if(taxonFix == "none"){
 
   }else if(taxonFix == "lump"){
-
-
-    ##Generate a list of those individual genera that make up the slash genera
-    slashedgen <- unique(c(sub("\\/.*", "", slashgen_fin),
-                           sub(".*\\/", "", slashgen_fin),
-                           "Neocloeon"))
-
-    cnt = c()
-    hldr = c()
-    gns = c()
-    slashedgen <- slashedgen[order(slashedgen)]
-    for(i in slashedgen){
-      hldr <- grep(i, slashgen_fin, fixed = T)
-      cnt <- c(cnt, hldr)
-      gns = c(gns, rep(i, times = length(hldr)))
-    }
-
-    dat1 = data.frame(Genus = gns,
-                      Slash = slashgen_fin[cnt])
 
     #If genera that are one of genera in dat1, rename the Genus with the slash
     #label from dat1, else, keep the original Genus label
@@ -627,32 +711,6 @@ getInvertData <- function(dataType = "abun",
                               dat1$Slash[match(TotalRows$Genus,
                                                dat1$Genus)],
                               TotalRows$Genus)
-    #There are some problems here, since there are multiple "slash" genera per
-    #individual genus, so need to lump these
-    #Select those genera that appear in >1 "slash" genera
-    probslash <- dat1 %>%
-      group_by(Genus) %>%
-      mutate(count = n()) %>%
-      filter(count >1) %>%
-      dplyr::select(-count)
-
-    ##Split this dataset
-    probslashl <- split(probslash, probslash$Genus)
-
-    ##Take the unique genera in the "slash" genera and join them into a larger
-    ##lump "slash" genus
-    for(i in 1:length(probslashl)){
-      probslashl[[i]]$Fix <- paste(sort(unique(c(sub("\\/.*",
-                                                     "",
-                                                     probslashl[[i]]$Slash),
-                                                 sub(".*\\/",
-                                                     "",
-                                                     probslashl[[i]]$Slash)))),
-                                   collapse = "/")
-    }
-
-    ##Bind these together
-    fix_slash <- dplyr::bind_rows(probslashl)
 
     #If genera that are one of problem slash genera, rename the Genus with the lumped
     #label from fix_slash, else, keep the original Genus label
@@ -661,52 +719,16 @@ getInvertData <- function(dataType = "abun",
                                                   fix_slash$Slash)],
                               TotalRows$Genus)
 
+    ##Do the same for those in slashlump
+    TotalRows$Genus <- ifelse(TotalRows$Genus %in% slashlump$genus,
+                              slashlump$lump[match(TotalRows$Genus,
+                                                   slashlump$genus)],
+                              TotalRows$Genus)
 
     #create bench genus in TotalRows
     TotalRows <- TotalRows %>%
       dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
 
-    ##From the genus to slash dataset from above, remove all of those that do not
-    ## appear in the clust_labels dataset
-    ##First, match the group information based on the genera present in both the dat1
-    ## and clust_labels dataset
-    dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
-                                                   StreamData:::.clust_labels$genus),]$group
-
-    ##Remove all observations with an NA for the group in dat1 (does not appear in
-    ## clust_labels); then take 1 observation for each slash genus and generate
-    ## information (this does not matter) to better join this dataset with the
-    ## clust_labels dataset
-    dat1L <- dat1 %>%
-      dplyr::filter(!is.na(group)) %>%
-      dplyr::group_by(Slash) %>%
-      dplyr::slice(1) %>%
-      dplyr::mutate(X = 10.65,
-                    num = 65,
-                    genus = Slash) %>%
-      dplyr::ungroup() %>%
-      dplyr::select(X, num, group, genus)
-
-    dat1L$genus <- ifelse(dat1L$genus %in% fix_slash$Slash,
-                          fix_slash$Fix[match(dat1L$genus,
-                                              fix_slash$Slash)],
-                          dat1L$genus)
-
-    ##Remove replicate genus from the dat1L list
-    dat1L <- dat1L %>%
-      dplyr::group_by(genus) %>%
-      dplyr::slice(1) %>%
-      dplyr::ungroup()
-
-    ##Third, pull the "lump" information from clust_labels based on the "group"
-    ## from dat1L
-    dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
-                                                   StreamData:::.clust_labels$group),]$lump
-
-    ##Finally, join these datasets, so that all slashes will be successfully pulled
-    ## into the appropriate "lump" group
-    slashlump <- dplyr::bind_rows(list(StreamData:::.clust_labels,
-                                       dat1L))
 
     #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
     #else, keep the original Genus label
