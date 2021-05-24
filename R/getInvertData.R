@@ -20,6 +20,8 @@
 #' @param NRSA logical. Should EPA NRSA invertebrate samples be included in the
 #'   output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
 #'   below for more information.
+#' @param sharedTaxa logical. Should Genera be limited to those that appear in
+#'   both the NRSA and NAWQA datasets? \code{TRUE} or \code{FALSE}.
 #'
 #'
 #' @return A species by sample data frame with site, stream reach, and
@@ -120,6 +122,7 @@ getInvertData <- function(dataType = "abun",
                           abunMeasure = "density",
                           rarefy = TRUE,
                           NRSA = FALSE,
+                          sharedTaxa = FALSE,
                           seed = 0){
   if(!(abunMeasure %in% c("density", "abundance"))) {
     stop('abunMeasure must be either "density" or "abundance".')}
@@ -1075,6 +1078,35 @@ getInvertData <- function(dataType = "abun",
         dplyr::filter(!(grepl("/", GENUS)))
     }
 
+    ##When "taxonLevel" isn't in all caps (in the function), create a NRSA specific
+    ##taxonLevel that is in all caps
+    taxonLevel.nrsa <- base::toupper(taxonLevel)
+
+
+    if(isTRUE(sharedTaxa)){
+      ##List of NAWQA Genera
+      NAWQAgenera <- unique(TotalRows$Genus)
+
+      ##List of NRSA Genera
+      NRSAgenera <- unique(NRSA_inverts$GENUS)
+
+      ##Filter NRSA to only those genera in NAWQA
+      NRSA_inverts <- NRSA_inverts %>%
+        filter(GENUS %in% NAWQAgenera)
+
+      ##Select only those taxa that appear in NAWQA
+      ##add "tax_" prefix to the names, as this is how the genera names appear
+      ##as columns in the NAWQA dataset
+      NAWQAgeneraONLY <- paste("tax_",
+                               NAWQAgenera[!(NAWQAgenera %in% NRSAgenera)],
+                               sep = "")
+
+      ##Filter NAWQA to only those genera in NRSA (-select [delete] any that
+      ##appear in columns in the invert_comms1 dataset)
+      invert_comms1 <- invert_comms1 %>%
+        dplyr::select(-tidyselect::any_of(NAWQAgeneraONLY))
+
+    } else {}
 
     ##Fourth step: (can get code from the getInvertData function)
     ## NOTE: this step is only needed when looking at taxonomic resolutions ABOVE genus
@@ -1087,9 +1119,7 @@ getInvertData <- function(dataType = "abun",
                "ORDER",
                "FAMILY")
 
-    ##When "taxonLevel" isn't in all caps (in the function), create a NRSA specific
-    ##taxonLevel that is in all caps
-    taxonLevel.nrsa <- base::toupper(taxonLevel)
+
 
     nrsa_comms1 = NRSA_inverts %>%
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel.nrsa)), dplyr::any_vars(. != "")) %>%

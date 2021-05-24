@@ -13,6 +13,7 @@ getInvertData(
   abunMeasure = "density",
   rarefy = TRUE,
   NRSA = FALSE,
+  sharedTaxa = FALSE,
   seed = 0
 )
 }
@@ -42,6 +43,9 @@ below for more information.}
 \item{NRSA}{logical. Should EPA NRSA invertebrate samples be included in the
 output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
 below for more information.}
+
+\item{sharedTaxa}{logical. Should Genera be limited to those that appear in
+both the NRSA and NAWQA datasets? \code{TRUE} or \code{FALSE}.}
 
 \item{seed}{numeric. Set seed for \code{rarefy} to get consistent results with every
 iteration of the function.}
