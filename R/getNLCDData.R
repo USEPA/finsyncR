@@ -3,12 +3,12 @@
 #' @param data Input dataset which needs to include columns for
 #'  \code{"SiteNumber"} and \code{"CollectionYear"}.
 #'  \code{"SiteNumber"} must have \code{"USGS-"} prefix.
-#' @param scale Scale for LULC data to be generated. Must be \code{"cat"} for
-#'  catchment or \code{"ws"} for watershed. See \code{Details} below for more
+#' @param scale Scale for LULC data to be generated. Must be \code{"Cat"} for
+#'  catchment or \code{"Ws"} for watershed. See \code{Details} below for more
 #'  information.
 #' @param group logical. Should the land-use/land-cover data be grouped into broad
 #'  categories? \code{TRUE} or \code{FALSE}. See \code{Details} below for more
-#'  information.
+#'  information. IS NOT IMPLEMENTED YET.
 #'
 #' @return Function returns a site by year dataframe of NLCD land-use/land-cover
 #'   data for either the catchment or watershed scale.
@@ -25,16 +25,18 @@
 #'                    CollectionYear = 2007)
 #'
 #'   getNLCDData(data=dat,
-#'   scale = "cat",
+#'   scale = "Cat",
 #'   group = FALSE
 #'   }
 #'
 #' @export
 
-getNLCDData <- function(data, scale = "cat", group = FALSE){
+getNLCDData <- function(data, scale = "Cat", group = FALSE){
 
   ##Read in NLCD data from streamcat dataset from Ryan Hill
-  streamcat <- read.csv("C:/Users/mikem/Documents/Research/USGS Stream Macros/MahonRumschlagPowell/streamcat-usgs-nawqa-join.csv")
+  streamcat <- read.csv(base::system.file("extdata",
+                                          "streamcat-usgs-nawqa-join.csv",
+                                          package = "StreamData"))
 
   ##Naming scheme
   #ItemYearScale
@@ -73,8 +75,8 @@ getNLCDData <- function(data, scale = "cat", group = FALSE){
                                 NA
                          )),
            Info2 = ifelse(is.na(Year),
-                          str_remove(Info, Scale),
-                          str_remove(str_remove(Info, Scale), Year)),
+                          str_remove(Info, scale),
+                          str_remove(str_remove(Info, scale), Year)),
     ) %>%
     filter(Scale %in% scale) %>%
     filter(Info2 %in% c("PctBl", "PctConif", "PctCrop", "PctDecid", "PctGrs",
@@ -85,11 +87,12 @@ getNLCDData <- function(data, scale = "cat", group = FALSE){
     select(-Y_spec, -Info)
 
   ##Join Area of Ws and Cat with LULC data
-  USGS_streamcat2 <- USGS_streamcat %>%
-    unite(InfoBroadScale, c("InfoBroad", "Scale"), sep = "_", remove = T) %>%
+  USGS_streamcat <- streamcat2 %>%
+    unite(InfoBroadScale, c("Info2", "Scale"), sep = "_", remove = T) %>%
     pivot_wider(id_cols = c("COMID", "SiteNumber", "Year"),
                 names_from = "InfoBroadScale",
-                values_from = "Value")
+                values_from = "value") %>%
+    mutate(Year = as.numeric(Year))
 
   ##Years are the NLCD years
   Years = c(2001,2004,2006,2008,2011,2013,2016)
@@ -101,16 +104,14 @@ getNLCDData <- function(data, scale = "cat", group = FALSE){
 
   ##Generate closest LULC year
   for(i in 1:nrow(data)){
-    data$ClosestYear[i] = Years[which.min(abs(Years-data$CollectionYear[i]))]
+    data$ClosestYear[i] = as.numeric(Years[which.min(abs(Years-data$CollectionYear[i]))])
   }
 
-  #CHECK THIS MIKE; REMOVE IT MAYBE?
-  ##Add USGS- to site numbers to match the LULC data
-  data$SiteNumber = paste("USGS-", data$SiteNumber, sep = "")
+
 
   ##Join the datasets
   data = data %>%
-    left_join(USGS_streamcat2,
+    left_join(USGS_streamcat,
               by = c("SiteNumber" = "SiteNumber",
                      "ClosestYear" = "Year")) %>%
     select(-ClosestYear)

@@ -4,20 +4,20 @@
 \alias{getNLCDData}
 \title{Generate NLCD Land-use/Land-cover data for each NAWQA site}
 \usage{
-getNLCDData(data, scale = "cat", group = FALSE)
+getNLCDData(data, scale = "Cat", group = FALSE)
 }
 \arguments{
 \item{data}{Input dataset which needs to include columns for
 \code{"SiteNumber"} and \code{"CollectionYear"}.
 \code{"SiteNumber"} must have \code{"USGS-"} prefix.}
 
-\item{scale}{Scale for LULC data to be generated. Must be \code{"cat"} for
-catchment or \code{"ws"} for watershed. See \code{Details} below for more
+\item{scale}{Scale for LULC data to be generated. Must be \code{"Cat"} for
+catchment or \code{"Ws"} for watershed. See \code{Details} below for more
 information.}
 
 \item{group}{logical. Should the land-use/land-cover data be grouped into broad
 categories? \code{TRUE} or \code{FALSE}. See \code{Details} below for more
-information.}
+information. IS NOT IMPLEMENTED YET.}
 }
 \value{
 Function returns a site by year dataframe of NLCD land-use/land-cover
@@ -39,7 +39,7 @@ To be completed.
                    CollectionYear = 2007)
 
   getNLCDData(data=dat,
-  scale = "cat",
+  scale = "Cat",
   group = FALSE
   }
 
