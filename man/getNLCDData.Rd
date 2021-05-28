@@ -17,7 +17,7 @@ information.}
 
 \item{group}{logical. Should the land-use/land-cover data be grouped into broad
 categories? \code{TRUE} or \code{FALSE}. See \code{Details} below for more
-information. IS NOT IMPLEMENTED YET.}
+information.}
 }
 \value{
 Function returns a site by year dataframe of NLCD land-use/land-cover
@@ -27,13 +27,33 @@ Function returns a site by year dataframe of NLCD land-use/land-cover
 Generate NLCD Land-use/Land-cover data for each NAWQA site
 }
 \details{
-To be completed.
+Currently, this function only works for USGS NAWQA sites, but implementation
+  for EPA NRSA sites will be completed in the near future. Land-use/land-cover
+  data is extracted from the USGS National Land Cover Database (NLCD). These
+  LULC data are available in the following years: 2001, 2004, 2006, 2008,
+  2011, 2013, and 2016. For instances of years in the input data that are not
+  exact year matches from this list, years are temporally matched to the closest
+  year with LULC data (e.g. a site sampled in 1995 will have LULC data from 2001).
+  Note that for samples that fall at the midpoint of two NLCD years (e.g. 2005),
+  the function defaults to the earlier year (e.g. a site sampled in 2005 will
+  have LULC data from 2004).
+
+  Data can be extracted at the catchment (\code{"Cat"}) or watershed (\code{"Ws"})
+  scales. Watershed is larger than catchment, and includes land that drains
+  downstream of the sampling location. Catchment only includes land that is
+  upstream of the sampling location (watershed).
+
+  LULC data can be grouped (\code{group = TRUE}) into five broad categories.
+  These categories include "water" (grouping of all wetland and open water
+  land covers), "urban" (grouping of all urban land covers), "forest" (grouping
+  of deciduous, coniferous, and mixed forests), "open" (grouping of shrub,
+  barren land, grassland, and hay/pasture), and "crop" (no grouping, just the
+  crop landuse).
 }
 \examples{
 \dontrun{
-## Code to generate the sum of the county-level use estimates (high estimate)
-## from site number "05276005" from 1997-1999 (2 year lag) for "insecticide",
-## "herbicide", and "synthetic_fungicide".
+## Code to generate the percent land-use/land-cover in the catchment for
+## site number "05276005" from 2007.
 
   dat = data.frame(SiteNumber = "USGS-05276005",
                    CollectionYear = 2007)
