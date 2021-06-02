@@ -108,7 +108,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
 
   if(isTRUE(group)){
     streamcat2 <- streamcat2 %>%
-      dplyr::mutate(Info2 <- ifelse(grepl("PctUrb",
+      dplyr::mutate(Info2 = ifelse(grepl("PctUrb",
                                    Info2),
                              "PctUrb",
                              ifelse(grepl(paste(c("PctDec","PctCon",
