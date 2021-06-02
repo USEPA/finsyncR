@@ -127,7 +127,9 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                                                         Info2),
                                                   "PctOpn",
                                                   "PctCrop"))))
-      )
+      ) %>%
+      dplyr::group_by(COMID, SiteNumber, Scale, Year, Info2) %>%
+      dplyr::summarize(value = sum(value))
   }
 
   ##Join Area of Ws and Cat with LULC data
@@ -158,7 +160,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
     dplyr::left_join(USGS_streamcat,
               by = c("SiteNumber" = "SiteNumber",
                      "ClosestYear" = "Year")) %>%
-    dplyr::select(-ClosestYear)
+    dplyr::select(-ClosestYear, -COMID)
 
   return(data)
 }
