@@ -71,7 +71,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
     ##Pivot longer, so that non-site info columns are in "Info" and the values are
     ##in "value"; this will help with extraction of year and scale information
     ##In turn, this process will make it easier to join StreamCat data w/ biodata
-    dplyr::pivot_longer(cols = tidyselect::ends_with("Cat") |
+    tidyr::pivot_longer(cols = tidyselect::ends_with("Cat") |
                    tidyselect::ends_with("Ws") |
                    tidyselect::starts_with("Cat") |
                    tidyselect::starts_with("Ws"),
@@ -133,7 +133,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
   ##Join Area of Ws and Cat with LULC data
   USGS_streamcat <- streamcat2 %>%
     tidyr::unite(InfoBroadScale, c("Info2", "Scale"), sep = "_", remove = T) %>%
-    dplyr::pivot_wider(id_cols = c("COMID", "SiteNumber", "Year"),
+    tidyr::pivot_wider(id_cols = c("COMID", "SiteNumber", "Year"),
                 names_from = "InfoBroadScale",
                 values_from = "value") %>%
     dplyr::mutate(Year = as.numeric(Year))
