@@ -21,7 +21,7 @@ getInvertData(
 \item{dataType}{Output data type, either \code{"abun"} or \code{"occur"}.}
 
 \item{taxonLevel}{Level of taxonomic resolution, must be one of:
-\code{"AlgalGroup"}, \code{"Phylum"}, \code{"Class"}, \code{"Order"},
+\code{"Phylum"}, \code{"Class"}, \code{"Order"},
 \code{"Family"}, \code{"Genus"}, or \code{"Species"}.}
 
 \item{taxonFix}{How to deal with changes in taxonomy across time, must
