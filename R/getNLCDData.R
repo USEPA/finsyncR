@@ -125,7 +125,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                                                                 "PctHbWet"),
                                                               collapse = "|"),
                                                         Info2),
-                                                  "PctOpn",
+                                                  "PctWater",
                                                   "PctCrop"))))
       ) %>%
       dplyr::group_by(COMID, SiteNumber, Scale, Year, Info2) %>%
