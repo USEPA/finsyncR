@@ -68,21 +68,17 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
                                                "COUNTY_FIPS_CODE" = "character"))  %>%
     mutate(compound = stringr::str_to_lower(COMPOUND))
 
-  ##Remove the unzipped file from the system
-  if(file.exists(system.file("extdata",
-                             "pestCountyEstYrs.txt",
-                             package = "StreamData"))){
-    unlink(system.file("extdata",
-                       "pestCountyEstYrs.txt",
-                       package = "StreamData"))
-  }
-
   if(ePest == "low"){
     ePest = "EPEST_LOW_KG"
     dropC = "EPEST_HIGH_KG"
-  }else{ePest = "EPEST_HIGH_KG"
-  dropC = "EPEST_LOW_KG"
+  }else{
+    ePest = "EPEST_HIGH_KG"
+    dropC = "EPEST_LOW_KG"
   }
+
+  ##Make the data a dataframe, ran into some issues when it was a tibble and
+  ##maintained grouping variables
+  data = data.frame(data)
 
   #takes input data and links cnty and state FIPS
   site.dat <- data %>% dplyr::left_join(StreamData:::.site.info, by = "SiteNumber")
@@ -105,7 +101,7 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
     # LOW estimates
     dplyr::select(-tidyselect::any_of(dropC)) %>%
     # GROUP by pesticide types (e.g. insecticides, herbicides, fungicides)
-    dplyr::left_join(.pest.info, by = c("compound" = "Name")) %>%
+    dplyr::left_join(StreamData:::.pest.info, by = c("compound" = "Name")) %>%
     dplyr::filter_at(vars(any_of(pestLevel)), any_vars(. %in% pestLevelName)) %>%
     # SUM (or average) by "insecticides", "herbicides", "fungicides" in each
     # County-Yr-GROUP combo
@@ -127,22 +123,25 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
       dat.end <- site.dat.j %>%
         dplyr::select(-CollectionYear, -StateFIPSCode, -CountyFIPSCode) %>%
         dplyr::group_by(SiteNumber, LagYear) %>%
-        dplyr::summarize_all(list(sum),na.rm = TRUE) %>%
+        dplyr::summarize_all(list(sum), na.rm = TRUE) %>%
         dplyr::ungroup()
     }else{
       if(lagType == "mean"){
         dat.end <- site.dat.j %>%
           dplyr::select(-CollectionYear, -StateFIPSCode, -CountyFIPSCode) %>%
           dplyr::group_by(SiteNumber, LagYear) %>%
-          dplyr::summarize_all(list(mean),na.rm = TRUE) %>%
+          dplyr::summarize_all(list(mean), na.rm = TRUE) %>%
           dplyr::ungroup()
       } else { if(!(lagType %in% c("sum", "mean"))){
         stop("Provide lagType as 'sum' (sum across years) or 'mean' (average across years) ")
       } }
     }
-  }else{
+  } else {
     dat.end <- site.dat.j %>%
       dplyr::select(-StateFIPSCode, -CountyFIPSCode)
   }
+
+  colnames(dat.end)[which(colnames(dat.end) == "LagYear")] = "CollectionYear"
+
   return(data.frame(dat.end))
 }
