@@ -10,7 +10,6 @@ getInvertData(
   taxonFix = "lump",
   program = "National Water Quality Assessment",
   lifestage = FALSE,
-  abunMeasure = "density",
   rarefy = TRUE,
   NRSA = FALSE,
   sharedTaxa = FALSE,
@@ -32,9 +31,6 @@ dataset. See \code{Details} below for more information.}
 
 \item{lifestage}{logical. Should the output dataset should include lifestage information for
 each individual? \code{TRUE} or \code{FALSE}.}
-
-\item{abunMeasure}{Measure of abundance, either \code{"abundance"} or
-\code{"density"}.}
 
 \item{rarefy}{logical. Should samples be standardized by the number of individuals
 identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
@@ -105,10 +101,6 @@ Note: There are 81 sampling events (sampling location - collection
   \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
   (for example, \code{program = c("National Water Quality Assessment",
   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
-
-  If \code{dataType = "abun"} AND \code{abunMeasure = "density"},
-  ~0.5 \% of samples (22 samples) removed from the dataset, because area
-  sampled was not provided for these samples.
 
   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
   will be retained. Thus, ~17 \% of samples will be removed, as they have <300

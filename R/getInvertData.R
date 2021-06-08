@@ -10,8 +10,6 @@
 #'   dataset. See \code{Details} below for more information.
 #' @param lifestage logical. Should the output dataset should include lifestage information for
 #'   each individual? \code{TRUE} or \code{FALSE}.
-#' @param abunMeasure Measure of abundance, either \code{"abundance"} or
-#'   \code{"density"}.
 #' @param rarefy logical. Should samples be standardized by the number of individuals
 #'   identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 #'   below for more information.
@@ -75,10 +73,6 @@
 #'   (for example, \code{program = c("National Water Quality Assessment",
 #'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
 #'
-#'   If \code{dataType = "abun"} AND \code{abunMeasure = "density"},
-#'   ~0.5 \% of samples (22 samples) removed from the dataset, because area
-#'   sampled was not provided for these samples.
-#'
 #'   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
 #'   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
 #'   individuals sampled. We set the rarefaction threshold at 300, because 1) with
@@ -119,13 +113,10 @@ getInvertData <- function(dataType = "abun",
                           taxonFix = "lump",
                           program = "National Water Quality Assessment",
                           lifestage = FALSE,
-                          abunMeasure = "density",
                           rarefy = TRUE,
                           NRSA = FALSE,
                           sharedTaxa = FALSE,
                           seed = 0){
-  if(!(abunMeasure %in% c("density", "abundance"))) {
-    stop('abunMeasure must be either "density" or "abundance".')}
 
   if(!(dataType %in% c("abun", "occur"))) {
     stop('dataType must be either "abun" or "occur".')}
@@ -560,12 +551,10 @@ getInvertData <- function(dataType = "abun",
                         invertsampinfo,
                         by = "SIDNO")
 
-  if(abunMeasure == "abundance"){
+  ##Fix this; remove the notAbun stuff in the future; just drop Density_m2
     abunMeasure = "Abundance"
     notAbun <- "Density_m2"
-  } else {
-    notAbun <- "Abundance"
-    abunMeasure <- "Density_m2"}
+
 
   mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
   taxcols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
@@ -590,6 +579,7 @@ getInvertData <- function(dataType = "abun",
       dplyr::sample_n(size = 300) %>%
       dplyr::ungroup() %>%
       dplyr::group_by(SIDNO, PublishedTaxonName) %>%
+      dplyr::mutate(RawCount = n()) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup()
   } else {}
@@ -798,12 +788,9 @@ getInvertData <- function(dataType = "abun",
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
       tidyr::unite(UNIQUEID, c(SIDNO, tidyselect::all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
       dplyr::group_by(UNIQUEID) %>%
-      dplyr::mutate(Abundance = sum(Abundance)) %>%
+      dplyr::mutate(Abundance = sum(RawCount)) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(Density_m2 = ifelse(is.na(AreaSampTot_m2),
-                                        NA,
-                                        Abundance / AreaSampTot_m2)) %>%
       dplyr::select(-tidyselect::any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
                                           "LabComponent", "LabProcName",
                                           "TaxonomicResultReviewStatus",
@@ -1039,7 +1026,6 @@ getInvertData <- function(dataType = "abun",
     ##FIX ALL TAXONOMIC ISSUES; only needed IF taxonLevel = "Genus"
     ##NEED TO UPDATE THIS FOR FAMILY
 
-    ###NEED TO GET switch1to1 in StreamData env
     ##Convert those genera that need to be updated
     NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
                                  StreamData:::.switch1to1$Genus,
