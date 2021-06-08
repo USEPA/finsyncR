@@ -131,12 +131,6 @@ getInvertData <- function(dataType = "abun",
     "no species level ID given)"))
   }
 
-  if(dataType == "abun" && abunMeasure == "density"){
-    message(paste('22 samples are being dropped from full dataset, because area',
-            'samples was missing for these samples and density could not be',
-            'estimated.'))
-  }
-
   if(lifestage != TRUE && lifestage != FALSE){
     stop('lifestage must be set to either TRUE or FALSE.')
   }
