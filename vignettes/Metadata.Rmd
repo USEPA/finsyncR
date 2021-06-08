@@ -190,13 +190,13 @@ Note: This column only appears when `AlgType = "Phyto"`.
 
 
 ## Information on taxa columns
-Following all of the above columns are an unknown number of columns that code for the unique taxa found in each dataset at the specific taxonomic resolution (phylum through subspecies). The values in these columns will either code for abundance or occurrence (presence/absence, coded as 1/0). These values default to density estimates for each taxa. For inverts, it is individuals per m^2^; for periphyton, it is cells per cm^2^; for phytoplankton, it is cells per mL; and for fish, it is individuals per unit effort per meter(i.e., for electroshocking: individuals per minute shocking per meter). However, these units become raw abundance values when AbunMeasure = "Abundance" in `getInvertData()` only. Further, within `getFishData()`, when standardize = "FALSE", the values become individuals per meter, but using unstandardized data here is not recommended. 
+Following all of the above columns are an unknown number of columns that code for the unique taxa found in each dataset at the specific taxonomic resolution (phylum through subspecies). The values in these columns will either code for abundance or occurrence (presence/absence, coded as 1/0). These values default to density estimates for each taxa. For inverts, it is individuals per m^2^; for periphyton, it is cells per cm^2^; for phytoplankton, it is cells per mL; and for fish, it is individuals per unit effort per meter(i.e., for electroshocking: individuals per minute shocking per meter). Further, within `getFishData()`, when standardize = "FALSE", the values become individuals per meter, but using unstandardized data here is not recommended. 
 
 ```{r example, warning = FALSE, message = FALSE}
-library(StreamData)
-
-Invertdata = getInvertData(taxonLevel = "Genus",
-                           rarefy = FALSE)
-colnames(Invertdata)[1:32]
+# library(StreamData)
+# 
+# Invertdata = getInvertData(taxonLevel = "Genus",
+#                            rarefy = FALSE)
+# colnames(Invertdata)[1:32]
 
 ```

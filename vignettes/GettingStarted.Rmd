@@ -34,7 +34,6 @@ Inverts <- getInvertData(dataType = "occur",
                          taxonLevel = "Genus",
                          program = "National Water Quality Assessment",
                          lifestage = FALSE,
-                         abunMeasure = "abundance",
                          rarefy = TRUE,
                          seed = 11111)
 
