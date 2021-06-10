@@ -198,9 +198,10 @@ getInvertData <- function(dataType = "abun",
   ## understanding of the datasets, I believe it is best to go with
   ## "PublishedTaxonName" as the basis for the "SampleGrouping".
 
+  Inverts$SampleTypeCode[grep("CSQA", Inverts$ProjectLabel)] <- "SWAMP"
 
   Inverts <- Inverts %>%
-    dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW")) %>%
+    dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW", "SWAMP")) %>%
     dplyr::filter(FieldComponent == "M") %>%
     dplyr::mutate(CollectionDate = as.Date(CollectionDate,
                                     format = "%m/%d/%Y"),
