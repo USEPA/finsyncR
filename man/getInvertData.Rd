@@ -41,7 +41,7 @@ output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
 below for more information.}
 
 \item{sharedTaxa}{logical. Should Genera be limited to those that appear in
-both the NRSA and NAWQA datasets? \code{TRUE} or \code{FALSE}.}
+both the NRSA and USGS datasets? \code{TRUE} or \code{FALSE}.}
 
 \item{seed}{numeric. Set seed for \code{rarefy} to get consistent results with every
 iteration of the function.}
@@ -100,7 +100,9 @@ Note: There are 81 sampling events (sampling location - collection
   \code{"Collection of Basic Records"},
   \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
   (for example, \code{program = c("National Water Quality Assessment",
-  "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
+  "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs).
+  If you choose program = "ALL", this only combines samples with SampleMethodCodes
+  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE".
 
   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
   will be retained. Thus, ~17 \% of samples will be removed, as they have <300

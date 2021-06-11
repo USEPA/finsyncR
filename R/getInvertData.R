@@ -19,7 +19,7 @@
 #'   output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
 #'   below for more information.
 #' @param sharedTaxa logical. Should Genera be limited to those that appear in
-#'   both the NRSA and NAWQA datasets? \code{TRUE} or \code{FALSE}.
+#'   both the NRSA and USGS datasets? \code{TRUE} or \code{FALSE}.
 #'
 #'
 #' @return A species by sample data frame with site, stream reach, and
@@ -71,7 +71,9 @@
 #'   \code{"Collection of Basic Records"},
 #'   \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
 #'   (for example, \code{program = c("National Water Quality Assessment",
-#'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs)
+#'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs).
+#'   If you choose program = "ALL", this only combines samples with SampleMethodCodes
+#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE".
 #'
 #'   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
 #'   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
@@ -123,12 +125,12 @@ getInvertData <- function(dataType = "abun",
 
   if(!(taxonLevel %in% StreamData:::.TaxLevCols_Inverts$Phylum$taxcols)){
     stop(paste('taxonLevel must be set between ranks "Phylum" and "Subspecies";',
-         'see "Details" in ?getInvertData.'))
+               'see "Details" in ?getInvertData.'))
   }
   if(!(taxonFix %in% c("none", "lump","remove"))){
     stop(paste("Provide taxonFix as 'none' (do nothing) or 'lump'",
-    "(lump genera across years) or 'remove' (remove observations if",
-    "no species level ID given)"))
+               "(lump genera across years) or 'remove' (remove observations if",
+               "no species level ID given)"))
   }
 
   if(lifestage != TRUE && lifestage != FALSE){
@@ -150,10 +152,10 @@ getInvertData <- function(dataType = "abun",
   }
 
   Project <- utils::read.csv(base::system.file("extdata",
-                                    "20201217.0749.Project.csv",
-                                    package = "StreamData"),
-                        comment.char="#",
-                        stringsAsFactors = FALSE)
+                                               "20201217.0749.Project.csv",
+                                               package = "StreamData"),
+                             comment.char="#",
+                             stringsAsFactors = FALSE)
   if(program == "ALL") {
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
@@ -171,8 +173,8 @@ getInvertData <- function(dataType = "abun",
   SamplingRatio_SamplerType <- StreamData:::.SamplingRatio_SamplerType
 
   Inverts <- dplyr::left_join(Inverts,
-                       SamplingRatio_SamplerType,
-                       by = "LabRecordID")
+                              SamplingRatio_SamplerType,
+                              by = "LabRecordID")
 
   ### Have to sum invertebrate abundance of duplicate species entries for
   ### all samplers
@@ -198,22 +200,45 @@ getInvertData <- function(dataType = "abun",
   ## understanding of the datasets, I believe it is best to go with
   ## "PublishedTaxonName" as the basis for the "SampleGrouping".
 
+  if(program == "ALL") {
+  ## Need to get the SamplingMethodReference data from invertsamp
+  invertSampleRef = utils::read.csv(system.file("extdata",
+                                                "20201217.0749.InvertSamp.csv",
+                                                package = "StreamData"),
+                                    colClasses = c("SiteNumber" = "character"),
+                                    stringsAsFactors = FALSE) %>%
+    dplyr::rename(SIDNO = grep("SIDNO", names(.))) %>%
+    dplyr::select(SIDNO,
+                  SamplingMethodReference)
+
+  ##Pull the information from invertsample to Inverts
+  Inverts$SamplingMethodReference <- invertSampleRef$SamplingMethodReference[match(Inverts$SIDNO,
+                                                                                   invertSampleRef$SIDNO)]
+
   Inverts$SampleTypeCode[grep("CSQA", Inverts$ProjectLabel)] <- "SWAMP"
+  Inverts$SampleTypeCode[grep("EMAP 1990", Inverts$SamplingMethodReference)] <- "EMAP"
+  Inverts$SampleTypeCode[grep("CDPHE Riffle",
+                              Inverts$SamplingMethodReference)] <- "CDPHE RR"
+  Inverts <- Inverts %>%
+    dplyr::select(-SamplingMethodReference)
+
+  }
 
   Inverts <- Inverts %>%
-    dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW", "SWAMP")) %>%
+    dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW", "SWAMP",
+                                        "EMAP", "CDPHE RR")) %>%
     dplyr::filter(FieldComponent == "M") %>%
     dplyr::mutate(CollectionDate = as.Date(CollectionDate,
-                                    format = "%m/%d/%Y"),
-           Identifier = paste(SIDNO,
-                              SiteNumber,
-                              CollectionDate, sep = "_"),
-           SampleGrouping = paste(SIDNO,
-                                  SiteNumber,
-                                  CollectionDate,
-                                  PublishedTaxonName,
-                                  Lifestage,
-                                  sep = "_" ))
+                                           format = "%m/%d/%Y"),
+                  Identifier = paste(SIDNO,
+                                     SiteNumber,
+                                     CollectionDate, sep = "_"),
+                  SampleGrouping = paste(SIDNO,
+                                         SiteNumber,
+                                         CollectionDate,
+                                         PublishedTaxonName,
+                                         Lifestage,
+                                         sep = "_" ))
 
 
   ##Generate the list of "slash" genera that appear in the NAWQA dataset
@@ -269,7 +294,7 @@ getInvertData <- function(dataType = "abun",
                                      fromLast = TRUE), ] %>%
     dplyr::group_by(SampleGrouping) %>%
     dplyr::mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
-           Ratios = paste(Ratio, collapse = "_")) %>%
+                  Ratios = paste(Ratio, collapse = "_")) %>%
     dplyr::ungroup()
 
 
@@ -294,10 +319,10 @@ getInvertData <- function(dataType = "abun",
       dplyr::select(-SummedAbundance, -SummedRawCount)})
 
   Corrected_SingleRatios <- suppressMessages({dplyr::bind_rows((dplyr::anti_join(Invert_SingleRatios,
-                                                 SingleRatio_Duplicates) %>%
-                                                   dplyr::mutate(DatasetPortion =
-                                                  "NonDuplicate_SingleRatio")),
-                                      SumSingleRatioData)})
+                                                                                 SingleRatio_Duplicates) %>%
+                                                                  dplyr::mutate(DatasetPortion =
+                                                                                  "NonDuplicate_SingleRatio")),
+                                                               SumSingleRatioData)})
 
   ### For those with "1:1 FS + Grid ratio", a "lab-large rare" individual was
   ### recorded following a gridded tray subsample
@@ -348,7 +373,7 @@ getInvertData <- function(dataType = "abun",
   SumGridLLRData <- Gridded_LLRRemoved_Duplicates %>%
     dplyr::group_by(SampleGrouping) %>%
     dplyr::mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
-           Ratios = paste(Ratio, collapse = "_")) %>%
+                  Ratios = paste(Ratio, collapse = "_")) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(DatasetPortion = "Gridded_LLRRemoved_Duplicates")
 
@@ -392,9 +417,9 @@ getInvertData <- function(dataType = "abun",
   ## non-duplicated rows within the 'SingleRatio' portions
   Corrected_Gridded_LLRRemoved <- suppressMessages({dplyr::bind_rows(
     (dplyr::anti_join(Invert_MixedSamplerType_GridOnly_LLRRemoved,
-               Gridded_LLRRemoved_Duplicates) %>%
+                      Gridded_LLRRemoved_Duplicates) %>%
        dplyr::mutate(DatasetPortion =
-                "NonDuplicate_Gridded_LLRRemoved")),
+                       "NonDuplicate_Gridded_LLRRemoved")),
     SumGridLLRData2)})
 
   ## We now have to clean the data for sites that used a Folsom Sampler that
@@ -437,7 +462,7 @@ getInvertData <- function(dataType = "abun",
     Invert_MixedRatios_Folsom_AntiJoin_Duplicates  %>%
     dplyr::group_by(SampleGrouping) %>%
     dplyr::mutate(LabRecordIDs = paste(LabRecordID, collapse = "_"),
-           Ratios = paste(Ratio, collapse = "_")) %>%
+                  Ratios = paste(Ratio, collapse = "_")) %>%
     dplyr::ungroup()
 
   ## Moving the numeric values of each row to the end of the dataset to better
@@ -475,14 +500,14 @@ getInvertData <- function(dataType = "abun",
 
   Corrected_MixedRatios_FolsomSamplerOnly <- suppressMessages({dplyr::bind_rows((
     dplyr::anti_join(Invert_MixedRatios_FolsomSamplerOnly_AntiJoin,
-              Invert_MixedRatios_Folsom_AntiJoin_Duplicates,
-              by = "SampleGrouping") %>%
+                     Invert_MixedRatios_Folsom_AntiJoin_Duplicates,
+                     by = "SampleGrouping") %>%
       dplyr::mutate(DatasetPortion = "NonDuplicate_FolsomSampler")),
     SumData)})
 
   TotalRows <- do.call(dplyr::bind_rows,list(Corrected_MixedRatios_FolsomSamplerOnly,
-                                  Corrected_Gridded_LLRRemoved,
-                                  Corrected_SingleRatios))
+                                             Corrected_Gridded_LLRRemoved,
+                                             Corrected_SingleRatios))
 
   ###The above code, hypothetically, could be removed to a separate, hidden
   ## function. Would take a little bit of work, but could easily be done.
@@ -496,10 +521,10 @@ getInvertData <- function(dataType = "abun",
   ###Need to add a section for Lifestage "T/F"; if true count separately, if false count together
 
   invertsamp = utils::read.csv(system.file("extdata",
-                                    "20201217.0749.InvertSamp.csv",
-                                    package = "StreamData"),
-                        colClasses = c("SiteNumber" = "character"),
-                        stringsAsFactors = FALSE) %>%
+                                           "20201217.0749.InvertSamp.csv",
+                                           package = "StreamData"),
+                               colClasses = c("SiteNumber" = "character"),
+                               stringsAsFactors = FALSE) %>%
     dplyr::rename(SIDNO = grep("SIDNO", names(.))) %>%
     dplyr::select(SIDNO,
                   SiteNumber,
@@ -509,20 +534,20 @@ getInvertData <- function(dataType = "abun",
                   ChannelFeatures)
 
   invertsampinv = utils::read.csv(system.file("extdata",
-                                       "20201217.0749.SampleInv.csv",
-                                       package = "StreamData"),
-                           colClasses = c("SiteNumber" = "character"),
-                           stringsAsFactors = FALSE) %>%
+                                              "20201217.0749.SampleInv.csv",
+                                              package = "StreamData"),
+                                  colClasses = c("SiteNumber" = "character"),
+                                  stringsAsFactors = FALSE) %>%
     dplyr::rename(SIDNO = grep("SIDNO", names(.))) %>%
     dplyr::select(SIDNO,
                   ReplicateType)
 
 
   invertsite = utils::read.csv(system.file("extdata",
-                                    "20201217.0749.SiteInfo.csv",
-                                    package = "StreamData"),
-                        colClasses = c("SiteNumber" = "character"),
-                        stringsAsFactors = FALSE) %>%
+                                           "20201217.0749.SiteInfo.csv",
+                                           package = "StreamData"),
+                               colClasses = c("SiteNumber" = "character"),
+                               stringsAsFactors = FALSE) %>%
     dplyr::select(SiteNumber,
                   Latitude_dd,
                   Longitude_dd,
@@ -534,21 +559,21 @@ getInvertData <- function(dataType = "abun",
                   StateFIPSCode)
 
   invertsampinfo = dplyr::left_join(dplyr::left_join(invertsamp,
-                                       invertsampinv,
-                                       by = "SIDNO"),
-                             invertsite,
-                             by = "SiteNumber") %>%
+                                                     invertsampinv,
+                                                     by = "SIDNO"),
+                                    invertsite,
+                                    by = "SiteNumber") %>%
     dplyr::select(-SiteNumber) %>%
     dplyr::mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
-           StateFIPSCode = sprintf("%02d", StateFIPSCode))
+                  StateFIPSCode = sprintf("%02d", StateFIPSCode))
 
   TotalRows = dplyr::left_join(TotalRows,
-                        invertsampinfo,
-                        by = "SIDNO")
+                               invertsampinfo,
+                               by = "SIDNO")
 
   ##Fix this; remove the notAbun stuff in the future; just drop Density_m2
-    abunMeasure = "Abundance"
-    notAbun <- "Density_m2"
+  abunMeasure = "Abundance"
+  notAbun <- "Density_m2"
 
 
   mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
@@ -676,7 +701,7 @@ getInvertData <- function(dataType = "abun",
   ##Add "Anafroptilum.Centroptilum.Procloeon" to the fix list
   dat1L[(nrow(dat1L) + 1),] <- list(10.6, 65, 1, "Anafroptilum.Centroptilum.Procloeon")
 
-    ##Third, pull the "lump" information from clust_labels based on the "group"
+  ##Third, pull the "lump" information from clust_labels based on the "group"
   ## from dat1L
   dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
                                                  StreamData:::.clust_labels$group),]$lump
@@ -905,8 +930,8 @@ getInvertData <- function(dataType = "abun",
     ##Rearrange columns to match those of 08/09 and 13/14
     NRSA_0304_inverts <- NRSA_0304_inverts %>%
       dplyr::relocate(any_of(c("UID", "SITE_ID", "YEAR", "VISIT_NO", "SAMPLE_TYPE",
-                        "TARGET_TAXON", "TOTAL", "PHYLUM", "CLASS", "ORDER",
-                        "FAMILY", "GENUS")))
+                               "TARGET_TAXON", "TOTAL", "PHYLUM", "CLASS", "ORDER",
+                               "FAMILY", "GENUS")))
 
     ##2008/2009
     ##Filter to BERW; remove columns that are not needed
@@ -915,14 +940,14 @@ getInvertData <- function(dataType = "abun",
       dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -BENT_COM, -DATE_BENT,
                     -SAMPLE_CAT, -PUBLICATION_DATE) %>%
       dplyr::mutate(YEAR = paste("20", stringr::str_sub(DATE_COL, -2,-1), sep = ""),
-             YEAR = as.numeric(YEAR)) %>%
+                    YEAR = as.numeric(YEAR)) %>%
       dplyr::select(-DATE_COL)
 
     ##Join the count data to the taxa data to match those of 03/04
     NRSA_0809_inverts<- NRSA_0809_inverts %>%
       dplyr::left_join(NRSA_0809_inverts_tax %>%
-                  dplyr::select(TAXA_ID, PHYLUM, CLASS, ORDER, FAMILY, GENUS),
-                by = "TAXA_ID")
+                         dplyr::select(TAXA_ID, PHYLUM, CLASS, ORDER, FAMILY, GENUS),
+                       by = "TAXA_ID")
 
     ##Update this weird TARGET_TAXON that is THIENEMANNIMYIA GENUS GR., but does not
     ##have a genus associated with it; so make genus = "THIENEMANNIMYIA"
@@ -936,7 +961,7 @@ getInvertData <- function(dataType = "abun",
       dplyr::select(-TAXA_ID)
 
     ##2013/2014
-        ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
+    ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
     ##not available in all datasets, so remove those that are not found across data)
     NRSA_1314_inverts = NRSA_1314_inverts %>%
       dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
@@ -1033,16 +1058,16 @@ getInvertData <- function(dataType = "abun",
       #If genera that are one of genera in dat1, rename the Genus with the slash
       #label from dat1, else, keep the original Genus label
       NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% dat1$Genus,
-                                dat1$Slash[match(NRSA_inverts$GENUS,
-                                                 dat1$Genus)],
-                                NRSA_inverts$GENUS)
+                                   dat1$Slash[match(NRSA_inverts$GENUS,
+                                                    dat1$Genus)],
+                                   NRSA_inverts$GENUS)
 
       #If genera that are one of problem slash genera, rename the Genus with the lumped
       #label from fix_slash, else, keep the original Genus label
       NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% fix_slash$Slash,
-                                fix_slash$Fix[match(NRSA_inverts$GENUS,
-                                                    fix_slash$Slash)],
-                                NRSA_inverts$GENUS)
+                                   fix_slash$Fix[match(NRSA_inverts$GENUS,
+                                                       fix_slash$Slash)],
+                                   NRSA_inverts$GENUS)
 
       #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
       #else, keep the original Genus label
@@ -1141,11 +1166,11 @@ getInvertData <- function(dataType = "abun",
                     LAT_DD83, LON_DD83, AG_ECO9, NRS13_URBN, RT_NRSA,
                     US_L3CODE, US_L3NAME) %>%
       dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "?",
-                              "",
-                              RT_NRSA),
-             DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
-             VISIT_NO = as.character(VISIT_NO),
-             MASTER_SITEID = SITE_ID) %>%
+                                     "",
+                                     RT_NRSA),
+                    DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
+                    VISIT_NO = as.character(VISIT_NO),
+                    MASTER_SITEID = SITE_ID) %>%
       dplyr::relocate(MASTER_SITEID, .after = SITE_ID)
 
     ##08/09 - MISSING L3 NAME (not a problem)
@@ -1156,15 +1181,15 @@ getInvertData <- function(dataType = "abun",
                     LAT_DD83, LON_DD83, AGGR_ECO9_2015, URBAN, RT_NRSA,
                     US_L3CODE_2015) %>%
       dplyr::mutate(RT_NRSA = ifelse(RT_NRSA == "R",
-                              "R",
-                              ifelse(RT_NRSA == "S",
-                                     "In",
-                                     ifelse(RT_NRSA == "T",
-                                            "Im",
-                                            "")))) %>%
+                                     "R",
+                                     ifelse(RT_NRSA == "S",
+                                            "In",
+                                            ifelse(RT_NRSA == "T",
+                                                   "Im",
+                                                   "")))) %>%
       dplyr::mutate(US_L3NAME = "",
-             DATE_COL = as.Date(DATE_COL, format = "%d-%b-%y"),
-             VISIT_NO = as.character(VISIT_NO))
+                    DATE_COL = as.Date(DATE_COL, format = "%d-%b-%y"),
+                    VISIT_NO = as.character(VISIT_NO))
 
     ##For some reason, one MASTER_SITEID is missing for one replicate sample, so give it the site id
     NRSA_0809_sites$MASTER_SITEID[which(NRSA_0809_sites$SITE_ID == "FW08LA004")] = "FW08LA004"
@@ -1176,12 +1201,12 @@ getInvertData <- function(dataType = "abun",
       dplyr::select(SITE_ID, VISIT_NO, SITETYPE, DATE_COL, STATE, LAT_DD, LON_DD,
                     ECOWSA9, RT_WSA, ECO3, ECO3_NM) %>%
       dplyr::mutate(RT_WSA = ifelse(RT_WSA == "R",
-                             "R",
-                             ifelse(RT_WSA == "S",
-                                    "In",
-                                    ifelse(RT_WSA == "T",
-                                           "Im",
-                                           "")))) %>%
+                                    "R",
+                                    ifelse(RT_WSA == "S",
+                                           "In",
+                                           ifelse(RT_WSA == "T",
+                                                  "Im",
+                                                  "")))) %>%
       dplyr::mutate(URBAN = "",
                     UID = paste("200304", SITE_ID, VISIT_NO,
                                 sep = "_"),
@@ -1208,8 +1233,8 @@ getInvertData <- function(dataType = "abun",
       tidyr::unite(UNIQUEID, c(UID, SITE_ID, YEAR, VISIT_NO),
                    sep = "_", remove = FALSE) %>%
       dplyr::left_join(NRSA_sites %>%
-                  tidyr::unite(UNIQUEID, c(UID, SITE_ID, YEAR, VISIT_NO),
-                               sep = "_", remove = T), by = "UNIQUEID") %>%
+                         tidyr::unite(UNIQUEID, c(UID, SITE_ID, YEAR, VISIT_NO),
+                                      sep = "_", remove = T), by = "UNIQUEID") %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
       dplyr::mutate(ProjectLabel = ifelse(YEAR %in% c(2013, 2014),
                                           "NRSA1314",
@@ -1218,34 +1243,34 @@ getInvertData <- function(dataType = "abun",
                                                  ifelse(YEAR %in% c(2018, 2019),
                                                         "NRSA1819",
                                                         "WSA"))),
-             ProjectAssignedSampleLabel = UID,
-             NAWQA.SMCOD = UNIQUEID,
-             NAWQAStudyUnitCode = SITETYPE,
-             CollectionDate = DATE_COL,
-             StartTime = NA,
-             TimeDatum = NA,
-             CollectionYear = YEAR,
-             CollectionMonth = lubridate::month(DATE_COL),
-             CollectionDayOfYear = lubridate::yday(DATE_COL),
-             SiteVisitSampleNumber = VISIT_NO,
-             ProvisionalData = NA,
-             SiteNumber = MASTER_SITEID,
-             SiteName = MASTER_SITEID,
-             StateFIPSCode = NA,
-             CountyFIPSCode = NA,
-             Latitude_dd = LAT_DD83,
-             Longitude_dd = LON_DD83,
-             CoordinateDatum = "NAD83",
-             HUCCode = NA,
-             DrainageArea_mi2 = NA ,
-             SampleTypeCode = SAMPLE_TYPE,
-             IdentificationEntity = NA,
-             AreaSampTot_m2  = NA,
-             GeomorphicChannelUnit = NA,
-             ChannelBoundaries = NA,
-             ChannelFeatures = NA,
-             ReplicateType  = NA
-             ) %>%
+                    ProjectAssignedSampleLabel = UID,
+                    NAWQA.SMCOD = UNIQUEID,
+                    NAWQAStudyUnitCode = SITETYPE,
+                    CollectionDate = DATE_COL,
+                    StartTime = NA,
+                    TimeDatum = NA,
+                    CollectionYear = YEAR,
+                    CollectionMonth = lubridate::month(DATE_COL),
+                    CollectionDayOfYear = lubridate::yday(DATE_COL),
+                    SiteVisitSampleNumber = VISIT_NO,
+                    ProvisionalData = NA,
+                    SiteNumber = MASTER_SITEID,
+                    SiteName = MASTER_SITEID,
+                    StateFIPSCode = NA,
+                    CountyFIPSCode = NA,
+                    Latitude_dd = LAT_DD83,
+                    Longitude_dd = LON_DD83,
+                    CoordinateDatum = "NAD83",
+                    HUCCode = NA,
+                    DrainageArea_mi2 = NA ,
+                    SampleTypeCode = SAMPLE_TYPE,
+                    IdentificationEntity = NA,
+                    AreaSampTot_m2  = NA,
+                    GeomorphicChannelUnit = NA,
+                    ChannelBoundaries = NA,
+                    ChannelFeatures = NA,
+                    ReplicateType  = NA
+      ) %>%
       dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
                     -SITE_ID, -MASTER_SITEID, -UID, -UNIQUEID, -DATE_COL,
                     -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO) %>%
@@ -1259,17 +1284,17 @@ getInvertData <- function(dataType = "abun",
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else provide an NA
     nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$SITE_ID,
-                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
-                                                                    StreamData:::.NRSA_siteIDs$SITE_ID)],
-                            NA)
+                                    StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
+                                                                               StreamData:::.NRSA_siteIDs$SITE_ID)],
+                                    NA)
 
     ##if site number in nrsa_comms1 is in the MASTER_SITEID in the master crosswalk list,
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else give the current UNIQUE ID
     nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$MASTER_SITEID,
-                                      StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
-                                                                                 StreamData:::.NRSA_siteIDs$MASTER_SITEID)],
-                                      nrsa_comms1$UNIQUE_ID)
+                                    StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
+                                                                               StreamData:::.NRSA_siteIDs$MASTER_SITEID)],
+                                    nrsa_comms1$UNIQUE_ID)
 
     ##if there are any NA values in UNIQUE ID, replace these with the SiteNumber
     nrsa_comms1$SiteNumber = ifelse(is.na(nrsa_comms1$UNIQUE_ID),
@@ -1283,6 +1308,10 @@ getInvertData <- function(dataType = "abun",
     ##Need to then join this dataset to invert_comms1
     invert_comms1[setdiff(names(nrsa_comms1), names(invert_comms1))] <- NA
     nrsa_comms1[setdiff(names(invert_comms1), names(nrsa_comms1))] <- NA
+
+    ##Add Agency columns
+    invert_comms1$Agency <- "USGS"
+    nrsa_comms1$Agency <- "EPA"
 
     invert_comms1 <- invert_comms1  %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
@@ -1304,7 +1333,7 @@ getInvertData <- function(dataType = "abun",
   if(dataType == "occur") {
     invert_comms1 = invert_comms1 %>%
       dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
-                    ~replace(., . > 0, 1)))
+                                  ~replace(., . > 0, 1)))
   }
 
   ##Remove the "tax_" prefix
