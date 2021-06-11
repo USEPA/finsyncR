@@ -102,7 +102,7 @@ Note: There are 81 sampling events (sampling location - collection
   (for example, \code{program = c("National Water Quality Assessment",
   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs).
   If you choose program = "ALL", this only combines samples with SampleMethodCodes
-  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE".
+  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP".
 
   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
   will be retained. Thus, ~17 \% of samples will be removed, as they have <300

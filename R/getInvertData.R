@@ -73,7 +73,7 @@
 #'   (for example, \code{program = c("National Water Quality Assessment",
 #'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs).
 #'   If you choose program = "ALL", this only combines samples with SampleMethodCodes
-#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE".
+#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP".
 #'
 #'   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
 #'   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
@@ -219,6 +219,10 @@ getInvertData <- function(dataType = "abun",
   Inverts$SampleTypeCode[grep("EMAP 1990", Inverts$SamplingMethodReference)] <- "EMAP"
   Inverts$SampleTypeCode[grep("CDPHE Riffle",
                               Inverts$SamplingMethodReference)] <- "CDPHE RR"
+  Inverts$SampleTypeCode[grep("PNAMP",
+                              Inverts$SamplingMethodReference)] <- "PNAMP"
+
+
   Inverts <- Inverts %>%
     dplyr::select(-SamplingMethodReference)
 
@@ -226,7 +230,7 @@ getInvertData <- function(dataType = "abun",
 
   Inverts <- Inverts %>%
     dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW", "SWAMP",
-                                        "EMAP", "CDPHE RR")) %>%
+                                        "EMAP", "CDPHE RR", "PNAMP")) %>%
     dplyr::filter(FieldComponent == "M") %>%
     dplyr::mutate(CollectionDate = as.Date(CollectionDate,
                                            format = "%m/%d/%Y"),
