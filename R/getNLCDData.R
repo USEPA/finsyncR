@@ -13,16 +13,15 @@
 #' @return Function returns a site by year dataframe of NLCD land-use/land-cover
 #'   data for either the catchment or watershed scale.
 #'
-#' @details Currently, this function only works for USGS NAWQA sites, but implementation
-#'   for EPA NRSA sites will be completed in the near future. Land-use/land-cover
-#'   data is extracted from the USGS National Land Cover Database (NLCD). These
-#'   LULC data are available in the following years: 2001, 2004, 2006, 2008,
-#'   2011, 2013, and 2016. For instances of years in the input data that are not
-#'   exact year matches from this list, years are temporally matched to the closest
-#'   year with LULC data (e.g. a site sampled in 1995 will have LULC data from 2001).
-#'   Note that for samples that fall at the midpoint of two NLCD years (e.g. 2005),
-#'   the function defaults to the earlier year (e.g. a site sampled in 2005 will
-#'   have LULC data from 2004).
+#' @details This function has been updated to include all USGS and EPA NRSA sites.
+#'   Land-use/land-cover data is extracted from the USGS National Land Cover
+#'   Database (NLCD). These LULC data are available in the following years:
+#'   2001, 2004, 2006, 2008, 2011, 2013, and 2016. For instances of years in the
+#'   input data that are not exact year matches from this list, years are
+#'   temporally matched to the closest year with LULC data (e.g. a site sampled
+#'   in 1995 will have LULC data from 2001). Note that for samples that fall at
+#'   the midpoint of two NLCD years (e.g. 2005), the function defaults to the
+#'   earlier year (e.g. a site sampled in 2005 will have LULC data from 2004).
 #'
 #'   Data can be extracted at the catchment (\code{"Cat"}) or watershed (\code{"Ws"})
 #'   scales. Watershed is larger than catchment, and includes land that drains
@@ -39,7 +38,7 @@
 #' @examples
 #' \dontrun{
 #' ## Code to generate the percent land-use/land-cover in the catchment for
-#' ## site number "05276005" from 2007.
+#' ## site number "USGS-05276005" from 2007.
 #'
 #'   dat = data.frame(SiteNumber = "USGS-05276005",
 #'                    CollectionYear = 2007)
@@ -55,7 +54,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
 
   ##Read in NLCD data from streamcat dataset from Ryan Hill
   streamcat <- read.csv(base::system.file("extdata",
-                                          "streamcat-usgs-nawqa-join.csv",
+                                          "streamcat_all.csv",
                                           package = "StreamData"))
 
   ##Naming scheme
@@ -96,7 +95,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                          )),
            Info2 = ifelse(is.na(Year),
                           stringr::str_remove(Info, scale),
-                          stringr::str_remove(stringr::str_remove(Info, scale), Year)),
+                          stringr::str_remove(stringr::str_remove(Info, scale), Year))
     ) %>%
     dplyr::filter(Scale %in% scale) %>%
     dplyr::filter(Info2 %in% c("PctBl", "PctConif", "PctCrop", "PctDecid", "PctGrs",
@@ -129,7 +128,8 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                                                   "PctCrop"))))
       ) %>%
       dplyr::group_by(COMID, SiteNumber, Scale, Year, Info2) %>%
-      dplyr::summarize(value = sum(value))
+      dplyr::summarize(value = sum(value)) %>%
+      dplyr::ungroup()
   }
 
   ##Join Area of Ws and Cat with LULC data
@@ -164,3 +164,4 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
 
   return(data)
 }
+

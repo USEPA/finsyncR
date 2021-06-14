@@ -27,16 +27,15 @@ Function returns a site by year dataframe of NLCD land-use/land-cover
 Generate NLCD Land-use/Land-cover data for each NAWQA site
 }
 \details{
-Currently, this function only works for USGS NAWQA sites, but implementation
-  for EPA NRSA sites will be completed in the near future. Land-use/land-cover
-  data is extracted from the USGS National Land Cover Database (NLCD). These
-  LULC data are available in the following years: 2001, 2004, 2006, 2008,
-  2011, 2013, and 2016. For instances of years in the input data that are not
-  exact year matches from this list, years are temporally matched to the closest
-  year with LULC data (e.g. a site sampled in 1995 will have LULC data from 2001).
-  Note that for samples that fall at the midpoint of two NLCD years (e.g. 2005),
-  the function defaults to the earlier year (e.g. a site sampled in 2005 will
-  have LULC data from 2004).
+This function has been updated to include all USGS and EPA NRSA sites.
+  Land-use/land-cover data is extracted from the USGS National Land Cover
+  Database (NLCD). These LULC data are available in the following years:
+  2001, 2004, 2006, 2008, 2011, 2013, and 2016. For instances of years in the
+  input data that are not exact year matches from this list, years are
+  temporally matched to the closest year with LULC data (e.g. a site sampled
+  in 1995 will have LULC data from 2001). Note that for samples that fall at
+  the midpoint of two NLCD years (e.g. 2005), the function defaults to the
+  earlier year (e.g. a site sampled in 2005 will have LULC data from 2004).
 
   Data can be extracted at the catchment (\code{"Cat"}) or watershed (\code{"Ws"})
   scales. Watershed is larger than catchment, and includes land that drains
@@ -53,7 +52,7 @@ Currently, this function only works for USGS NAWQA sites, but implementation
 \examples{
 \dontrun{
 ## Code to generate the percent land-use/land-cover in the catchment for
-## site number "05276005" from 2007.
+## site number "USGS-05276005" from 2007.
 
   dat = data.frame(SiteNumber = "USGS-05276005",
                    CollectionYear = 2007)

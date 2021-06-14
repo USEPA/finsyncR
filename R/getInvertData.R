@@ -843,7 +843,8 @@ getInvertData <- function(dataType = "abun",
     dplyr::select(-Identifier,
                   -SIDNO,
                   -ReleaseCategory) %>%
-    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
+    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames)) %>%
+    dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
 
 
   if(isTRUE(NRSA)){
