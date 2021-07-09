@@ -8,7 +8,7 @@ getFishData(
   dataType = "abun",
   taxonLevel = "Species",
   program = "National Water Quality Assessment",
-  standardize = TRUE
+  standardize = "none"
 )
 }
 \arguments{
@@ -22,8 +22,12 @@ getFishData(
 \item{program}{The program name(s) that should be included in the output
 dataset. See \code{Details} below for more information.}
 
-\item{standardize}{logical. Should abundance be standardized by unit effort (see
-details)? \code{"TRUE"} or \code{"FALSE"}.}
+\item{standardize}{Standardization method to use for calculating fish abundance matrices.
+Default is \code{standardize = "none"}, which returns raw fish abundance values. Other options include
+\code{standardize = "CPUE"}, which returns standardized abundances in Catch per Unit Effort.
+An alternative standardization method is \code{standardize = "MGMS"}, which calculates
+Multigear Mean Standardization (MGMS) values to account for catchability differences between
+fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).}
 }
 \value{
 A species by sample data frame with site, stream reach, and
@@ -38,9 +42,22 @@ Note: To standardize fish abundance data, abundances were divided by
   stream length sampled. ~35% of the data have been removed,
   as these samples lacked the required standardization information.
   Therefore, if you are interested in occurrence (pres/abs) data only, then
-  set \code{standardize = FALSE} and \code{dataType = "occur"}. Thus,
-  be aware that setting \code{standardize = FALSE} will result in a larger
-  dataset with additional samples/sites than when \code{standardize = TRUE}.
+  set \code{dataType = "occur"}. Thus, be aware that setting \code{dataType = "occur"}
+  will result in a larger dataset with additional samples/sites than when \code{dataType = "abun"}.
+
+  To account for differences in efficacy between shocking, seine netting, and
+  snorkeling, we included multigear mean standardization (\code{standardize = "MGMS"}) as a
+  standardization method as an alternative to catch per unit effort (\code{standardize = "CPUE"}).
+  To calculate MGMS, we first calculated the mean total CPUE (summation of CPUEs for all
+  taxa at each site for each collection date) for each sampling method. Then we divided
+  each CPUE value by the mean total CPUE for their respective sampling methods. See
+  the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS computation.
+
+  Keep in mind that when setting \code{standardize = "CPUE"} will result in a larger dataset
+  (more rows) than \code{standardize = "MGMS"} because CPUE data will have a row for each sampling
+  method used at each time-location, whereas MGMS will have only one row for each time-location
+  because the fuction is standardizing by sampling method in addition to standardizing by
+  time and area sampled.
 
   \code{program} refers to the Local, regional, or national program project
   for which data were originally collected. Because the National Water
@@ -67,4 +84,9 @@ Fish <- getFishData(taxonLevel = "Family")
 }
 
 
+}
+\references{
+Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
+catch per unit effort data from different fish sampling gears: multigear mean standardization (MGMS).
+Can. J. Fish. Aquat. Sci. 74:8-14.
 }

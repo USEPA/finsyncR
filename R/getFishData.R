@@ -7,8 +7,12 @@
 #'   \code{"Genus"}, \code{"Species"}, or \code{"Subspecies"}.
 #' @param program The program name(s) that should be included in the output
 #'   dataset. See \code{Details} below for more information.
-#' @param standardize logical. Should abundance be standardized by unit effort (see
-#'   details)? \code{"TRUE"} or \code{"FALSE"}.
+#' @param standardize Standardization method to use for calculating fish abundance matrices.
+#'   Default is \code{standardize = "none"}, which returns raw fish abundance values. Other options include
+#'   \code{standardize = "CPUE"}, which returns standardized abundances in Catch per Unit Effort.
+#'   An alternative standardization method is \code{standardize = "MGMS"}, which calculates
+#'   Multigear Mean Standardization (MGMS) values to account for catchability differences between
+#'   fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).
 #'
 #' @return A species by sample data frame with site, stream reach, and
 #'   sample information.
@@ -18,9 +22,22 @@
 #'   stream length sampled. ~35% of the data have been removed,
 #'   as these samples lacked the required standardization information.
 #'   Therefore, if you are interested in occurrence (pres/abs) data only, then
-#'   set \code{standardize = FALSE} and \code{dataType = "occur"}. Thus,
-#'   be aware that setting \code{standardize = FALSE} will result in a larger
-#'   dataset with additional samples/sites than when \code{standardize = TRUE}.
+#'   set \code{dataType = "occur"}. Thus, be aware that setting \code{dataType = "occur"}
+#'   will result in a larger dataset with additional samples/sites than when \code{dataType = "abun"}.
+#'
+#'   To account for differences in efficacy between shocking, seine netting, and
+#'   snorkeling, we included multigear mean standardization (\code{standardize = "MGMS"}) as a
+#'   standardization method as an alternative to catch per unit effort (\code{standardize = "CPUE"}).
+#'   To calculate MGMS, we first calculated the mean total CPUE (summation of CPUEs for all
+#'   taxa at each site for each collection date) for each sampling method. Then we divided
+#'   each CPUE value by the mean total CPUE for their respective sampling methods. See
+#'   the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS computation.
+#'
+#'   Keep in mind that when setting \code{standardize = "CPUE"} will result in a larger dataset
+#'   (more rows) than \code{standardize = "MGMS"} because CPUE data will have a row for each sampling
+#'   method used at each time-location, whereas MGMS will have only one row for each time-location
+#'   because the fuction is standardizing by sampling method in addition to standardizing by
+#'   time and area sampled.
 #'
 #'   \code{program} refers to the Local, regional, or national program project
 #'   for which data were originally collected. Because the National Water
@@ -40,6 +57,10 @@
 #'   matrix. We will include an extension of this function to return the
 #'   individual-level information (length, width, deformities, etc.).
 #'
+#' @references Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
+#' catch per unit effort data from different fish sampling gears: multigear mean standardization (MGMS).
+#' Can. J. Fish. Aquat. Sci. 74:8-14.
+#'
 #' @examples
 #' \dontrun{
 #' Fish <- getFishData(taxonLevel = "Family")
@@ -52,18 +73,19 @@
 getFishData <- function(dataType = "abun",
                         taxonLevel = "Species",
                         program = "National Water Quality Assessment",
-                        standardize = TRUE) {
+                        standardize = "none") {
 
   if(!(dataType %in% c("abun", "occur"))) {
     stop('dataType must be either "abun" or "occur".')}
 
-  if(!isTRUE(standardize) && dataType == "abun"){
+  if(standardize == "none" && dataType == "abun"){
     message(paste('It is highly recommended that you use standardized',
-                  'abundances, rather than raw abundances.'))
+                  'abundances, rather than raw abundances.
+                  (i.e. `standardize = "CPUE"` or `standardize = "MGMS"`)'))
   }
 
-  if(standardize != TRUE && standardize != FALSE){
-    stop('standardize must be set to either TRUE or FALSE.')
+  if(!(standardize %in% c("none","CPUE","MGMS")) && dataType == "abun"){
+    stop('standardize must be "none", "CPUE", or "MGMS"')
   }
 
   if(!(taxonLevel %in% StreamData:::.TaxLevCols_Fish$Superclass$taxcols)){
@@ -190,11 +212,36 @@ getFishData <- function(dataType = "abun",
 
   ##Need to figure out here IF this results in multiple SIDNO-MethodBasic lines
 
-  if(isTRUE(standardize)){
+  if(dataType == "abun"){
 
+  # calculate abundance matrices via raw abundance ("none"), CPUE standardization, or MGMS standardization
+  if(standardize == "none"){
+    fish_comm2 = fish_comm %>%
+      dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
+                                         "Seine",
+                                         ifelse(grepl("Snork", MethodCode, fixed = TRUE),
+                                                "Snorkel",
+                                                "Shocking"))) %>%
+      dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
+      dplyr::group_by(SIDNO, MethodBasic) %>%
+      dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                  sum)) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
+                                            rowSums(across(c("NumberSeineHauls",
+                                                             "NumberStationarySetsKicks")),
+                                                    na.rm = TRUE),
+                                            ifelse(MethodBasic == "Shocking",
+                                                   MinutesShockTime,
+                                                   NumberSnorkelingTransects))) %>%
+      dplyr::relocate(tidyselect::contains("tax_"),
+                      .after = tidyselect::last_col())
+
+  }
     ####ISSUE HERE
     ##For some reason there are some zeros for standardize method
-
+  if (standardize == "CPUE"){
     fish_comm2 <- fish_comm %>%
       dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
                !is.na(NumberStationarySetsKicks) |
@@ -224,31 +271,131 @@ getFishData <- function(dataType = "abun",
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
                     ~. / StandardMethod / ReachLengthFished_m ))
 
-  } else {
+    # sum CPUE for replicate methods (e.g. "Seine x2" or "Shock x2")
+    siteInfo = fish_comm2 %>%
+      dplyr::select(-tidyselect::contains("tax_")) %>%
+      dplyr::group_by(CollectionDate, SiteNumber)
+
+    condensedCPUEdata = fish_comm2 %>%
+      dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber, MethodBasic) %>%
+      dplyr::group_by(CollectionDate, SiteNumber, MethodBasic) %>%
+      dplyr::summarise_all(.funs = sum)
+
+    fish_comm2 = siteInfo %>%
+      dplyr::left_join(condensedCPUEdata) %>%
+      dplyr::group_by(CollectionDate,SiteNumber,MethodBasic) %>%
+      dplyr::slice(1)
+
+    }
+
+    # alternative standardization method, multigear mean standardization (Gibson-Reinemer et al. 2014)
+  if (standardize == "MGMS"){
+      fish_comm2 <- fish_comm %>%
+        dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
+                        !is.na(NumberStationarySetsKicks) |
+                        !is.na(NumberSnorkelingTransects)) %>%
+        dplyr::filter(!is.na(ReachLengthFished_m))%>%
+        dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
+                                           "Seine",
+                                           ifelse(grepl("Snork", MethodCode, fixed = TRUE),
+                                                  "Snorkel",
+                                                  "Shocking"))) %>%
+        dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
+        dplyr::group_by(SIDNO, MethodBasic) %>%
+        dplyr::mutate(across(contains("tax_"),
+                             sum)) %>%
+        dplyr::mutate(MinutesShockTime = sum(MinutesShockTime, na.rm = TRUE)) %>%
+        dplyr::slice(1) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
+                                              rowSums(across(c("NumberSeineHauls",
+                                                               "NumberStationarySetsKicks")),
+                                                      na.rm = TRUE),
+                                              ifelse(MethodBasic == "Shocking",
+                                                     MinutesShockTime,
+                                                     NumberSnorkelingTransects))) %>%
+        dplyr::relocate(tidyselect::contains("tax_"),
+                        .after = tidyselect::last_col()) %>%
+        dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                    ~. / StandardMethod / ReachLengthFished_m ))
+
+      # sum CPUE for replicate methods (e.g. "Seine x2" or "Shock x2")
+      siteInfo = fish_comm2 %>%
+        dplyr::select(-tidyselect::contains("tax_")) %>%
+        dplyr::group_by(CollectionDate, SiteNumber)
+
+      condensedCPUEdata = fish_comm2 %>%
+        dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber, MethodBasic) %>%
+        dplyr::group_by(CollectionDate, SiteNumber, MethodBasic) %>%
+        dplyr::summarise_all(.funs = sum)
+
+      fish_comm2 = siteInfo %>%
+        dplyr::left_join(condensedCPUEdata) %>%
+        dplyr::group_by(CollectionDate,SiteNumber,MethodBasic) %>%
+        dplyr::slice(1)
+
+      TotalCPUE.df = fish_comm2 %>%
+        dplyr::mutate(TotalCPUE = rowSums(dplyr::across(tidyselect::contains("tax_")))) # sum CPUE for all taxa
+
+      # Remove TotalCPUE NAs to avoid producing NaN in Mean Total CPUE calculations
+      # (this only seems to be a problem for ~10 Shocking data points)
+
+      MeanTotalCPUE = TotalCPUE.df[!is.na(TotalCPUE.df$TotalCPUE),] %>%
+        dplyr::group_by(MethodBasic) %>%
+        dplyr::summarise(MeanTotalCPUE = mean(TotalCPUE)) # calculate avg CPUE for each sampling method
+
+      fish_comm2 = dplyr::left_join(fish_comm2, MeanTotalCPUE, by = "MethodBasic")
+
+      fish_comm2 = fish_comm2 %>%
+        dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                    .fns = ~./MeanTotalCPUE)) %>% # divide each row by the mean CPUE for its respective sampling method
+                                                                  # (this is now in units of MGMS)
+        dplyr::ungroup()
+
+      siteInfo = fish_comm2 %>%
+        dplyr::select(-tidyselect::contains("tax_")) %>%
+        dplyr::group_by(CollectionDate, SiteNumber) %>%
+        dplyr::mutate(Methods = paste(MethodBasic, collapse = ", ")) %>%
+        # include only unique site-date combinations
+        dplyr::slice(1) %>%
+        dplyr::ungroup()
+
+      # sum MGMS values for rows with same collection date and site number (combining methods since they are now standardized)
+      condensedMGMSdata = fish_comm2 %>%
+        dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber) %>%
+        dplyr::group_by(CollectionDate, SiteNumber) %>%
+        dplyr::summarise_all(.funs = mean) %>%
+        dplyr::ungroup()
+
+      fish_comm2 = siteInfo %>%
+        dplyr::left_join(condensedMGMSdata)
+
+  }
+}
+
+  if(dataType == "occur") {
     fish_comm2 = fish_comm %>%
       dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
-                                  "Seine",
-                                  ifelse(grepl("Snork", MethodCode, fixed = TRUE),
-                                         "Snorkel",
-                                         "Shocking"))) %>%
+                                         "Seine",
+                                         ifelse(grepl("Snork", MethodCode, fixed = TRUE),
+                                                "Snorkel",
+                                                "Shocking"))) %>%
       dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
       dplyr::group_by(SIDNO, MethodBasic) %>%
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-                    sum)) %>%
+                                  sum)) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
-                                     rowSums(across(c("NumberSeineHauls",
-                                                      "NumberStationarySetsKicks")),
-                                             na.rm = TRUE),
-                                     ifelse(MethodBasic == "Shocking",
-                                            MinutesShockTime,
-                                            NumberSnorkelingTransects))) %>%
+                                            rowSums(across(c("NumberSeineHauls",
+                                                             "NumberStationarySetsKicks")),
+                                                    na.rm = TRUE),
+                                            ifelse(MethodBasic == "Shocking",
+                                                   MinutesShockTime,
+                                                   NumberSnorkelingTransects))) %>%
       dplyr::relocate(tidyselect::contains("tax_"),
-               .after = tidyselect::last_col())
-  }
+                      .after = tidyselect::last_col())
 
-  if(dataType == "occur") {
     fish_comm2 = fish_comm2 %>%
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
                     ~replace(., . > 0, 1)))
