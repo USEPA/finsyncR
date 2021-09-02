@@ -110,7 +110,7 @@
 #'
 #' @export
 
-getInvertData <- function(dataType = "abun",
+getInvertData <- function(dataType = "occur",
                           taxonLevel = "Genus",
                           taxonFix = "lump",
                           program = "National Water Quality Assessment",
@@ -313,7 +313,7 @@ getInvertData <- function(dataType = "abun",
       dplyr::mutate(Abundance = SummedAbundance,
                     Density_m2 = as.numeric("NA"),
                     AdjRawCount = as.numeric("NA"),
-                    RawCount =SummedRawCount,
+                    RawCount = SummedRawCount,
                     TotAreaSampled_m2 = as.numeric("NA"),
                     FieldSplitRatio = as.numeric("NA"),
                     Note = "Abundance measure is summed 'Abundance' across multiple inputs
@@ -372,7 +372,7 @@ getInvertData <- function(dataType = "abun",
 
   ### We can also add the unique 'Ratio' included in the duplicates
   ### (which should be the same for all duplicates)
-  ### Now we can the 'LabRecord_Labels' and 'Ratio_Labels' to the duplicated data
+  ### Now we can add the 'LabRecord_Labels' and 'Ratio_Labels' to the duplicated data
 
   SumGridLLRData <- Gridded_LLRRemoved_Duplicates %>%
     dplyr::group_by(SampleGrouping) %>%
@@ -575,38 +575,31 @@ getInvertData <- function(dataType = "abun",
                                invertsampinfo,
                                by = "SIDNO")
 
-  ##Fix this; remove the notAbun stuff in the future; just drop Density_m2
-  abunMeasure = "Abundance"
-  notAbun <- "Density_m2"
-
-
   mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
   taxcols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
 
-  ##MIKE NOTE BELOW
-  ###NOTE: NEED TO MOVE THIS AFTER THE RANDOM SAMPLING, BECAUSE IT IS CAUSING SAMPLES TO BE DROPPED
-  ##THIS COULD AFFECT SOME THINGS, BUT MIGHT BE REALLY EASY
+  if(dataType == "occur"){
+    if(isTRUE(rarefy)) {
+      set.seed(seed)
 
-  if(isTRUE(rarefy)) {
-    set.seed(seed)
-
-    TotalRows = TotalRows %>%
-      dplyr::group_by(SIDNO) %>%
-      dplyr::mutate(indcounted = sum(RawCount)) %>%
-      dplyr::filter(indcounted > 299) %>%
-      dplyr::select(-indcounted) %>%
-      dplyr::ungroup() %>%
-      dplyr::group_by(SIDNO, PublishedTaxonName) %>%
-      dplyr::slice(rep(1:dplyr::n(), times=RawCount)) %>%
-      dplyr::ungroup() %>%
-      dplyr::group_by(SIDNO) %>%
-      dplyr::sample_n(size = 300) %>%
-      dplyr::ungroup() %>%
-      dplyr::group_by(SIDNO, PublishedTaxonName) %>%
-      dplyr::mutate(RawCount = n()) %>%
-      dplyr::slice(1) %>%
-      dplyr::ungroup()
-  } else {}
+      TotalRows = TotalRows %>%
+        dplyr::group_by(SIDNO) %>%
+        dplyr::mutate(indcounted = sum(RawCount)) %>%
+        dplyr::filter(indcounted > 299) %>%
+        dplyr::select(-indcounted) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(SIDNO, PublishedTaxonName) %>%
+        dplyr::slice(rep(1:dplyr::n(), times=RawCount)) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(SIDNO) %>%
+        dplyr::sample_n(size = 300) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(SIDNO, PublishedTaxonName) %>%
+        dplyr::mutate(RawCount = n()) %>%
+        dplyr::slice(1) %>%
+        dplyr::ungroup()
+    } else {}
+  }   else {}
 
 
 
@@ -768,6 +761,16 @@ getInvertData <- function(dataType = "abun",
 
   }
 
+  ##Fix this; remove the notAbun stuff in the future; just drop Density_m2
+  if(dataType == "occur") {
+    abunMeasure = "RawCount"
+    notMeasure = "Density"
+  } else {
+    abunMeasure = "Density"
+    notMeasure = "RawCount"
+  }
+
+
   if(isTRUE(lifestage)) {
     #Lifestage-taxon combinations
     invert_comms1 = TotalRows %>%
@@ -775,18 +778,20 @@ getInvertData <- function(dataType = "abun",
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), any_vars(. != "")) %>%
       tidyr::unite(UNIQUEID, c(SIDNO, tidyselect::all_of(taxonLevel), Lifestage), sep = "_", remove = FALSE) %>%
       dplyr::group_by(UNIQUEID) %>%
-      dplyr::mutate(Abundance = sum(Abundance)) %>%
+      dplyr::mutate(Abundance = sum(Abundance),
+                    RawCount = sum(RawCount)) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(Density_m2 = ifelse(is.na(AreaSampTot_m2),
+      dplyr::mutate(Density = ifelse(is.na(AreaSampTot_m2),
                                         NA,
                                         Abundance / AreaSampTot_m2)) %>%
       dplyr::select(-any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
                               "LabComponent", "LabProcName",
+                              "Density_m2",
                               "TaxonomicResultReviewStatus",
                               "PublishedSortOrder", "BioDataTaxonName", "BioDataShortName",
                               "BenchTaxonName", "BenchTaxonNameReferenceCode",
-                              "AdjRawCount", "RawCount",
+                              "AdjRawCount", "Abundance",
                               "FieldSplitRatio", "LabSubsamplingRatio", "UniqueTaxonFlag",
                               "TargetLevelNotReachedReason", "Artifact", "BenchNotes",
                               "TaxonRecordSource", "IdentificationDate",
@@ -797,8 +802,8 @@ getInvertData <- function(dataType = "abun",
                               "Ratio", 'X', "NumbEntries", "SampleGrouping", "LabRecordIDs",
                               "Ratios", "Note", "UNIQUEID", "PublishedTaxonNameLevel",
                               "SamplerType", "DatasetPortion", "TotAreaSampled_m2"))) %>%
-      dplyr::select(-tidyselect::any_of(mycols),
-                    -tidyselect::any_of(notAbun)) %>%
+      dplyr::select(-tidyselect::any_of(mycols))
+      dplyr::select(-tidyselect::any_of(notMeasure)) %>%
       tidyr::unite(Taxon_Life, c(tidyselect::all_of(taxonLevel), Lifestage), sep = "_") %>%
       tidyr::pivot_wider(names_from = tidyselect::all_of(Taxon_Life),
                          names_prefix = "tax_",
@@ -812,16 +817,21 @@ getInvertData <- function(dataType = "abun",
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
       tidyr::unite(UNIQUEID, c(SIDNO, tidyselect::all_of(taxonLevel)), sep = "_", remove = FALSE) %>%
       dplyr::group_by(UNIQUEID) %>%
-      dplyr::mutate(Abundance = sum(RawCount)) %>%
+      dplyr::mutate(Abundance = sum(Abundance),
+                    RawCount = sum(RawCount)) %>%
       dplyr::slice(1) %>%
       dplyr::ungroup() %>%
+      dplyr::mutate(Density = ifelse(is.na(AreaSampTot_m2),
+                                     NA,
+                                     Abundance / AreaSampTot_m2)) %>%
       dplyr::select(-tidyselect::any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
                                           "LabComponent", "LabProcName",
+                                          "Density_m2",
                                           "TaxonomicResultReviewStatus",
                                           "PublishedSortOrder", "BioDataTaxonName", "BioDataShortName",
                                           "BenchTaxonName", "BenchTaxonNameReferenceCode",
-                                          "AdjRawCount", "RawCount",
-                                          "FieldSplitRatio", "LabSubsamplingRatio", "UniqueTaxonFlag",
+                                          "AdjRawCount", "Abundance",
+                                          "UniqueTaxonFlag",
                                           "TargetLevelNotReachedReason", "Artifact", "BenchNotes",
                                           "TaxonRecordSource", "IdentificationDate",
                                           "VerificationEntity", "VerificationDate", "CurationEntity",
@@ -832,18 +842,25 @@ getInvertData <- function(dataType = "abun",
                                           "Ratios", "Note", "Lifestage", "UNIQUEID", "PublishedTaxonNameLevel",
                                           "SamplerType", "DatasetPortion", "TotAreaSampled_m2"))) %>%
       dplyr::select(-tidyselect::any_of(mycols)) %>%
-      dplyr::select(-tidyselect::any_of(notAbun)) %>%
+      dplyr::select(-tidyselect::any_of(notMeasure)) %>%
       tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
                          names_prefix = "tax_",
                          values_from = tidyselect::all_of(abunMeasure),
                          values_fill = 0)
   }
 
+  if(dataType == "abun"){
+    invert_comms1 = invert_comms1 %>%
+      dplyr::filter(!is.na(AreaSampTot_m2))
+  }
+
+
   invert_comms1 = invert_comms1 %>%
     dplyr::select(-Identifier,
                   -SIDNO,
                   -ReleaseCategory) %>%
-    dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames)) %>%
+    dplyr::relocate(tidyselect::any_of(c(StreamData:::.ReorderUSGSBioDataColNames,
+                                       "FieldSplitRatio", "LabSubsamplingRatio"))) %>%
     dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
 
 

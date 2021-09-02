@@ -5,7 +5,7 @@
 \title{Access clean USGS Macro-Invertebrate Dataset}
 \usage{
 getInvertData(
-  dataType = "abun",
+  dataType = "occur",
   taxonLevel = "Genus",
   taxonFix = "lump",
   program = "National Water Quality Assessment",
