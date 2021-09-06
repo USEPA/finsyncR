@@ -9,6 +9,7 @@
 #' @import stringr
 #' @import tidyselect
 #' @import lubridate
+#' @import data.table
 #' @importFrom utils read.csv
 #' @importFrom utils read.table
 #'
