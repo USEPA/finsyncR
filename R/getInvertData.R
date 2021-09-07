@@ -267,6 +267,133 @@ getInvertData <- function(dataType = "occur",
     filter(nfsr < 2) %>%
     ungroup())
 
+  ##Generate proportional mean labsubsampling ratios for samples with multiple
+  ##labsaubsampling ratios; add these to those samples with single labsubsampling
+  ##ratios; add fieldsplitratios to this;
+  ##output the full dataset to be combined later in dataset
+
+  Multiratio <- Inverts %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType),
+                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
+                                "LLR",
+                                "NoDrop")) %>%
+    dplyr::filter(nfsr > 1) %>%
+    dplyr::filter(samplerN > 1) %>%
+    dplyr::filter(drop != "LLR") %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType)) %>%
+    dplyr::filter(nfsr > 1) %>%
+    dplyr::group_by(SIDNO, LabSubsamplingRatio) %>%
+    dplyr::summarize(sumcount = sum(RawCount),
+                     .groups = 'drop') %>%
+    dplyr::mutate(prop1 = sumcount * LabSubsamplingRatio) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::summarize(count = sum(sumcount),
+                     fullprop = sum(prop1),
+                     .groups = 'drop') %>%
+    dplyr::mutate(LabSubsamplingRatio = fullprop / count) %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio)
+
+  SingleRatios = Inverts %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType),
+                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
+                                "LLR",
+                                "NoDrop")) %>%
+    dplyr::filter(nfsr == 1) %>%
+    dplyr::filter(drop != "LLR") %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType)) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio)
+
+  MultiratioSingleRatio <- Inverts %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType),
+                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
+                                "LLR",
+                                "NoDrop")) %>%
+    dplyr::filter(nfsr > 1) %>%
+    dplyr::filter(samplerN > 1) %>%
+    dplyr::filter(drop != "LLR") %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType)) %>%
+    dplyr::filter(nfsr == 1) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio)
+
+  MultiratioSingleSamplerSingleRatio <- Inverts %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType),
+                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
+                                "LLR",
+                                "NoDrop")) %>%
+    dplyr::filter(nfsr > 1) %>%
+    dplyr::filter(samplerN == 1) %>%
+    dplyr::filter(drop != "LLR") %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType)) %>%
+    dplyr::filter(nfsr == 1) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup() %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio)
+
+  MultipleRatiosSingle <- Inverts %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType),
+                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
+                                "LLR",
+                                "NoDrop")) %>%
+    dplyr::filter(nfsr > 1) %>%
+    dplyr::filter(samplerN == 1) %>%
+    dplyr::filter(drop != "LLR") %>%
+    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
+                  samplerN = dplyr::n_distinct(SamplerType)) %>%
+    dplyr::filter(nfsr > 1) %>%
+    dplyr::group_by(SIDNO, LabSubsamplingRatio) %>%
+    dplyr::summarize(sumcount = sum(RawCount),
+                     .groups = 'drop') %>%
+    dplyr::mutate(prop1 = sumcount * LabSubsamplingRatio) %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(SIDNO) %>%
+    dplyr::summarize(count = sum(sumcount),
+                     fullprop = sum(prop1),
+                     .groups = 'drop') %>%
+    dplyr::mutate(LabSubsamplingRatio = fullprop / count) %>%
+    dplyr::select(SIDNO, LabSubsamplingRatio)
+
+  FieldLabRatios <- dplyr::bind_rows(SingleRatios, Multiratio, MultiratioSingleRatio,
+                                     MultiratioSingleSamplerSingleRatio,
+                                     MultipleRatiosSingle) %>%
+    left_join(Inverts %>%
+                dplyr::select(SIDNO, FieldSplitRatio) %>%
+                dplyr::group_by(SIDNO) %>%
+                dplyr::slice(1) %>%
+                dplyr::ungroup(),
+              by = "SIDNO"
+    )
+
+
   ### *** It is at this stage, we COULD filter for a given 'Lifestage'
   ### ( (blank), L [larvae], P [pupae], A [adult]);
   ### we will leave in ALL 'Lifestage' at this moment***
@@ -510,6 +637,16 @@ getInvertData <- function(dataType = "occur",
   TotalRows <- do.call(dplyr::bind_rows,list(Corrected_MixedRatios_FolsomSamplerOnly,
                                              Corrected_Gridded_LLRRemoved,
                                              Corrected_SingleRatios))
+
+  ##Replace the field and lab split ratios in TotalRows with the estimated ones
+  ##in FieldLabRatios
+
+
+  TotalRows$FieldSplitRatio <- FieldLabRatios$FieldSplitRatio[match(TotalRows$SIDNO,
+                             FieldLabRatios$SIDNO)]
+  TotalRows$LabSubsamplingRatio <- FieldLabRatios$LabSubsamplingRatio[match(TotalRows$SIDNO,
+                                       FieldLabRatios$SIDNO)]
+
 
   ###The above code, hypothetically, could be removed to a separate, hidden
   ## function. Would take a little bit of work, but could easily be done.
