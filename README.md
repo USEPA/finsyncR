@@ -8,7 +8,7 @@
 <!-- badges: end -->
 
 The goal of StreamData is to provide easy access and automated data
-management to USGS stream BioData, pesticide county use estimates, and
+management to USGS and EPA stream data, pesticide county use estimates, and
 measured water quality data.
 
 ## Installation

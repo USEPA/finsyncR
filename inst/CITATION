@@ -6,12 +6,13 @@ citEntry(
   author = personList(as.person("Michael Mahon"),
                                    as.person("Devin Jones"),
                                    as.person("Ethan Brown"),
+                                   as.person("Stefan Kunz"),
                                    as.person("Samantha Rumschlag")),
   year = "2021",
-  note        = "R package version 0.0.0.9",
+  note        = "R package version 0.0.0.9215",
  textVersion  =
-           paste("Michael Mahon, Devin Jones, Ethan Brown,",
+           paste("Michael Mahon, Devin Jones, Ethan Brown, Stefan Kunz,",
                  "Samantha Rumschlag (2021). StreamData: R Package to",
                  "Access Cleaned and Compiled USGS Biodata.",
-                 "R package version 0.0.0.9")
+                 "R package version 0.0.0.9215")
 )

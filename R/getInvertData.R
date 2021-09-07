@@ -6,8 +6,9 @@
 #'   \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
 #' @param taxonFix How to deal with changes in taxonomy across time, must
 #'   be one of: \code{"none"}, \code{"lump"}, \code{"remove"}.
-#' @param program The program name(s) that should be included in the output
-#'   dataset. See \code{Details} below for more information.
+#' @param agency The agency name(s) (e.g., "USGS" and "EPA") that should be
+#'   included in the output dataset. As of now, "USGS" must be present in the
+#'   agency vector. See \code{Details} below for more information.
 #' @param lifestage logical. Should the output dataset should include lifestage information for
 #'   each individual? \code{TRUE} or \code{FALSE}.
 #' @param rarefy logical. Should samples be standardized by the number of individuals
@@ -15,9 +16,6 @@
 #'   below for more information.
 #' @param seed numeric. Set seed for \code{rarefy} to get consistent results with every
 #'   iteration of the function.
-#' @param NRSA logical. Should EPA NRSA invertebrate samples be included in the
-#'   output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
-#'   below for more information.
 #' @param sharedTaxa logical. Should Genera be limited to those that appear in
 #'   both the NRSA and USGS datasets? \code{TRUE} or \code{FALSE}.
 #'
@@ -60,20 +58,20 @@
 #'   generate "slash" genera, but, it does not link these genera to larger linked
 #'   genera.
 #'
-#'   \code{program} refers to the local, regional, or national program project
-#'   for which data were originally collected. Because the National Water
-#'   Quality Assessment (NAWQA) contains the most standardized sampling methods,
-#'   we recommend using only the NAWQA dataset (set as default) for density and
-#'   abundance measures. If you want to use all datasets, set
-#'   \code{program = "ALL"}. Otherwise, \code{program} can be set to
-#'   \code{"National Water Quality Assessment"},
-#'   \code{"Cooperative Water Program"},
-#'   \code{"Collection of Basic Records"},
-#'   \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
-#'   (for example, \code{program = c("National Water Quality Assessment",
-#'   "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs).
-#'   If you choose program = "ALL", this only combines samples with SampleMethodCodes
-#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP".
+#'   \code{agency} refers to agency that collected the invertebrate samples. If
+#'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
+#'   For the "USGS" dataset, this includes all programs with SampleMethodCodes
+#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
+#'   includes "EPA", samples from the EPA National Stream and River
+#'   Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
+#'   (2000-2004) will be included. Note that from these samples, only moving
+#'   waters classified as "wadeable" are included and only samples that are
+#'   "reach-wide" are included. Some information included in the USGS dataset
+#'   are not included in the EPA datasets, and thus will appear as "NA".
+#'   Similar to the USGS data, there were inherent taxonomic issues with the
+#'   EPA data. As such, we have taken the same steps as described above under
+#'   \code{taxonFix} to address these concerns. NOTE: As of now, \code{agency}
+#'   must include "USGS". This will be fixed in future versions.
 #'
 #'   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
 #'   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
@@ -89,15 +87,6 @@
 #'   a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
 #'   the measure that you are interested in using.
 #'
-#'   If \code{NRSA = TRUE}, then samples from the EPA National Stream and River
-#'   Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
-#'   (2000-2004) will be included. Note that from these samples, only moving
-#'   waters classified as "wadeable" are included and only samples that are
-#'   "reach-wide" are included. Some information included in the NAWQA dataset
-#'   are not included in the EPA NRSA datasets, and thus will appear as "NA".
-#'   Similar to the NAWQA data, there were inherent taxonomic issues with the
-#'   NRSA data. As such, we have taken the same steps as described above under
-#'   \code{taxonFix} to address these concerns.
 #'
 #' @examples
 #' \dontrun{
@@ -113,10 +102,9 @@
 getInvertData <- function(dataType = "occur",
                           taxonLevel = "Genus",
                           taxonFix = "lump",
-                          program = "National Water Quality Assessment",
+                          agency = c("USGS", "EPA"),
                           lifestage = FALSE,
                           rarefy = TRUE,
-                          NRSA = FALSE,
                           sharedTaxa = FALSE,
                           seed = 0){
 
@@ -141,6 +129,10 @@ getInvertData <- function(dataType = "occur",
     stop('rarefy must be set to either TRUE or FALSE.')
   }
 
+  if(!any(grepl("USGS", agency))){
+    stop('agency must contain "USGS" at this time')
+  }
+
   Inverts <- utils::read.csv(base::unz(base::system.file("extdata",
                                                          "20201217.0749.InvertResults.zip",
                                                          package = "StreamData"),
@@ -156,13 +148,13 @@ getInvertData <- function(dataType = "occur",
                                                package = "StreamData"),
                              comment.char="#",
                              stringsAsFactors = FALSE)
-  if(program == "ALL") {
+
+  if(any(grepl("USGS", agency))) {
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
                   "Collection of Basic Records",
                   "Other Federal Agencies")
-  } else {database <- program }
-
+  }
 
   Inverts <- Inverts %>%
     dplyr::filter(ProjectLabel %in% (Project %>%
@@ -200,7 +192,6 @@ getInvertData <- function(dataType = "occur",
   ## understanding of the datasets, I believe it is best to go with
   ## "PublishedTaxonName" as the basis for the "SampleGrouping".
 
-  if(program == "ALL") {
   ## Need to get the SamplingMethodReference data from invertsamp
   invertSampleRef = utils::read.csv(system.file("extdata",
                                                 "20201217.0749.InvertSamp.csv",
@@ -225,8 +216,6 @@ getInvertData <- function(dataType = "occur",
 
   Inverts <- Inverts %>%
     dplyr::select(-SamplingMethodReference)
-
-  }
 
   Inverts <- Inverts %>%
     dplyr::filter(SampleTypeCode %in% c("IRTH", "BERW", "SWAMP",
@@ -268,6 +257,15 @@ getInvertData <- function(dataType = "occur",
                                                    PublishedTaxonNameLevel)
     )
 
+  ##Remove 8 samples with >1 Field Split Ratio, because samples are listed as
+  ##1 and 0.33; a sample cannot be split >1 time, so samples are being dropped
+  ##All 8 samples are from CCYK BioTDB
+
+  Inverts <- data.frame(Inverts %>%
+    group_by(SIDNO) %>%
+    mutate(nfsr = length(unique(FieldSplitRatio))) %>%
+    filter(nfsr < 2) %>%
+    ungroup())
 
   ### *** It is at this stage, we COULD filter for a given 'Lifestage'
   ### ( (blank), L [larvae], P [pupae], A [adult]);
@@ -864,7 +862,7 @@ getInvertData <- function(dataType = "occur",
     dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
 
 
-  if(isTRUE(NRSA)){
+  if(any(grepl("EPA", agency))){
 
     ##Read in datasets directly from EPA website
     NRSA_1819_inverts = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv",

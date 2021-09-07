@@ -1,7 +1,7 @@
 Package: StreamData
 Type: Package
 Title: R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group
-Version: 0.0.0.9214
+Version: 0.0.0.9215
 Authors@R:
     c(person(given = "Samantha",
            family = "Rumschlag",
@@ -18,13 +18,17 @@ Authors@R:
       person(given = "Ethan",
            family = "Brown",
            role = c("aut"),
-           email = "ebrown23@nd.edu")     
+           email = "ebrown23@nd.edu"),
+      person(given = "Stefan",
+           family = "Kunz",
+           role = c("aut"),
+           email = "stkunz@uni-landau.de"),
            )
 Maintainer: Michael Mahon <mmahon4@nd.edu>
 Description: For now, this R package is to be used only by members of the
     Powell Center working group led by Samantha Rumschlag. This R package
     provides functions to generate site by taxa matrices for macroinvertebrates,
-    fish, and algae from USGS BioData along with the pertinent sample- and
+    fish, and algae from USGS and EPA datasets along with the pertinent sample- and
     site-level information. Additionally, this R package provides functions to
     generate site-level information that may be of use in understanding the
     abiotic, contaminant, and land use drivers of dynamics of these communities.
