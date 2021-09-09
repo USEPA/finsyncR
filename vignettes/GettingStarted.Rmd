@@ -32,7 +32,7 @@ The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `
 
 Inverts <- getInvertData(dataType = "occur",
                          taxonLevel = "Genus",
-                         program = "National Water Quality Assessment",
+                         agency = "USGS",
                          lifestage = FALSE,
                          rarefy = TRUE,
                          seed = 11111)
@@ -86,7 +86,7 @@ Note: ~35 samples lacked the required standardization information. Therefore, if
 Fish <- getFishData(dataType = "abun",
                     taxonLevel = "Family",
                     program = "National Water Quality Assessment",
-                    standardize = TRUE)
+                    standardize = "none")
 
 head(Fish)[,1:35]
 

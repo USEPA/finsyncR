@@ -1,7 +1,7 @@
 Package: StreamData
 Type: Package
 Title: R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group
-Version: 0.0.0.9215
+Version: 0.0.0.9216
 Authors@R:
     c(person(given = "Samantha",
            family = "Rumschlag",
@@ -22,7 +22,7 @@ Authors@R:
       person(given = "Stefan",
            family = "Kunz",
            role = c("aut"),
-           email = "stkunz@uni-landau.de"),
+           email = "stkunz@uni-landau.de")
            )
 Maintainer: Michael Mahon <mmahon4@nd.edu>
 Description: For now, this R package is to be used only by members of the
@@ -44,7 +44,7 @@ Imports:
     utils,
     tidyselect (>= 1.1.0)
 Depends:
-    R (>= 2.10)
+    R (>= 3.5.0)
 Suggests: 
     knitr,
     rmarkdown

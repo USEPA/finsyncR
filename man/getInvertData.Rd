@@ -8,10 +8,9 @@ getInvertData(
   dataType = "occur",
   taxonLevel = "Genus",
   taxonFix = "lump",
-  program = "National Water Quality Assessment",
+  agency = c("USGS", "EPA"),
   lifestage = FALSE,
   rarefy = TRUE,
-  NRSA = FALSE,
   sharedTaxa = FALSE,
   seed = 0
 )
@@ -26,18 +25,15 @@ getInvertData(
 \item{taxonFix}{How to deal with changes in taxonomy across time, must
 be one of: \code{"none"}, \code{"lump"}, \code{"remove"}.}
 
-\item{program}{The program name(s) that should be included in the output
-dataset. See \code{Details} below for more information.}
+\item{agency}{The agency name(s) (e.g., "USGS" and "EPA") that should be
+included in the output dataset. As of now, "USGS" must be present in the
+agency vector. See \code{Details} below for more information.}
 
 \item{lifestage}{logical. Should the output dataset should include lifestage information for
 each individual? \code{TRUE} or \code{FALSE}.}
 
 \item{rarefy}{logical. Should samples be standardized by the number of individuals
 identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
-below for more information.}
-
-\item{NRSA}{logical. Should EPA NRSA invertebrate samples be included in the
-output of this function? \code{TRUE} or \code{FALSE}. See  \code{Details}
 below for more information.}
 
 \item{sharedTaxa}{logical. Should Genera be limited to those that appear in
@@ -89,20 +85,20 @@ Note: There are 81 sampling events (sampling location - collection
   generate "slash" genera, but, it does not link these genera to larger linked
   genera.
 
-  \code{program} refers to the local, regional, or national program project
-  for which data were originally collected. Because the National Water
-  Quality Assessment (NAWQA) contains the most standardized sampling methods,
-  we recommend using only the NAWQA dataset (set as default) for density and
-  abundance measures. If you want to use all datasets, set
-  \code{program = "ALL"}. Otherwise, \code{program} can be set to
-  \code{"National Water Quality Assessment"},
-  \code{"Cooperative Water Program"},
-  \code{"Collection of Basic Records"},
-  \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
-  (for example, \code{program = c("National Water Quality Assessment",
-  "Cooperative Water Program")} for both NAWQA and Cooperative Water Programs).
-  If you choose program = "ALL", this only combines samples with SampleMethodCodes
-  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP".
+  \code{agency} refers to agency that collected the invertebrate samples. If
+  you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
+  For the "USGS" dataset, this includes all programs with SampleMethodCodes
+  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
+  includes "EPA", samples from the EPA National Stream and River
+  Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
+  (2000-2004) will be included. Note that from these samples, only moving
+  waters classified as "wadeable" are included and only samples that are
+  "reach-wide" are included. Some information included in the USGS dataset
+  are not included in the EPA datasets, and thus will appear as "NA".
+  Similar to the USGS data, there were inherent taxonomic issues with the
+  EPA data. As such, we have taken the same steps as described above under
+  \code{taxonFix} to address these concerns. NOTE: As of now, \code{agency}
+  must include "USGS". This will be fixed in future versions.
 
   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
@@ -117,16 +113,6 @@ Note: There are 81 sampling events (sampling location - collection
   occurrence data (presence/absence) OR proportional data (each taxon represents
   a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
   the measure that you are interested in using.
-
-  If \code{NRSA = TRUE}, then samples from the EPA National Stream and River
-  Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
-  (2000-2004) will be included. Note that from these samples, only moving
-  waters classified as "wadeable" are included and only samples that are
-  "reach-wide" are included. Some information included in the NAWQA dataset
-  are not included in the EPA NRSA datasets, and thus will appear as "NA".
-  Similar to the NAWQA data, there were inherent taxonomic issues with the
-  NRSA data. As such, we have taken the same steps as described above under
-  \code{taxonFix} to address these concerns.
 }
 \examples{
 \dontrun{

@@ -129,6 +129,14 @@ getInvertData <- function(dataType = "occur",
     stop('rarefy must be set to either TRUE or FALSE.')
   }
 
+  if(rarefy == TRUE && dataType == "abun"){
+    stop('rarefy must be set to FALSE when requesting abundance data')
+  }
+
+  if(rarefy == FALSE && dataType == "occur"){
+    warning('rarefy should be set to TRUE when requesting occurrence data')
+  }
+
   if(!any(grepl("USGS", agency))){
     stop('agency must contain "USGS" at this time')
   }
@@ -262,10 +270,11 @@ getInvertData <- function(dataType = "occur",
   ##All 8 samples are from CCYK BioTDB
 
   Inverts <- data.frame(Inverts %>%
-    group_by(SIDNO) %>%
-    mutate(nfsr = length(unique(FieldSplitRatio))) %>%
-    filter(nfsr < 2) %>%
-    ungroup())
+                          dplyr::group_by(SIDNO) %>%
+                          dplyr::mutate(nfsr = length(unique(FieldSplitRatio))) %>%
+                          dplyr::filter(nfsr < 2) %>%
+                          dplyr::ungroup() %>%
+                          dplyr::select(-nfsr))
 
   ##Generate proportional mean labsubsampling ratios for samples with multiple
   ##labsaubsampling ratios; add these to those samples with single labsubsampling
@@ -1171,6 +1180,37 @@ getInvertData <- function(dataType = "occur",
                                  "Cricotopus/Orthocladius",
                                  NRSA_inverts$GENUS)
 
+    ##Incorporate abundance conversions here
+    if(dataType == "abun"){
+      ##Read in the density conversion dataset from the EPA
+      NRSADenconv <- utils::read.csv(base::system.file("extdata",
+                                                  "EPA_DensityConv.csv",
+                                                  package = "StreamData"),
+                      colClasses = c("SITE_ID" = "character"),
+                      stringsAsFactors = FALSE) %>%
+        dplyr::select(-ABUNDCNT, -TOTLDENS, -UNIQUE_ID)
+
+      ##Pair down the EPA dataset to only those site-year-visit_no combinations
+      ##that appear in the NRSA_inverts dataset
+      NRSADenconv <- NRSADenconv[which((paste(NRSADenconv$SITE_ID,
+                                              NRSADenconv$YEAR,
+                                              NRSADenconv$VISIT_NO,
+                                              sep = "_") %in%
+                                          paste(NRSA_inverts$SITE_ID,
+                                                NRSA_inverts$YEAR,
+                                                NRSA_inverts$VISIT_NO,
+                                                sep = "_"))),]
+
+      ##Join the datasets together; convert TOTAL to density, using the
+      ##DenAbunRatio; multiple this by 10.76 to convert from ind ft^-2 to ind m^-2
+      ##Remove the DenAbunRatio from the final dataset; and output
+      NRSA_inverts <- NRSA_inverts %>%
+        dplyr::left_join(NRSADenconv, by = c("SITE_ID", "YEAR", "VISIT_NO")) %>%
+        dplyr::mutate(TOTAL = round(TOTAL * DenAbunRatio * 10.76, 4)) %>%
+        dplyr::select(-DenAbunRatio)
+
+    }
+
     ##Second step:
     ##Rarefy samples to 300 in the same manner as the NAQWA data for consistency
     if(isTRUE(rarefy)) {
@@ -1430,7 +1470,8 @@ getInvertData <- function(dataType = "occur",
       ) %>%
       dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
                     -SITE_ID, -MASTER_SITEID, -UID, -UNIQUEID, -DATE_COL,
-                    -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO) %>%
+                    -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO,
+                    -AG_ECO9, -NRS13_URBN, -RT_NRSA) %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 
     ##To make sure the NRSA sites are correct crosswalked across sampling rounds
@@ -1478,6 +1519,7 @@ getInvertData <- function(dataType = "occur",
       dplyr::relocate(tidyselect::any_of(colnames(invert_comms1)))
 
     invert_comms1 <- dplyr::bind_rows(invert_comms1, nrsa_comms1)
+
     invert_comms1 = invert_comms1 %>%
       dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
                                   ~ifelse(is.na(.x),
