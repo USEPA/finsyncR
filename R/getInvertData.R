@@ -90,7 +90,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' Inverts <- getInvertData(taxonLevel = "Family")
+#' Inverts <- getInvertData(taxonLevel = "Genus")
 #'
 #' RarefyInverts <- getInvertData(taxonLevel = "Genus",
 #'                                rarefy = TRUE,
@@ -655,7 +655,7 @@ getInvertData <- function(dataType = "occur",
                              FieldLabRatios$SIDNO)]
   TotalRows$LabSubsamplingRatio <- FieldLabRatios$LabSubsamplingRatio[match(TotalRows$SIDNO,
                                        FieldLabRatios$SIDNO)]
-
+  TotalRows$PercentCount = TotalRows$FieldSplitRatio * TotalRows$LabSubsamplingRatio
 
   ###The above code, hypothetically, could be removed to a separate, hidden
   ## function. Would take a little bit of work, but could easily be done.
@@ -975,7 +975,8 @@ getInvertData <- function(dataType = "occur",
                                           "PublishedSortOrder", "BioDataTaxonName", "BioDataShortName",
                                           "BenchTaxonName", "BenchTaxonNameReferenceCode",
                                           "AdjRawCount", "Abundance",
-                                          "UniqueTaxonFlag",
+                                          "UniqueTaxonFlag", "FieldSplitRatio",
+                                          "LabSubsamplingRatio",
                                           "TargetLevelNotReachedReason", "Artifact", "BenchNotes",
                                           "TaxonRecordSource", "IdentificationDate",
                                           "VerificationEntity", "VerificationDate", "CurationEntity",
@@ -995,7 +996,8 @@ getInvertData <- function(dataType = "occur",
 
   if(dataType == "abun"){
     invert_comms1 = invert_comms1 %>%
-      dplyr::filter(!is.na(AreaSampTot_m2))
+      dplyr::filter(!is.na(AreaSampTot_m2)) %>%
+      dplyr::filter(AreaSampTot_m2 != 0)
   }
 
 
@@ -1003,8 +1005,8 @@ getInvertData <- function(dataType = "occur",
     dplyr::select(-Identifier,
                   -SIDNO,
                   -ReleaseCategory) %>%
-    dplyr::relocate(tidyselect::any_of(c(StreamData:::.ReorderUSGSBioDataColNames,
-                                       "FieldSplitRatio", "LabSubsamplingRatio"))) %>%
+    dplyr::relocate(tidyselect::any_of(c(StreamData:::.ReorderUSGSBioDataColNames[-26],
+                                       "PercentCount", "AreaSampTot_m2"))) %>%
     dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
 
 
@@ -1206,8 +1208,7 @@ getInvertData <- function(dataType = "occur",
       ##Remove the DenAbunRatio from the final dataset; and output
       NRSA_inverts <- NRSA_inverts %>%
         dplyr::left_join(NRSADenconv, by = c("SITE_ID", "YEAR", "VISIT_NO")) %>%
-        dplyr::mutate(TOTAL = round(TOTAL * DenAbunRatio * 10.76, 4)) %>%
-        dplyr::select(-DenAbunRatio)
+        dplyr::mutate(TOTAL = round(((TOTAL * PCTCOUNT) / NUMTRANS) * 10.76, 4))
 
     }
 
@@ -1466,12 +1467,14 @@ getInvertData <- function(dataType = "occur",
                     GeomorphicChannelUnit = NA,
                     ChannelBoundaries = NA,
                     ChannelFeatures = NA,
-                    ReplicateType  = NA
+                    ReplicateType  = NA,
+                    PercentCount = PCTCOUNT,
+                    AreaSampTot_m2 = round(NUMTRANS / 10.76, 3)
       ) %>%
       dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
                     -SITE_ID, -MASTER_SITEID, -UID, -UNIQUEID, -DATE_COL,
                     -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO,
-                    -AG_ECO9, -NRS13_URBN, -RT_NRSA) %>%
+                    -AG_ECO9, -NRS13_URBN, -RT_NRSA, -PCTCOUNT, -NUMTRANS) %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 
     ##To make sure the NRSA sites are correct crosswalked across sampling rounds
@@ -1534,6 +1537,12 @@ getInvertData <- function(dataType = "occur",
       dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
                                   ~replace(., . > 0, 1)))
   }
+
+  invert_comms1$CollectionDate = as.Date(invert_comms1$CollectionDayOfYear,
+          origin = paste(invert_comms1$CollectionYear-1,
+                         '12-31',
+                         sep = "-"))
+
 
   ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
