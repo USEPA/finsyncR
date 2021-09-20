@@ -1182,32 +1182,36 @@ getInvertData <- function(dataType = "occur",
                                  "Cricotopus/Orthocladius",
                                  NRSA_inverts$GENUS)
 
+    ##Read in the density conversion dataset from the EPA
+    NRSADenconv <- utils::read.csv(base::system.file("extdata",
+                                                     "EPA_DensityConv.csv",
+                                                     package = "StreamData"),
+                                   colClasses = c("SITE_ID" = "character"),
+                                   stringsAsFactors = FALSE) %>%
+      dplyr::select(-ABUNDCNT, -TOTLDENS, -UNIQUE_ID)
+
+    ##Pair down the EPA dataset to only those site-year-visit_no combinations
+    ##that appear in the NRSA_inverts dataset
+    NRSADenconv <- NRSADenconv[which((paste(NRSADenconv$SITE_ID,
+                                            NRSADenconv$YEAR,
+                                            NRSADenconv$VISIT_NO,
+                                            sep = "_") %in%
+                                        paste(NRSA_inverts$SITE_ID,
+                                              NRSA_inverts$YEAR,
+                                              NRSA_inverts$VISIT_NO,
+                                              sep = "_"))),]
+
+
+    NRSA_inverts <- NRSA_inverts %>%
+      dplyr::left_join(NRSADenconv, by = c("SITE_ID", "YEAR", "VISIT_NO"))
     ##Incorporate abundance conversions here
     if(dataType == "abun"){
-      ##Read in the density conversion dataset from the EPA
-      NRSADenconv <- utils::read.csv(base::system.file("extdata",
-                                                  "EPA_DensityConv.csv",
-                                                  package = "StreamData"),
-                      colClasses = c("SITE_ID" = "character"),
-                      stringsAsFactors = FALSE) %>%
-        dplyr::select(-ABUNDCNT, -TOTLDENS, -UNIQUE_ID)
 
-      ##Pair down the EPA dataset to only those site-year-visit_no combinations
-      ##that appear in the NRSA_inverts dataset
-      NRSADenconv <- NRSADenconv[which((paste(NRSADenconv$SITE_ID,
-                                              NRSADenconv$YEAR,
-                                              NRSADenconv$VISIT_NO,
-                                              sep = "_") %in%
-                                          paste(NRSA_inverts$SITE_ID,
-                                                NRSA_inverts$YEAR,
-                                                NRSA_inverts$VISIT_NO,
-                                                sep = "_"))),]
 
       ##Join the datasets together; convert TOTAL to density, using the
       ##DenAbunRatio; multiple this by 10.76 to convert from ind ft^-2 to ind m^-2
       ##Remove the DenAbunRatio from the final dataset; and output
       NRSA_inverts <- NRSA_inverts %>%
-        dplyr::left_join(NRSADenconv, by = c("SITE_ID", "YEAR", "VISIT_NO")) %>%
         dplyr::mutate(TOTAL = round(((TOTAL * PCTCOUNT) / NUMTRANS) * 10.76, 4))
 
     }
