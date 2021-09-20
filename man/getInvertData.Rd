@@ -116,7 +116,7 @@ Note: There are 81 sampling events (sampling location - collection
 }
 \examples{
 \dontrun{
-Inverts <- getInvertData(taxonLevel = "Family")
+Inverts <- getInvertData(taxonLevel = "Genus")
 
 RarefyInverts <- getInvertData(taxonLevel = "Genus",
                                rarefy = TRUE,
