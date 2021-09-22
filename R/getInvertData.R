@@ -655,7 +655,7 @@ getInvertData <- function(dataType = "occur",
                              FieldLabRatios$SIDNO)]
   TotalRows$LabSubsamplingRatio <- FieldLabRatios$LabSubsamplingRatio[match(TotalRows$SIDNO,
                                        FieldLabRatios$SIDNO)]
-  TotalRows$PercentCount = TotalRows$FieldSplitRatio * TotalRows$LabSubsamplingRatio
+  TotalRows$PropID = TotalRows$FieldSplitRatio * TotalRows$LabSubsamplingRatio
 
   ###The above code, hypothetically, could be removed to a separate, hidden
   ## function. Would take a little bit of work, but could easily be done.
@@ -936,7 +936,7 @@ getInvertData <- function(dataType = "occur",
                               "PublishedSortOrder", "BioDataTaxonName", "BioDataShortName",
                               "BenchTaxonName", "BenchTaxonNameReferenceCode",
                               "AdjRawCount", "Abundance",
-                              "FieldSplitRatio", "LabSubsamplingRatio", "UniqueTaxonFlag",
+                              "UniqueTaxonFlag",
                               "TargetLevelNotReachedReason", "Artifact", "BenchNotes",
                               "TaxonRecordSource", "IdentificationDate",
                               "VerificationEntity", "VerificationDate", "CurationEntity",
@@ -975,8 +975,7 @@ getInvertData <- function(dataType = "occur",
                                           "PublishedSortOrder", "BioDataTaxonName", "BioDataShortName",
                                           "BenchTaxonName", "BenchTaxonNameReferenceCode",
                                           "AdjRawCount", "Abundance",
-                                          "UniqueTaxonFlag", "FieldSplitRatio",
-                                          "LabSubsamplingRatio",
+                                          "UniqueTaxonFlag",
                                           "TargetLevelNotReachedReason", "Artifact", "BenchNotes",
                                           "TaxonRecordSource", "IdentificationDate",
                                           "VerificationEntity", "VerificationDate", "CurationEntity",
@@ -1006,7 +1005,8 @@ getInvertData <- function(dataType = "occur",
                   -SIDNO,
                   -ReleaseCategory) %>%
     dplyr::relocate(tidyselect::any_of(c(StreamData:::.ReorderUSGSBioDataColNames[-26],
-                                       "PercentCount", "AreaSampTot_m2"))) %>%
+                                       "FieldSplitRatio", "LabSubsamplingRatio",
+                                       "PropID", "AreaSampTot_m2"))) %>%
     dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
 
 
@@ -1212,7 +1212,7 @@ getInvertData <- function(dataType = "occur",
       ##DenAbunRatio; multiple this by 10.76 to convert from ind ft^-2 to ind m^-2
       ##Remove the DenAbunRatio from the final dataset; and output
       NRSA_inverts <- NRSA_inverts %>%
-        dplyr::mutate(TOTAL = round(((TOTAL * PCTCOUNT) / NUMTRANS) * 10.76, 4))
+        dplyr::mutate(TOTAL = round(((TOTAL / PCTCOUNT) / NUMTRANS) * 10.76, 4))
 
     }
 
@@ -1472,7 +1472,9 @@ getInvertData <- function(dataType = "occur",
                     ChannelBoundaries = NA,
                     ChannelFeatures = NA,
                     ReplicateType  = NA,
-                    PercentCount = PCTCOUNT,
+                    FieldSplitRatio = NA,
+                    LabSubsamplingRatio = NA,
+                    PropID = PCTCOUNT,
                     AreaSampTot_m2 = round(NUMTRANS / 10.76, 3)
       ) %>%
       dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
