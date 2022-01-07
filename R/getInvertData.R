@@ -1016,7 +1016,7 @@ getInvertData <- function(dataType = "occur",
     NRSA_1819_inverts = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv",
                                  colClasses = c("UID" = "character"),
                                  stringsAsFactors = FALSE)
-    NRSA_1819_sites = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_site_information_-_data.csv",
+    NRSA_1819_sites = read.csv("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
                                colClasses = c("UID" = "character"),
                                stringsAsFactors = FALSE)
 
