@@ -281,14 +281,22 @@ getInvertData <- function(dataType = "occur",
   ##ratios; add fieldsplitratios to this;
   ##output the full dataset to be combined later in dataset
 
-  Multiratio <- Inverts %>%
+  ##Generate a Ratios dataset, to reduce code repitition
+  Ratios <- Inverts %>%
     dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
     dplyr::group_by(SIDNO) %>%
+    # find the number of unique LSSR and SamplerTypes per SIDNO,
+    # if number of LSSR is > 1 and the observation's LSSR is 1, this is a Lab Large Rare
+    # These need to be dropped
     dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
                   samplerN = dplyr::n_distinct(SamplerType),
                   drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
                                 "LLR",
-                                "NoDrop")) %>%
+                                "NoDrop"))
+
+  ##Code to get LabSubsamplingRatio when there were multiple LSSR and sampler
+  ## types per SIDNO, but multiple ratios after LLR were removed
+  Multiratio <-  Ratios %>%
     dplyr::filter(nfsr > 1) %>%
     dplyr::filter(samplerN > 1) %>%
     dplyr::filter(drop != "LLR") %>%
@@ -307,14 +315,8 @@ getInvertData <- function(dataType = "occur",
     dplyr::mutate(LabSubsamplingRatio = fullprop / count) %>%
     dplyr::select(SIDNO, LabSubsamplingRatio)
 
-  SingleRatios = Inverts %>%
-    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
-    dplyr::group_by(SIDNO) %>%
-    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
-                  samplerN = dplyr::n_distinct(SamplerType),
-                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
-                                "LLR",
-                                "NoDrop")) %>%
+  ##Code to get LabSubsamplingRatio when there were single LSSR per SIDNO
+  SingleRatios = Ratios %>%
     dplyr::filter(nfsr == 1) %>%
     dplyr::filter(drop != "LLR") %>%
     dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
@@ -325,14 +327,9 @@ getInvertData <- function(dataType = "occur",
     dplyr::ungroup() %>%
     dplyr::select(SIDNO, LabSubsamplingRatio)
 
-  MultiratioSingleRatio <- Inverts %>%
-    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
-    dplyr::group_by(SIDNO) %>%
-    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
-                  samplerN = dplyr::n_distinct(SamplerType),
-                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
-                                "LLR",
-                                "NoDrop")) %>%
+  ##Code to get LabSubsamplingRatio when there were multiple LSSR and sampler
+  ## types per SIDNO, but a single ratio after LLR were removed
+  MultiratioSingleRatio <- Ratios %>%
     dplyr::filter(nfsr > 1) %>%
     dplyr::filter(samplerN > 1) %>%
     dplyr::filter(drop != "LLR") %>%
@@ -345,14 +342,9 @@ getInvertData <- function(dataType = "occur",
     dplyr::ungroup() %>%
     dplyr::select(SIDNO, LabSubsamplingRatio)
 
-  MultiratioSingleSamplerSingleRatio <- Inverts %>%
-    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
-    dplyr::group_by(SIDNO) %>%
-    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
-                  samplerN = dplyr::n_distinct(SamplerType),
-                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
-                                "LLR",
-                                "NoDrop")) %>%
+  ##Code to get LabSubsamplingRatio when there were multiple LSSR per SIDNO,
+  ## and single sampler type, but single ratio after LLR were removed
+  MultiratioSingleSamplerSingleRatio <- Ratios %>%
     dplyr::filter(nfsr > 1) %>%
     dplyr::filter(samplerN == 1) %>%
     dplyr::filter(drop != "LLR") %>%
@@ -365,14 +357,9 @@ getInvertData <- function(dataType = "occur",
     dplyr::ungroup() %>%
     dplyr::select(SIDNO, LabSubsamplingRatio)
 
-  MultipleRatiosSingle <- Inverts %>%
-    dplyr::select(SIDNO, LabSubsamplingRatio, SamplerType, RawCount) %>%
-    dplyr::group_by(SIDNO) %>%
-    dplyr::mutate(nfsr = length(unique(LabSubsamplingRatio)),
-                  samplerN = dplyr::n_distinct(SamplerType),
-                  drop = ifelse(nfsr > 1 & LabSubsamplingRatio == 1,
-                                "LLR",
-                                "NoDrop")) %>%
+  ##Code to get LabSubsamplingRatio when there were multiple ratios per SIDNO,
+  ##but a multiple ratios with 1 sampler type after LLR were removed
+  MultipleRatiosSingle <- Ratios %>%
     dplyr::filter(nfsr > 1) %>%
     dplyr::filter(samplerN == 1) %>%
     dplyr::filter(drop != "LLR") %>%
@@ -391,6 +378,7 @@ getInvertData <- function(dataType = "occur",
     dplyr::mutate(LabSubsamplingRatio = fullprop / count) %>%
     dplyr::select(SIDNO, LabSubsamplingRatio)
 
+  ##rbind all back together and join to the Inverts Field Split Ratio data
   FieldLabRatios <- dplyr::bind_rows(SingleRatios, Multiratio, MultiratioSingleRatio,
                                      MultiratioSingleSamplerSingleRatio,
                                      MultipleRatiosSingle) %>%
@@ -402,14 +390,7 @@ getInvertData <- function(dataType = "occur",
               by = "SIDNO"
     )
 
-
-  ### *** It is at this stage, we COULD filter for a given 'Lifestage'
-  ### ( (blank), L [larvae], P [pupae], A [adult]);
-  ### we will leave in ALL 'Lifestage' at this moment***
-  ### *** We will HAVE TO include 'Lifestage' within our unique identifiers for
-  ### each site, as not to lose this level of detail for analyses***
-
-
+  ## Generate the actual abundance data to be used for the site x species matrix
   ## We now have to clean the data for sites that used a Folsom Sampler that
   ## identified invertebrates with multiple 'LabSubsamplingRatio'
   ### IF n_distinct(LabSubsamplingRatio) == 1, then the sample was either fully
@@ -526,7 +507,6 @@ getInvertData <- function(dataType = "occur",
   ## which we will then place the 'SummedAbundance' value in
   ## To not overwrite the previous step so we can always modify later
   ## Replacing the 'Abundance' value with the 'SummedAbundance' value
-
 
   SumGridLLRData2 = suppressWarnings({SumGridLLRData %>%
       dplyr::select(-"LabRecordID", -"NWQLSubsamplingCode", -"Ratio",
@@ -649,7 +629,7 @@ getInvertData <- function(dataType = "occur",
 
   ##Replace the field and lab split ratios in TotalRows with the estimated ones
   ##in FieldLabRatios
-
+  ##PropID (Proportion of field sample identified is the FieldSplitRatio * LSSR)
 
   TotalRows$FieldSplitRatio <- FieldLabRatios$FieldSplitRatio[match(TotalRows$SIDNO,
                              FieldLabRatios$SIDNO)]
@@ -657,17 +637,13 @@ getInvertData <- function(dataType = "occur",
                                        FieldLabRatios$SIDNO)]
   TotalRows$PropID = TotalRows$FieldSplitRatio * TotalRows$LabSubsamplingRatio
 
-  ###The above code, hypothetically, could be removed to a separate, hidden
-  ## function. Would take a little bit of work, but could easily be done.
-
   ###At this point, we need to join information on stream, site, and sample (?)
   ## information
   ### Need to get sampled area from the Sample dataset
   ###Then, we need to pivot_wider, filter based on taxon level, remove excess
   ## columns, and change the data type
-  ###Can use code from the "getAlgaeData" function to work on this portion.
-  ###Need to add a section for Lifestage "T/F"; if true count separately, if false count together
 
+  ##Gather sample information
   invertsamp = utils::read.csv(system.file("extdata",
                                            "20201217.0749.InvertSamp.csv",
                                            package = "StreamData"),
@@ -681,6 +657,7 @@ getInvertData <- function(dataType = "occur",
                   ChannelBoundaries,
                   ChannelFeatures)
 
+  ##Gather Sample inventory information (specifically, just replicate type)
   invertsampinv = utils::read.csv(system.file("extdata",
                                               "20201217.0749.SampleInv.csv",
                                               package = "StreamData"),
@@ -690,7 +667,7 @@ getInvertData <- function(dataType = "occur",
     dplyr::select(SIDNO,
                   ReplicateType)
 
-
+  ##Gather site level information
   invertsite = utils::read.csv(system.file("extdata",
                                            "20201217.0749.SiteInfo.csv",
                                            package = "StreamData"),
@@ -706,6 +683,7 @@ getInvertData <- function(dataType = "occur",
                   CountyFIPSCode,
                   StateFIPSCode)
 
+  ##Join all of the site, sample, and inventory information together
   invertsampinfo = dplyr::left_join(dplyr::left_join(invertsamp,
                                                      invertsampinv,
                                                      by = "SIDNO"),
@@ -715,17 +693,22 @@ getInvertData <- function(dataType = "occur",
     dplyr::mutate(CountyFIPSCode = sprintf("%03d", CountyFIPSCode),
                   StateFIPSCode = sprintf("%02d", StateFIPSCode))
 
+  ##Join the abundance data with the sample/site/inventory information
   TotalRows = dplyr::left_join(TotalRows,
                                invertsampinfo,
                                by = "SIDNO")
 
+  ##These are the column names that should be removed (mycols) and which rows
+  ##of data should be retained based on taxonomic resolution
+  ##(eg if taxonLevel == "Family", retain ALL taxonomic levels at Family and Below)
   mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
   taxcols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
 
+  ##Before any final data manipulation, if dataset is occurence and rarify is true
+  ##then rarify based on the RAWCOUNT (individuals actually identified)
   if(dataType == "occur"){
     if(isTRUE(rarefy)) {
       set.seed(seed)
-
       TotalRows = TotalRows %>%
         dplyr::group_by(SIDNO) %>%
         dplyr::mutate(indcounted = sum(RawCount)) %>%
@@ -744,10 +727,6 @@ getInvertData <- function(dataType = "occur",
         dplyr::ungroup()
     } else {}
   }   else {}
-
-
-
-  ##SLR - ADD OPTIONS TO 1) GROUP PROBLEMATIC IDENTIFICATIONS OR 2) THROW OUT PROBLEMATIC OBSERVATION WITH MISSING SPP DATA
 
   #create variable taxonFix = none, lump, remove
   #none = no change, lump = lump genera through time, remove = remove observation only if spp. level ID does not exist
@@ -779,10 +758,6 @@ getInvertData <- function(dataType = "occur",
   dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
                                                  StreamData:::.clust_labels$genus),]$group
 
-
-
-
-
   #There are some problems here, since there are multiple "slash" genera per
   #individual genus, so need to lump these
   #Select those genera that appear in >1 "slash" genera
@@ -811,8 +786,6 @@ getInvertData <- function(dataType = "occur",
   fix_slash <- dplyr::bind_rows(probslashl)
 
   ##Fix a naming issue; going to make sure this is fixed.
-
-
 
   ##Remove all observations with an NA for the group in dat1 (does not appear in
   ## clust_labels); then take 1 observation for each slash genus and generate
@@ -857,7 +830,7 @@ getInvertData <- function(dataType = "occur",
 
   if(taxonFix == "none"){
 
-  }else if(taxonFix == "lump"){
+  } else if(taxonFix == "lump"){
 
     #If genera that are one of genera in dat1, rename the Genus with the slash
     #label from dat1, else, keep the original Genus label
@@ -929,6 +902,7 @@ getInvertData <- function(dataType = "occur",
       dplyr::mutate(Density = ifelse(is.na(AreaSampTot_m2),
                                         NA,
                                         Abundance / AreaSampTot_m2)) %>%
+      ##Remvoe these rows of data (not needed)
       dplyr::select(-any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
                               "LabComponent", "LabProcName",
                               "Density_m2",
@@ -955,7 +929,7 @@ getInvertData <- function(dataType = "occur",
                          values_fill = 0)
 
   } else {
-    #All species are one
+    #All lifestages are one species
     invert_comms1 = TotalRows %>%
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols) %>%
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
@@ -968,6 +942,7 @@ getInvertData <- function(dataType = "occur",
       dplyr::mutate(Density = ifelse(is.na(AreaSampTot_m2),
                                      NA,
                                      Abundance / AreaSampTot_m2)) %>%
+      ##Drop these values
       dplyr::select(-tidyselect::any_of(c("LabOrderID", "LabRecordID", "FieldComponent",
                                           "LabComponent", "LabProcName",
                                           "Density_m2",
@@ -993,13 +968,15 @@ getInvertData <- function(dataType = "occur",
                          values_fill = 0)
   }
 
+  ##If datatype is abundance, remove all instances of when areasampled total is
+  ##not recorded OR is equal to 0
   if(dataType == "abun"){
     invert_comms1 = invert_comms1 %>%
       dplyr::filter(!is.na(AreaSampTot_m2)) %>%
       dplyr::filter(AreaSampTot_m2 != 0)
   }
 
-
+  ##site x species matrix, select only those columns that we need
   invert_comms1 = invert_comms1 %>%
     dplyr::select(-Identifier,
                   -SIDNO,
@@ -1012,7 +989,8 @@ getInvertData <- function(dataType = "occur",
 
   if(any(grepl("EPA", agency))){
 
-    ##Read in datasets directly from EPA website
+    ##Read in datasets directly from EPA website - may want a more stable source
+    ##in the future (github repo?)
     NRSA_1819_inverts = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv",
                                  colClasses = c("UID" = "character"),
                                  stringsAsFactors = FALSE)
@@ -1207,7 +1185,6 @@ getInvertData <- function(dataType = "occur",
     ##Incorporate abundance conversions here
     if(dataType == "abun"){
 
-
       ##Join the datasets together; convert TOTAL to density, using the
       ##DenAbunRatio; multiple this by 10.76 to convert from ind ft^-2 to ind m^-2
       ##Remove the DenAbunRatio from the final dataset; and output
@@ -1290,7 +1267,6 @@ getInvertData <- function(dataType = "occur",
     ##taxonLevel that is in all caps
     taxonLevel.nrsa <- base::toupper(taxonLevel)
 
-
     if(isTRUE(sharedTaxa)){
       ##List of NAWQA Genera
       NAWQAgenera <- unique(TotalRows$Genus)
@@ -1326,8 +1302,6 @@ getInvertData <- function(dataType = "occur",
                "CLASS",
                "ORDER",
                "FAMILY")
-
-
 
     nrsa_comms1 = NRSA_inverts %>%
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel.nrsa)), dplyr::any_vars(. != "")) %>%
@@ -1537,7 +1511,6 @@ getInvertData <- function(dataType = "occur",
 
   } else{ }
 
-
   if(dataType == "occur") {
     invert_comms1 = invert_comms1 %>%
       dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
@@ -1549,10 +1522,8 @@ getInvertData <- function(dataType = "occur",
                          '12-31',
                          sep = "-"))
 
-
   ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
-
 
   return(data.frame(invert_comms1))
 
