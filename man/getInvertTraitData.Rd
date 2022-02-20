@@ -44,11 +44,7 @@ Or in wide format, where each Trait group
 is a separate column with individual traits displayed as categories.
 For the Vieira dataset traits are displayed in wideformat with trait groups
 as columns and traits as categories, or if \code{"binary"} is specified,
-catgeorical traits are transformed to binary coding. Setting \code{format}.
-Currently, for the Vieira database, all information that is not categorical and that
-is which is rather a comment than a trait is removed for now.
-This inlcudes e.g. information on ecological preferences (02),
-water body types, and development patterns.
+catgeorical traits are transformed to binary coding. Setting \code{format}
 to \code{"wide"} and \code{database} to \code{"Vieira"} does not affect
 the data processing of the \code{"Vieira"} trait database.
 If \code{"binary"} is specified, column names
