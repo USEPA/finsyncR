@@ -33,11 +33,7 @@
 #' is a separate column with individual traits displayed as categories.
 #' For the Vieira dataset traits are displayed in wideformat with trait groups
 #' as columns and traits as categories, or if \code{"binary"} is specified,
-#' catgeorical traits are transformed to binary coding. Setting \code{format}.
-#' Currently, for the Vieira database, all information that is not categorical and that
-#' is which is rather a comment than a trait is removed for now.
-#' This inlcudes e.g. information on ecological preferences (02),
-#' water body types, and development patterns.
+#' catgeorical traits are transformed to binary coding. Setting \code{format}
 #' to \code{"wide"} and \code{database} to \code{"Vieira"} does not affect
 #' the data processing of the \code{"Vieira"} trait database.
 #' If \code{"binary"} is specified, column names
@@ -70,34 +66,31 @@ getInvertTraitData <- function(database = "Conus",
     if (database == "Vieira" || database == "Both") {
         TraitDB_Vieira <- readRDS(
             file = base::system.file("extdata",
-                "Traits_Vieira_pp.rds",
-                package = "StreamData"
-            )
+                                     "Traits_Vieira_pp.rds",
+                                     package = "StreamData")
         )
 
         # remove a few columns that contain additional information
         # TODO: Could be put into an additionald data.frame and be returned
         # as metainformation
         # (includes also information on water body type)
-        rm_col <- grep("(?i)Study.*|comment.*|TraitRecord.*|^Adult$|Data.*|WB.*|Morph.*|Dev.*",
-            names(TraitDB_Vieira),
-            value = TRUE
-        )
+        rm_col <-
+            grep(
+                "(?i)Study.*|comment.*|TraitRecord.*|^Adult$|Data.*|WB.*|Morph.*|Dev.*",
+                names(TraitDB_Vieira),
+                value = TRUE
+            )
         TraitDB_Vieira[, (rm_col) := NULL]
-        # Also information that is not categrocial is removed (for now)
-        # This includes information on water body type or certain
-        # environmental preferences (O2, etc.)
-        # TODO: Fix at a later stage
-        TraitDB_Vieira <- Filter(is.character, TraitDB_Vieira)
 
         # unique_id needed for duplicates
-        # TODO: There's a warning from data.table produced here,
-        # which can be igrnores for now
-        TraitDB_Vieira[, unique_id := 1:nrow(TraitDB_Vieira)]
+        TraitDB_Vieira[, unique_id := paste0("id_", 1:nrow(TraitDB_Vieira))]
+
+        # categorical traits converted into binary
         if (database != "Both") {
             if (format == "binary") {
+                char_cols <- names(Filter(is.character, TraitDB_Vieira))
                 TraitDB_Vieira_lf <- data.table::melt(
-                    data = TraitDB_Vieira,
+                    data = TraitDB_Vieira[, .SD, .SDcols = char_cols],
                     id.vars = c(
                         "Species",
                         "Genus",
@@ -111,18 +104,27 @@ getInvertTraitData <- function(database = "Conus",
                 )
 
                 # combine trait name & category names
-                TraitDB_Vieira_lf[
-                    !is.na(Trait),
-                    Trait := paste0(Trait_group, "_", Trait)
-                ]
+                TraitDB_Vieira_lf[!is.na(Trait),
+                                  Trait := paste0(Trait_group, "_", Trait)]
 
                 # convert back to long format
-                TraitDB_Vieira <- data.table::dcast(
+                TraitDB_Vieira_bin <- data.table::dcast(
                     data = TraitDB_Vieira_lf[!is.na(Trait), ],
                     formula = unique_id + Species + Genus + Family + Order ~
-                    Trait,
+                        Trait,
                     fun.aggregate = length
                 )
+
+                rm_cols <-
+                    intersect(names(TraitDB_Vieira), char_cols)
+                rm_cols <- rm_cols[rm_cols != "unique_id"]
+
+                # merge back non-categorical traits
+                TraitDB_Vieira[, (rm_cols) := NULL]
+                TraitDB_Vieira <-
+                    data.table::merge.data.table(x = TraitDB_Vieira_bin,
+                                                 y = TraitDB_Vieira,
+                                                 by = "unique_id")
             }
             return(TraitDB_Vieira)
         }
@@ -135,24 +137,30 @@ getInvertTraitData <- function(database = "Conus",
     # Genus" header and getting the link from there
     # (only necessary if the link will change in the future)
     if (database == "Conus" || database == "Both") {
-        GenusTraits_Conus <- data.table::fread("https://portal.edirepository.org/nis/dataviewer?packageid=edi.481.5&entityid=3a88bfdfefcfe6dcafb27afd3ce4e90c")
+        GenusTraits_Conus <-
+            data.table::fread(
+                "https://portal.edirepository.org/nis/dataviewer?packageid=edi.481.5&entityid=3a88bfdfefcfe6dcafb27afd3ce4e90c"
+            )
 
         # Load TaxonomyConus from Conus DB
-        TaxonomyConus <- data.table::fread("https://portal.edirepository.org/nis/dataviewer?packageid=edi.481.5&entityid=64a5bd1621948af6f486b105f591791f")
+        TaxonomyConus <-
+            data.table::fread(
+                "https://portal.edirepository.org/nis/dataviewer?packageid=edi.481.5&entityid=64a5bd1621948af6f486b105f591791f"
+            )
 
         # Load metainformation (trait definitions)
         if (isTRUE(meta)) {
-            TraitDefinition_Conus <- data.table::fread("https://portal.edirepository.org/nis/dataviewer?packageid=edi.481.5&entityid=0268356db22e387410820f0260340aa9")
+            TraitDefinition_Conus <-
+                data.table::fread(
+                    "https://portal.edirepository.org/nis/dataviewer?packageid=edi.481.5&entityid=0268356db22e387410820f0260340aa9"
+                )
         }
 
         # Merge taxonomic information
         GenusTraits_Conus[TaxonomyConus,
-            `:=`(
-                Family = i.Family,
-                Order = i.Order
-            ),
-            on = "Genus"
-        ]
+                          `:=`(Family = i.Family,
+                               Order = i.Order),
+                          on = "Genus"]
 
         # Transformation of Trait Groups and individual traits
         # TODO Return of the metainformation can probably
@@ -161,76 +169,93 @@ getInvertTraitData <- function(database = "Conus",
         if (format == "long") {
             if (database == "Both") {
                 if (isTRUE(meta)) {
-                    return(list(
-                        "Conus_longformat" = GenusTraits_Conus,
-                        "Trait_definitions_Conus" = TraitDefinition_Conus,
-                        "Vieira_TDB" = TraitDB_Vieira
-                    ))
+                    return(
+                        list(
+                            "Conus_longformat" = GenusTraits_Conus,
+                            "Trait_definitions_Conus" = TraitDefinition_Conus,
+                            "Vieira_TDB" = TraitDB_Vieira
+                        )
+                    )
                 }
-                return(list(
-                    "Conus_longformat" = GenusTraits_Conus,
-                    "Vieira_TDB" = TraitDB_Vieira
-                ))
+                return(
+                    list(
+                        "Conus_longformat" = GenusTraits_Conus,
+                        "Vieira_TDB" = TraitDB_Vieira
+                    )
+                )
             }
             if (isTRUE(meta) && database != "Both") {
-                return(list(
-                    "Conus_longformat" = GenusTraits_Conus,
-                    "Trait_definitions_Conus" = TraitDefinition_Conus
-                ))
+                return(
+                    list(
+                        "Conus_longformat" = GenusTraits_Conus,
+                        "Trait_definitions_Conus" = TraitDefinition_Conus
+                    )
+                )
             }
             return(GenusTraits_Conus)
         }
         if (format == "wide") {
             GenusTraits_Conus_wide <- data.table::dcast(GenusTraits_Conus,
-                Genus + Family + Order ~ Trait_group,
-                value.var = "Trait"
-            )
+                                                        Genus + Family + Order ~ Trait_group,
+                                                        value.var = "Trait")
             if (database == "Both") {
                 if (isTRUE(meta)) {
-                    return(list(
-                        "Conus_wideformat" = GenusTraits_Conus_wide,
-                        "Trait_definitions_Conus" = TraitDefinition_Conus,
-                        "Vieira_TDB" = TraitDB_Vieira
-                    ))
+                    return(
+                        list(
+                            "Conus_wideformat" = GenusTraits_Conus_wide,
+                            "Trait_definitions_Conus" = TraitDefinition_Conus,
+                            "Vieira_TDB" = TraitDB_Vieira
+                        )
+                    )
                 }
-                return(list(
-                    "Conus_wideformat" = GenusTraits_Conus_wide,
-                    "Vieira_TDB" = TraitDB_Vieira
-                ))
+                return(
+                    list(
+                        "Conus_wideformat" = GenusTraits_Conus_wide,
+                        "Vieira_TDB" = TraitDB_Vieira
+                    )
+                )
             }
             if (isTRUE(meta) && database != "Both") {
-                return(list(
-                    "Conus_wideformat" = GenusTraits_Conus_wide,
-                    "Trait_definitions_Conus" = TraitDefinition_Conus
-                ))
+                return(
+                    list(
+                        "Conus_wideformat" = GenusTraits_Conus_wide,
+                        "Trait_definitions_Conus" = TraitDefinition_Conus
+                    )
+                )
             }
             return(GenusTraits_Conus_wide)
         }
         if (format == "binary") {
             GenusTraits_Conus <- GenusTraits_Conus[!is.na(Trait), ]
             GenusTraits_Conus[, Trait := paste0(Trait_group, "_", Trait)]
-            GenusTraits_Conus_binary <- data.table::dcast(GenusTraits_Conus,
-                Genus + Family + Order ~ Trait,
-                fun.aggregate = length
-            )
+            GenusTraits_Conus_binary <-
+                data.table::dcast(GenusTraits_Conus,
+                                  Genus + Family + Order ~ Trait,
+                                  fun.aggregate = length)
             if (database == "Both") {
                 if (isTRUE(meta)) {
-                    return(list(
-                        "Conus_traits_binary_coded" = GenusTraits_Conus_binary,
-                        "Trait_definitions_Conus" = TraitDefinition_Conus,
-                        "Vieira_TDB" = TraitDB_Vieira
-                    ))
+                    return(
+                        list(
+                            "Conus_traits_binary_coded" = GenusTraits_Conus_binary,
+                            "Trait_definitions_Conus" = TraitDefinition_Conus,
+                            "Vieira_TDB" = TraitDB_Vieira
+                        )
+                    )
                 }
-                return(list(
-                    "Conus_traits_binary_coded" = GenusTraits_Conus_binary,
-                    "Vieira_TDB" = TraitDB_Vieira
-                ))
+                return(
+                    list(
+                        "Conus_traits_binary_coded" = GenusTraits_Conus_binary,
+                        "Vieira_TDB" = TraitDB_Vieira
+                    )
+                )
             }
             if (isTRUE(meta) && database != "Both") {
-                return(list(
-                    "Conus_traits_binary_coded" = GenusTraits_Conus_binary,
-                    "Trait_definitions_Conus" = TraitDefinition_Conus
-                ))
+                return(
+                    list(
+                        "Conus_traits_binary_coded" = GenusTraits_Conus_binary,
+                        "Trait_definitions_Conus" = TraitDefinition_Conus
+                    )
+                )
             }
             return(GenusTraits_Conus_binary)
         }
