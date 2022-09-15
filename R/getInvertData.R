@@ -1267,8 +1267,10 @@ getInvertData <- function(dataType = "occur",
     ##taxonLevel that is in all caps
     taxonLevel.nrsa <- base::toupper(taxonLevel)
 
+    if(taxonLevel != "Genus"){
     NRSA_inverts <- NRSA_inverts %>%
       dplyr::mutate(across(tidyselect::all_of(taxonLevel.nrsa), ~ stringr::str_to_sentence(.)))
+    }
 
     if(isTRUE(sharedTaxa)){
       ##List of NAWQA Genera
