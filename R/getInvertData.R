@@ -986,7 +986,6 @@ getInvertData <- function(dataType = "occur",
                                        "PropID", "AreaSampTot_m2"))) %>%
     dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
 
-
   if(any(grepl("EPA", agency))){
 
     ##Read in datasets directly from EPA website - may want a more stable source
@@ -1227,7 +1226,8 @@ getInvertData <- function(dataType = "occur",
 
     ##Convert those genera that need to be updated
     NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
-                                 StreamData:::.switch1to1$Genus,
+                                 StreamData:::.switch1to1$Genus[match(NRSA_inverts$GENUS,
+                                                                      StreamData:::.switch1to1$BenchGenus)],
                                  NRSA_inverts$GENUS)
 
     ##This is the same code as the NAWQA taxonomy fix
@@ -1267,6 +1267,9 @@ getInvertData <- function(dataType = "occur",
     ##taxonLevel that is in all caps
     taxonLevel.nrsa <- base::toupper(taxonLevel)
 
+    NRSA_inverts <- NRSA_inverts %>%
+      dplyr::mutate(across(tidyselect::all_of(taxonLevel.nrsa), ~ stringr::str_to_sentence(.)))
+
     if(isTRUE(sharedTaxa)){
       ##List of NAWQA Genera
       NAWQAgenera <- unique(TotalRows$Genus)
@@ -1301,7 +1304,10 @@ getInvertData <- function(dataType = "occur",
                "PHYLUM",
                "CLASS",
                "ORDER",
-               "FAMILY")
+               "FAMILY",
+               "GENUS")
+
+    mycols <- mycols[!(mycols %in% tidyselect::all_of(taxonLevel.nrsa))]
 
     nrsa_comms1 = NRSA_inverts %>%
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel.nrsa)), dplyr::any_vars(. != "")) %>%
@@ -1518,9 +1524,9 @@ getInvertData <- function(dataType = "occur",
   }
 
   invert_comms1$CollectionDate = as.Date(invert_comms1$CollectionDayOfYear,
-          origin = paste(invert_comms1$CollectionYear-1,
-                         '12-31',
-                         sep = "-"))
+                                         origin = paste(invert_comms1$CollectionYear-1,
+                                                        '12-31',
+                                                        sep = "-"))
 
   ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
