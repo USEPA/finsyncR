@@ -90,7 +90,7 @@ Note: There are 81 sampling events (sampling location - collection
   For the "USGS" dataset, this includes all programs with SampleMethodCodes
   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
   includes "EPA", samples from the EPA National Stream and River
-  Assessment programs (2013-2014, 2008-2009) and Wadeable Stream Assessment
+  Assessment programs (2018-2019, 2013-2014, 2008-2009) and Wadeable Stream Assessment
   (2000-2004) will be included. Note that from these samples, only moving
   waters classified as "wadeable" are included and only samples that are
   "reach-wide" are included. Some information included in the USGS dataset

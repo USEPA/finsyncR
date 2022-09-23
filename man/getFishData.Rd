@@ -7,8 +7,9 @@
 getFishData(
   dataType = "abun",
   taxonLevel = "Species",
-  program = "National Water Quality Assessment",
-  standardize = "none"
+  agency = c("USGS", "EPA"),
+  standardize = "none",
+  hybrids = TRUE
 )
 }
 \arguments{
@@ -19,8 +20,9 @@ getFishData(
 \code{"Order"}, \code{"Superfamily"}, \code{"Family"}, \code{"Subfamily"},
 \code{"Genus"}, \code{"Species"}, or \code{"Subspecies"}.}
 
-\item{program}{The program name(s) that should be included in the output
-dataset. See \code{Details} below for more information.}
+\item{agency}{The agency name(s) (e.g., "USGS" and "EPA") that should be
+included in the output dataset. As of now, "USGS" must be present in the
+agency vector. See \code{Details} below for more information.}
 
 \item{standardize}{Standardization method to use for calculating fish abundance matrices.
 Default is \code{standardize = "none"}, which returns raw fish abundance values. Other options include
@@ -28,6 +30,8 @@ Default is \code{standardize = "none"}, which returns raw fish abundance values.
 An alternative standardization method is \code{standardize = "MGMS"}, which calculates
 Multigear Mean Standardization (MGMS) values to account for catchability differences between
 fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).}
+
+\item{hybrid}{logical. Should hybrid individuals be included in the output dataset? \code{TRUE} or \code{FALSE}.}
 }
 \value{
 A species by sample data frame with site, stream reach, and
@@ -59,19 +63,21 @@ Note: To standardize fish abundance data, abundances were divided by
   because the fuction is standardizing by sampling method in addition to standardizing by
   time and area sampled.
 
-  \code{program} refers to the Local, regional, or national program project
-  for which data were originally collected. Because the National Water
-  Quality Assessment (NAWQA) contains the most standardized sampling methods,
-  we recommend using only the NAWQA dataset (set as default) for density and
-  abundance measures. If you want to use all datasets, set
-  \code{program = "ALL"}. Otherwise, \code{program} can be set to
-  \code{"National Water Quality Assessment"},
-  \code{"Cooperative Water Program"},
-  \code{"Collection of Basic Records"},
-  \code{"Other Federal Agencies"}, or a combination of these using \code{c()}
-  (for example, \code{program = c("National Water Quality Assessment",
-  "Cooperative Water Program")} for both NAWQA and Cooperative Water
-  Programs).
+  \code{agency} refers to agency that collected the invertebrate samples. If
+  you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
+  For the "USGS" dataset, this includes all programs with SampleMethodCodes
+  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
+  includes "EPA", samples from the EPA National Stream and River
+  Assessment programs (2018-2019, 2013-2014, 2008-2009) will be included.
+  Note that from these samples, only moving waters classified as "wadeable"
+  are included and only samples that are "reach-wide" are included. Some
+  information included in the USGS dataset are not included in the EPA
+  datasets, and thus will appear as "NA". Similar to the USGS data, there
+  were inherent taxonomic issues with the EPA data. As such, we have taken
+  the same steps as described above under \code{taxonFix} to address these
+  concerns. NOTE: As of now, \code{agency} must include "USGS". This will be
+  fixed in future versions. NOTE2: As of now, when \code{agency = c("USGS", "EPA")},
+  taxonLevel must be set to "Species" and dataType must be set to "occur".
 
   The \code{getFishData()} function only outputs a community (taxa x site)
   matrix. We will include an extension of this function to return the
