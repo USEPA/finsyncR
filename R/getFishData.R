@@ -74,7 +74,7 @@
 #'
 #' @export
 
-getFishData <- function(dataType = "abun",
+getFishData <- function(dataType = "occur",
                         taxonLevel = "Species",
                         agency = c("USGS","EPA"),
                         standardize = "none",
@@ -99,7 +99,7 @@ getFishData <- function(dataType = "abun",
   }
 
   if("EPA" %in% agency && dataType == "abun" |
-     "EPA" %in% agency && taxonLevel == "Species"){
+     "EPA" %in% agency && taxonLevel != "Species"){
     stop(paste('as of now, when EPA is included in the "agency" parameter',
                'dataType must be set to "occur" and taxonLevel set to "Species"'))
   }
@@ -489,8 +489,7 @@ getFishData <- function(dataType = "abun",
     NRSA_1314_fishtax <- utils::read.csv(system.file("extdata",
                                                      "updateNRSAfishtax.csv",
                                                      package = "StreamData"),
-                                         comment.char="#",
-                                         colClasses = c("UID" = "character"))
+                                         comment.char="#")
 
 
 
@@ -692,8 +691,10 @@ getFishData <- function(dataType = "abun",
 
 full_fish <- bind_rows(fish_comm2 %>%
   mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
-         StandardMethod = as.character(StandardMethod))%>%
-  dplyr::select(-StateFIPSCode, -CountyFIPSCode), NRSA_FISH_comm) %>%
+         StandardMethod = as.character(StandardMethod),
+         Agency = "USGS") %>%
+    relocate(Agency, .after = StandardMethod) %>%
+  dplyr::select(-StateFIPSCode, -CountyFIPSCode), NRSA_FISH_comm %>% mutate(Agency = "EPA")) %>%
   mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
 
 if(dataType == "occur") {
@@ -705,16 +706,20 @@ if(dataType == "occur") {
 
   } else {full_fish = fish_comm2 %>%
     mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
-           StandardMethod = as.character(StandardMethod))%>%
+           StandardMethod = as.character(StandardMethod),
+           Agency = "USGS")%>%
+    relocate(Agency, .after = StandardMethod) %>%
     dplyr::select(-StateFIPSCode, -CountyFIPSCode)}
 
 
+  colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
 
 
 
   if(!isTRUE(hybrids)) {
-    colnames(full_fish) = sub("tax_", "", colnames(full_fish))
+    full_fish <- full_fish %>%
+      dplyr::select(-c(tidyselect::contains(" x ")))
 
   }
 
