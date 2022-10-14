@@ -792,6 +792,20 @@ if(dataType == "occur") {
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
 
+  ##Fix some odd taxonomy issues here
+  full_fish <- full_fish %>%
+    mutate(`Cottus bairdii` = `Cottus bairdii` + `Cottus bairdi`,
+           `Macrhybopsis aestivalis` = `Macrhybopsis aestivalis` + `Macrhybopsis cf. aestivalis`,
+           `Notropis spectrunculus` = `Notropis spectrunculus` + `Notropis cf. spectrunculus`,
+           `Catostomus latipinnis` = `Catostomus latipinnis` + `Catostomus cf. latipinnis`,
+           `Cyprinella zanema` = `Cyprinella zanema` + `Cyprinella cf. zanema`,
+           `Noturus leptacanthus` = `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`) %>%
+    dplyr::select(-`Cottus bairdi`,
+                  -`Macrhybopsis cf. aestivalis`,
+                  -`Notropis cf. spectrunculus`,
+                  -`Catostomus cf. latipinnis`,
+                  -`Cyprinella cf. zanema`,
+                  -`Noturus sp. c.f. leptacanthus`)
 
 
   if(!isTRUE(hybrids)) {

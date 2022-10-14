@@ -1,16 +1,16 @@
 Package: StreamData
 Type: Package
-Title: R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group
+Title: Generate Cleaned and Compiled USGS and EPA River and Stream Biotic and Abiotic Datasets
 Version: 0.0.0.9300
 Authors@R:
-    c(person(given = "Samantha",
+    c(person(given = "Michael",
+           family = "Mahon",
+           role = c("aut", "cre"),
+           email = "mmahon4@nd.edu"),
+           person(given = "Samantha",
            family = "Rumschlag",
            role = c("aut", "cre"),
-           email = "srumschl@nd.edu"),
-      person(given = "Michael",
-           family = "Mahon",
-           role = c("aut"),
-           email = "mmahon4@nd.edu"),
+           email = "rumschlag.samantha@epa.gov"),
       person(given = "Devin",
            family = "Jones",
            role = c("aut"),
