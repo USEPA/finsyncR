@@ -14,7 +14,8 @@
 #' below for more information.
 #'
 #'
-#' @return
+#' @return A taxa by trait data frame with taxa and trait information.
+#'
 #'
 #'
 #' @details

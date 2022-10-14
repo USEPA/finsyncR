@@ -23,7 +23,7 @@ be displayed or removed?
 below for more information.}
 }
 \value{
-
+A taxa by trait data frame with taxa and trait information.
 }
 \description{
 Access to invertebrate Trait data from the US

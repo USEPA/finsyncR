@@ -5,7 +5,7 @@
 \title{Access clean USGS Fish Dataset}
 \usage{
 getFishData(
-  dataType = "abun",
+  dataType = "occur",
   taxonLevel = "Species",
   agency = c("USGS", "EPA"),
   standardize = "none",
@@ -60,7 +60,7 @@ Note: To standardize fish abundance data, abundances were divided by
   Keep in mind that when setting \code{standardize = "CPUE"} will result in a larger dataset
   (more rows) than \code{standardize = "MGMS"} because CPUE data will have a row for each sampling
   method used at each time-location, whereas MGMS will have only one row for each time-location
-  because the fuction is standardizing by sampling method in addition to standardizing by
+  because the function is standardizing by sampling method in addition to standardizing by
   time and area sampled.
 
   \code{agency} refers to agency that collected the invertebrate samples. If
@@ -85,7 +85,7 @@ Note: To standardize fish abundance data, abundances were divided by
 }
 \examples{
 \dontrun{
-Fish <- getFishData(taxonLevel = "Family")
+Fish <- getFishData(taxonLevel = "Species")
 
 }
 
