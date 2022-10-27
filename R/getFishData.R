@@ -785,9 +785,10 @@ if(dataType == "occur") {
   ##Remove those observations with 0s in their StandardMethod
   full_fish <- full_fish %>%
     filter(StandardMethod != 0) %>%
-    dplyr::select(-NumberSeineHauls, - NumberStationarySetsKicks, -NumberSnorkelingTransects,
-                  -SecondsShockTime, - MinutesShockTime, -MethodBasic, -StandardMethod,
-                  -MeanTotalCPUE)
+    dplyr::select(-tidyselect::any_of(c("NumberSeineHauls",
+                                       "NumberStationarySetsKicks", "NumberSnorkelingTransects",
+                          "MinutesShockTime", "MethodBasic", "StandardMethod",
+                          "MeanTotalCPUE")))
 
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
