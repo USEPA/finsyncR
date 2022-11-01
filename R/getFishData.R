@@ -434,6 +434,7 @@ getFishData <- function(dataType = "occur",
                                                 "Shocking"))) %>%
       dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
       dplyr::group_by(SIDNO, MethodBasic) %>%
+      dplyr::mutate(Methods = paste(MethodBasic, collapse = ", ")) %>%
       dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
                                   sum)) %>%
       dplyr::slice(1) %>%

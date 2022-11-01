@@ -1,7 +1,7 @@
 Package: StreamData
 Type: Package
 Title: Generate Cleaned and Compiled USGS and EPA River and Stream Biotic and Abiotic Datasets
-Version: 0.0.0.9300
+Version: 0.0.0.9301
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
