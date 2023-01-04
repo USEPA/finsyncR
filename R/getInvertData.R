@@ -728,153 +728,157 @@ getInvertData <- function(dataType = "occur",
     } else {}
   }   else {}
 
-  #create variable taxonFix = none, lump, remove
-  #none = no change, lump = lump genera through time, remove = remove observation only if spp. level ID does not exist
-  ##Generate a list of those individual genera that make up the slash genera
-  slashedgen <- unique(c(sub("\\/.*", "", slashgen_fin),
-                         sub(".*\\/", "", slashgen_fin),
-                         "Neocloeon"))
+  if(taxonLevel == "Genus"){
 
-  cnt = c()
-  hldr = c()
-  gns = c()
-  slashedgen <- slashedgen[order(slashedgen)]
-  for(i in slashedgen){
-    hldr <- grep(i, slashgen_fin, fixed = T)
-    cnt <- c(cnt, hldr)
-    gns = c(gns, rep(i, times = length(hldr)))
-  }
+    #create variable taxonFix = none, lump, remove
+    #none = no change, lump = lump genera through time, remove = remove observation only if spp. level ID does not exist
+    ##Generate a list of those individual genera that make up the slash genera
+    slashedgen <- unique(c(sub("\\/.*", "", slashgen_fin),
+                           sub(".*\\/", "", slashgen_fin),
+                           "Neocloeon"))
 
-  dat1 = data.frame(Genus = gns,
-                    Slash = slashgen_fin[cnt])
+    cnt = c()
+    hldr = c()
+    gns = c()
+    slashedgen <- slashedgen[order(slashedgen)]
+    for(i in slashedgen){
+      hldr <- grep(i, slashgen_fin, fixed = T)
+      cnt <- c(cnt, hldr)
+      gns = c(gns, rep(i, times = length(hldr)))
+    }
 
-  ##Fix a naming issue. Needs to include "Glyptotendipes"
-  dat1$Slash[grep("Chironomus/Einfeldia", dat1$Slash)] <- "Chironomus/Einfeldia/Glyptotendipes"
+    dat1 = data.frame(Genus = gns,
+                      Slash = slashgen_fin[cnt])
 
-  ##From the genus to slash dataset from above, remove all of those that do not
-  ## appear in the clust_labels dataset
-  ##First, match the group information based on the genera present in both the dat1
-  ## and clust_labels dataset
-  dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
-                                                 StreamData:::.clust_labels$genus),]$group
+    ##Fix a naming issue. Needs to include "Glyptotendipes"
+    dat1$Slash[grep("Chironomus/Einfeldia", dat1$Slash)] <- "Chironomus/Einfeldia/Glyptotendipes"
 
-  #There are some problems here, since there are multiple "slash" genera per
-  #individual genus, so need to lump these
-  #Select those genera that appear in >1 "slash" genera
-  probslash <- dat1 %>%
-    group_by(Genus) %>%
-    mutate(count = n()) %>%
-    filter(count >1) %>%
-    dplyr::select(-count)
+    ##From the genus to slash dataset from above, remove all of those that do not
+    ## appear in the clust_labels dataset
+    ##First, match the group information based on the genera present in both the dat1
+    ## and clust_labels dataset
+    dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
+                                                   StreamData:::.clust_labels$genus),]$group
 
-  ##Split this dataset
-  probslashl <- split(probslash, probslash$Genus)
+    #There are some problems here, since there are multiple "slash" genera per
+    #individual genus, so need to lump these
+    #Select those genera that appear in >1 "slash" genera
+    probslash <- dat1 %>%
+      group_by(Genus) %>%
+      mutate(count = n()) %>%
+      filter(count >1) %>%
+      dplyr::select(-count)
 
-  ##Take the unique genera in the "slash" genera and join them into a larger
-  ##lump "slash" genus
-  for(i in 1:length(probslashl)){
-    probslashl[[i]]$Fix <- paste(sort(unique(c(sub("\\/.*",
-                                                   "",
-                                                   probslashl[[i]]$Slash),
-                                               sub(".*\\/",
-                                                   "",
-                                                   probslashl[[i]]$Slash)))),
-                                 collapse = "/")
-  }
+    ##Split this dataset
+    probslashl <- split(probslash, probslash$Genus)
 
-  ##Bind these together
-  fix_slash <- dplyr::bind_rows(probslashl)
+    ##Take the unique genera in the "slash" genera and join them into a larger
+    ##lump "slash" genus
+    for(i in 1:length(probslashl)){
+      probslashl[[i]]$Fix <- paste(sort(unique(c(sub("\\/.*",
+                                                     "",
+                                                     probslashl[[i]]$Slash),
+                                                 sub(".*\\/",
+                                                     "",
+                                                     probslashl[[i]]$Slash)))),
+                                   collapse = "/")
+    }
 
-  ##Fix a naming issue; going to make sure this is fixed.
+    ##Bind these together
+    fix_slash <- dplyr::bind_rows(probslashl)
 
-  ##Remove all observations with an NA for the group in dat1 (does not appear in
-  ## clust_labels); then take 1 observation for each slash genus and generate
-  ## information (this does not matter) to better join this dataset with the
-  ## clust_labels dataset
-  dat1L <- dat1 %>%
-    dplyr::filter(!is.na(group)) %>%
-    dplyr::group_by(Slash) %>%
-    dplyr::slice(1) %>%
-    dplyr::mutate(X = 10.65,
-                  num = 65,
-                  genus = Slash) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(X, num, group, genus)
+    ##Fix a naming issue; going to make sure this is fixed.
 
-  dat1L$genus <- ifelse(dat1L$genus %in% fix_slash$Slash,
-                        fix_slash$Fix[match(dat1L$genus,
-                                            fix_slash$Slash)],
-                        dat1L$genus)
+    ##Remove all observations with an NA for the group in dat1 (does not appear in
+    ## clust_labels); then take 1 observation for each slash genus and generate
+    ## information (this does not matter) to better join this dataset with the
+    ## clust_labels dataset
+    dat1L <- dat1 %>%
+      dplyr::filter(!is.na(group)) %>%
+      dplyr::group_by(Slash) %>%
+      dplyr::slice(1) %>%
+      dplyr::mutate(X = 10.65,
+                    num = 65,
+                    genus = Slash) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(X, num, group, genus)
 
-  ##Remove replicate genus from the dat1L list
-  dat1L <- dat1L %>%
-    dplyr::group_by(genus) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup()
+    dat1L$genus <- ifelse(dat1L$genus %in% fix_slash$Slash,
+                          fix_slash$Fix[match(dat1L$genus,
+                                              fix_slash$Slash)],
+                          dat1L$genus)
 
-  ##Add "Anafroptilum.Centroptilum.Procloeon" to the fix list
-  dat1L[(nrow(dat1L) + 1),] <- list(10.6, 65, 1, "Anafroptilum.Centroptilum.Procloeon")
+    ##Remove replicate genus from the dat1L list
+    dat1L <- dat1L %>%
+      dplyr::group_by(genus) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup()
 
-  ##Third, pull the "lump" information from clust_labels based on the "group"
-  ## from dat1L
-  dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
-                                                 StreamData:::.clust_labels$group),]$lump
+    ##Add "Anafroptilum.Centroptilum.Procloeon" to the fix list
+    dat1L[(nrow(dat1L) + 1),] <- list(10.6, 65, 1, "Anafroptilum.Centroptilum.Procloeon")
 
-  ##Finally, join these datasets, so that all slashes will be successfully pulled
-  ## into the appropriate "lump" group
-  slashlump <- dplyr::bind_rows(list(StreamData:::.clust_labels,
-                                     dat1L))
+    ##Third, pull the "lump" information from clust_labels based on the "group"
+    ## from dat1L
+    dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
+                                                   StreamData:::.clust_labels$group),]$lump
 
-  ##Fix a naming issue with "Einfeldia" groups
-  slashlump$lump[grep("Einfeldia/Glyptotendipes", slashlump$lump)] <- "Chironomus/Einfeldia/Glyptotendipes"
+    ##Finally, join these datasets, so that all slashes will be successfully pulled
+    ## into the appropriate "lump" group
+    slashlump <- dplyr::bind_rows(list(StreamData:::.clust_labels,
+                                       dat1L))
 
-  if(taxonFix == "none"){
+    ##Fix a naming issue with "Einfeldia" groups
+    slashlump$lump[grep("Einfeldia/Glyptotendipes", slashlump$lump)] <- "Chironomus/Einfeldia/Glyptotendipes"
 
-  } else if(taxonFix == "lump"){
+    if(taxonFix == "none"){
 
-    #If genera that are one of genera in dat1, rename the Genus with the slash
-    #label from dat1, else, keep the original Genus label
-    TotalRows$Genus <- ifelse(TotalRows$Genus %in% dat1$Genus,
-                              dat1$Slash[match(TotalRows$Genus,
-                                               dat1$Genus)],
-                              TotalRows$Genus)
+    } else if(taxonFix == "lump"){
 
-    #If genera that are one of problem slash genera, rename the Genus with the lumped
-    #label from fix_slash, else, keep the original Genus label
-    TotalRows$Genus <- ifelse(TotalRows$Genus %in% fix_slash$Slash,
-                              fix_slash$Fix[match(TotalRows$Genus,
-                                                  fix_slash$Slash)],
-                              TotalRows$Genus)
+      #If genera that are one of genera in dat1, rename the Genus with the slash
+      #label from dat1, else, keep the original Genus label
+      TotalRows$Genus <- ifelse(TotalRows$Genus %in% dat1$Genus,
+                                dat1$Slash[match(TotalRows$Genus,
+                                                 dat1$Genus)],
+                                TotalRows$Genus)
 
-    ##Do the same for those in slashlump
-    TotalRows$Genus <- ifelse(TotalRows$Genus %in% slashlump$genus,
-                              slashlump$lump[match(TotalRows$Genus,
-                                                   slashlump$genus)],
-                              TotalRows$Genus)
+      #If genera that are one of problem slash genera, rename the Genus with the lumped
+      #label from fix_slash, else, keep the original Genus label
+      TotalRows$Genus <- ifelse(TotalRows$Genus %in% fix_slash$Slash,
+                                fix_slash$Fix[match(TotalRows$Genus,
+                                                    fix_slash$Slash)],
+                                TotalRows$Genus)
 
-    #create bench genus in TotalRows
-    TotalRows <- TotalRows %>%
-      dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
+      ##Do the same for those in slashlump
+      TotalRows$Genus <- ifelse(TotalRows$Genus %in% slashlump$genus,
+                                slashlump$lump[match(TotalRows$Genus,
+                                                     slashlump$genus)],
+                                TotalRows$Genus)
+
+      #create bench genus in TotalRows
+      TotalRows <- TotalRows %>%
+        dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
 
 
-    #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
-    #else, keep the original Genus label
-    TotalRows$Genus <- ifelse(TotalRows$BenchGenus %in% slashlump$genus,
-                              slashlump$lump[match(TotalRows$BenchGenus,
-                                                   slashlump$genus)],
-                              TotalRows$Genus)
+      #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
+      #else, keep the original Genus label
+      TotalRows$Genus <- ifelse(TotalRows$BenchGenus %in% slashlump$genus,
+                                slashlump$lump[match(TotalRows$BenchGenus,
+                                                     slashlump$genus)],
+                                TotalRows$Genus)
 
-    TotalRows <- TotalRows %>%
-      dplyr::select(-BenchGenus)
+      TotalRows <- TotalRows %>%
+        dplyr::select(-BenchGenus)
 
-  }else if(taxonFix == "remove"){
+    } else if(taxonFix == "remove"){
 
-    #filter out observations that have ambiguous taxa designations
-    ##remove those genera in the slashlump and remove all "/" genera
-    TotalRows <- TotalRows %>%
-      dplyr::filter(!(Genus %in% slashlump$genus &
-                        PublishedTaxonNameLevel == "Genus")) %>%
-      dplyr::filter(!(grepl("/", Genus)))
+      #filter out observations that have ambiguous taxa designations
+      ##remove those genera in the slashlump and remove all "/" genera
+      TotalRows <- TotalRows %>%
+        dplyr::filter(!(Genus %in% slashlump$genus &
+                          PublishedTaxonNameLevel == "Genus")) %>%
+        dplyr::filter(!(grepl("/", Genus)))
+
+    }
 
   }
 
@@ -1151,8 +1155,9 @@ getInvertData <- function(dataType = "occur",
                             TARGET_TAXON,
                             GENUS))
 
-    ##Convert Genera names from all caps to sentence case (GENUS to Genus)
+    ##Convert Taxa names from all caps to sentence case (e.g., GENUS to Genus)
     NRSA_inverts$GENUS <- stringr::str_to_sentence(NRSA_inverts$GENUS)
+
 
     ##Fix issue w/ str_to_sentence that is causing Orthocladius to be lowercase
     NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS == "Cricotopus/orthocladius",
@@ -1181,6 +1186,8 @@ getInvertData <- function(dataType = "occur",
 
     NRSA_inverts <- NRSA_inverts %>%
       dplyr::left_join(NRSADenconv, by = c("SITE_ID", "YEAR", "VISIT_NO"))
+
+
     ##Incorporate abundance conversions here
     if(dataType == "abun"){
 
@@ -1224,45 +1231,48 @@ getInvertData <- function(dataType = "occur",
     ##FIX ALL TAXONOMIC ISSUES; only needed IF taxonLevel = "Genus"
     ##NEED TO UPDATE THIS FOR FAMILY
 
-    ##Convert those genera that need to be updated
-    NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
-                                 StreamData:::.switch1to1$Genus[match(NRSA_inverts$GENUS,
-                                                                      StreamData:::.switch1to1$BenchGenus)],
-                                 NRSA_inverts$GENUS)
+    if(taxonLevel == "Genus") {
 
-    ##This is the same code as the NAWQA taxonomy fix
-    if(taxonFix == "none"){
-
-    } else if(taxonFix == "lump"){
-      #If genera that are one of genera in dat1, rename the Genus with the slash
-      #label from dat1, else, keep the original Genus label
-      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% dat1$Genus,
-                                   dat1$Slash[match(NRSA_inverts$GENUS,
-                                                    dat1$Genus)],
+      ##Convert those genera that need to be updated
+      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
+                                   StreamData:::.switch1to1$Genus[match(NRSA_inverts$GENUS,
+                                                                        StreamData:::.switch1to1$BenchGenus)],
                                    NRSA_inverts$GENUS)
 
-      #If genera that are one of problem slash genera, rename the Genus with the lumped
-      #label from fix_slash, else, keep the original Genus label
-      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% fix_slash$Slash,
-                                   fix_slash$Fix[match(NRSA_inverts$GENUS,
-                                                       fix_slash$Slash)],
-                                   NRSA_inverts$GENUS)
+      ##This is the same code as the NAWQA taxonomy fix
+      if(taxonFix == "none"){
 
-      #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
-      #else, keep the original Genus label
-      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% slashlump$genus,
-                                   slashlump$lump[match(NRSA_inverts$GENUS,
-                                                        slashlump$genus)],
-                                   NRSA_inverts$GENUS)
+      } else if(taxonFix == "lump"){
+        #If genera that are one of genera in dat1, rename the Genus with the slash
+        #label from dat1, else, keep the original Genus label
+        NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% dat1$Genus,
+                                     dat1$Slash[match(NRSA_inverts$GENUS,
+                                                      dat1$Genus)],
+                                     NRSA_inverts$GENUS)
 
-    }else if(taxonFix == "remove"){
+        #If genera that are one of problem slash genera, rename the Genus with the lumped
+        #label from fix_slash, else, keep the original Genus label
+        NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% fix_slash$Slash,
+                                     fix_slash$Fix[match(NRSA_inverts$GENUS,
+                                                         fix_slash$Slash)],
+                                     NRSA_inverts$GENUS)
 
-      #filter out rows that have bench genus from problem list & no species ID
-      NRSA_inverts <- NRSA_inverts %>%
-        dplyr::filter(!(GENUS %in% StreamData:::.clust_labels$genus)) %>%
-        dplyr::filter(!(grepl("/", GENUS)))
+        #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
+        #else, keep the original Genus label
+        NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% slashlump$genus,
+                                     slashlump$lump[match(NRSA_inverts$GENUS,
+                                                          slashlump$genus)],
+                                     NRSA_inverts$GENUS)
+
+      }else if(taxonFix == "remove"){
+
+        #filter out rows that have bench genus from problem list & no species ID
+        NRSA_inverts <- NRSA_inverts %>%
+          dplyr::filter(!(GENUS %in% StreamData:::.clust_labels$genus)) %>%
+          dplyr::filter(!(grepl("/", GENUS)))
+      }
+
     }
-
     ##When "taxonLevel" isn't in all caps (in the function), create a NRSA specific
     ##taxonLevel that is in all caps
     taxonLevel.nrsa <- base::toupper(taxonLevel)
@@ -1272,28 +1282,30 @@ getInvertData <- function(dataType = "occur",
       dplyr::mutate(across(tidyselect::all_of(taxonLevel.nrsa), ~ stringr::str_to_sentence(.)))
     }
 
-    if(isTRUE(sharedTaxa)){
-      ##List of NAWQA Genera
-      NAWQAgenera <- unique(TotalRows$Genus)
+    ###########Need to update this; need to convert Genus to whatever the level is
 
-      ##List of NRSA Genera
-      NRSAgenera <- unique(NRSA_inverts$GENUS)
+    if(isTRUE(sharedTaxa)){
+      ##List of NAWQA taxa
+      NAWQAtaxa <- c(unique(TotalRows[,taxonLevel]))[[taxonLevel]]
+
+      ##List of NRSA taxa
+      NRSAtaxa <- unique(NRSA_inverts[,taxonLevel.nrsa])
 
       ##Filter NRSA to only those genera in NAWQA
       NRSA_inverts <- NRSA_inverts %>%
-        filter(GENUS %in% NAWQAgenera)
+        filter(.[[taxonLevel.nrsa]] %in% NAWQAtaxa)
 
       ##Select only those taxa that appear in NAWQA
       ##add "tax_" prefix to the names, as this is how the genera names appear
       ##as columns in the NAWQA dataset
-      NAWQAgeneraONLY <- paste("tax_",
-                               NAWQAgenera[!(NAWQAgenera %in% NRSAgenera)],
+      NAWQAtaxaONLY <- paste("tax_",
+                               NAWQAtaxa[!(NAWQAtaxa %in% NRSAtaxa)],
                                sep = "")
 
       ##Filter NAWQA to only those genera in NRSA (-select [delete] any that
       ##appear in columns in the invert_comms1 dataset)
       invert_comms1 <- invert_comms1 %>%
-        dplyr::select(-tidyselect::any_of(NAWQAgeneraONLY))
+        dplyr::select(-tidyselect::any_of(NAWQAtaxaONLY))
 
     } else {}
 
