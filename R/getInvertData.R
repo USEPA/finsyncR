@@ -1282,8 +1282,6 @@ getInvertData <- function(dataType = "occur",
       dplyr::mutate(across(tidyselect::all_of(taxonLevel.nrsa), ~ stringr::str_to_sentence(.)))
     }
 
-    ###########Need to update this; need to convert Genus to whatever the level is
-
     if(isTRUE(sharedTaxa)){
       ##List of NAWQA taxa
       NAWQAtaxa <- c(unique(TotalRows[,taxonLevel]))[[taxonLevel]]
@@ -1299,7 +1297,7 @@ getInvertData <- function(dataType = "occur",
       ##add "tax_" prefix to the names, as this is how the genera names appear
       ##as columns in the NAWQA dataset
       NAWQAtaxaONLY <- paste("tax_",
-                               NAWQAtaxa[!(NAWQAtaxa %in% NRSAtaxa)],
+                               NAWQAtaxa[!(NAWQAtaxa %in% NRSAtaxa$GENUS)],
                                sep = "")
 
       ##Filter NAWQA to only those genera in NRSA (-select [delete] any that
