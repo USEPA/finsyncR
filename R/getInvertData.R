@@ -1286,8 +1286,10 @@ getInvertData <- function(dataType = "occur",
       ##List of NAWQA taxa
       NAWQAtaxa <- c(unique(TotalRows[,taxonLevel]))[[taxonLevel]]
 
-      ##List of NRSA taxa
-      NRSAtaxa <- unique(NRSA_inverts[,taxonLevel.nrsa])
+      ##List of NRSA taxa (have to do this rarfy thing to fix some weird issue)
+      if(isTRUE(rarefy)){
+        NRSAtaxa <- c(unique(NRSA_inverts[,taxonLevel.nrsa]))[[taxonLevel.nrsa]]
+      } else{ NRSAtaxa <- unique(NRSA_inverts[,taxonLevel.nrsa])}
 
       ##Filter NRSA to only those genera in NAWQA
       NRSA_inverts <- NRSA_inverts %>%
@@ -1297,7 +1299,7 @@ getInvertData <- function(dataType = "occur",
       ##add "tax_" prefix to the names, as this is how the genera names appear
       ##as columns in the NAWQA dataset
       NAWQAtaxaONLY <- paste("tax_",
-                               NAWQAtaxa[!(NAWQAtaxa %in% NRSAtaxa$GENUS)],
+                               NAWQAtaxa[!(NAWQAtaxa %in% NRSAtaxa)],
                                sep = "")
 
       ##Filter NAWQA to only those genera in NRSA (-select [delete] any that
