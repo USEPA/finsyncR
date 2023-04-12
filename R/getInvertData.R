@@ -882,6 +882,48 @@ getInvertData <- function(dataType = "occur",
 
   }
 
+  ##fix taxonomy of Mesogastropoda
+  TotalRows = TotalRows %>%
+    mutate(Order = ifelse(Family %in% c("Hydrobiidae", "Pleuroceridae",
+                                        "Pomatiopsidae", "Thiaridae"),
+                          "Neotaenioglossa",
+                          ifelse(Family %in% c("Pilidae", "Ampullariidae",
+                                               "Viviparidae"),
+                                 "Architaenioglossa",
+                                 ifelse(Family  %in% c("Unionidae", "Margaritiferidae"),
+                                        "Unionoida",
+                                        ifelse(Family %in% c("Naididae", "Tubificidae"),
+                                               "Tubificida",
+                                               ifelse(Family == "Lumbricidae",
+                                                      "Opisthopora",
+                                                      ifelse(Family == "Valvatidae",
+                                                             "Heterostropha",
+                                                             ifelse(Family == "Piscicolidae",
+                                                                    "Hirudinida",
+                                                                    ifelse(Family == "Planariidae",
+                                                                           "Neoophora",
+                                                                           ifelse(Family == "Aeolosomatidae",
+                                                                                  "",
+                                                                                  Order))))))))),
+           Class = ifelse(Family == "Aeolosomatidae",
+                          "",
+                          Class),
+           Family = ifelse(Family  %in% c("Naididae", "Tubificidae"),
+                           "Tubificidae",
+                           ifelse(Family  %in% c("Pilidae", "Ampullariidae"),
+                                  "Ampullariidae",
+                                  Family)),
+           #Code below is only for USGS and taxonomy dataset
+           Order = ifelse(Superfamily == "Ampullarioidea",
+                          "Architaenioglossa",
+                          ifelse(Superfamily %in% c("Truncatelloidea","Vermetoidea"),
+                                 "Neotaenioglossa",
+                                 Order)),
+           Order = ifelse(Superfamily == "" & Family =="" & Order == "Mesogastropoda",
+                          "",
+                          Order))
+
+
   ##Fix this; remove the notAbun stuff in the future; just drop Density_m2
   if(dataType == "occur") {
     abunMeasure = "RawCount"
@@ -1187,6 +1229,37 @@ getInvertData <- function(dataType = "occur",
     NRSA_inverts <- NRSA_inverts %>%
       dplyr::left_join(NRSADenconv, by = c("SITE_ID", "YEAR", "VISIT_NO"))
 
+##fix mesogastropoda issue
+    NRSA_inverts <- NRSA_inverts %>%
+      mutate(ORDER = ifelse(FAMILY %in% toupper(c("Hydrobiidae", "Pleuroceridae",
+                                                  "Pomatiopsidae", "Thiaridae")),
+                            toupper("Neotaenioglossa"),
+                            ifelse(FAMILY %in% toupper(c("Pilidae", "Ampullariidae",
+                                                         "Viviparidae")),
+                                   toupper("Architaenioglossa"),
+                                   ifelse(FAMILY  %in% toupper(c("Unionidae", "Margaritiferidae")),
+                                          toupper("Unionoida"),
+                                          ifelse(FAMILY %in% toupper(c("Naididae", "Tubificidae")),
+                                                 toupper("Tubificida"),
+                                                 ifelse(FAMILY == toupper("Lumbricidae"),
+                                                        toupper("Opisthopora"),
+                                                        ifelse(FAMILY == toupper("Valvatidae"),
+                                                               toupper("Heterostropha"),
+                                                               ifelse(FAMILY == toupper("Piscicolidae"),
+                                                                      toupper("Hirudinida"),
+                                                                      ifelse(FAMILY == toupper("Planariidae"),
+                                                                             toupper("Neoophora"),
+                                                                             ifelse(FAMILY == toupper("Aeolosomatidae"),
+                                                                                    "",
+                                                                                    ORDER))))))))),
+             CLASS = ifelse(FAMILY == toupper("Aeolosomatidae"),
+                            "",
+                            CLASS),
+             FAMILY = ifelse(FAMILY  %in% toupper(c("Naididae", "Tubificidae")),
+                             toupper("Tubificidae"),
+                             ifelse(FAMILY  %in% toupper(c("Pilidae", "Ampullariidae")),
+                                    toupper("Ampullariidae"),
+                                    FAMILY)))
 
     ##Incorporate abundance conversions here
     if(dataType == "abun"){
