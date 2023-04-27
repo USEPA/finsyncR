@@ -3,9 +3,9 @@
 \docType{package}
 \name{StreamData}
 \alias{StreamData}
-\title{StreamData: An R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group}
+\title{StreamData: An R Package to Access Cleaned and Compiled USGS and EPA Stream Data}
 \description{
 The \code{StreamData} package provides the data and functions to generate
-  the site by taxa datasets for macroinvertebrates, fish, and algal samples.
+  site by taxa datasets for macroinvertebrates, fish, and algal samples.
   Additionally, the package can provide county-level pesticide use estimates.
 }

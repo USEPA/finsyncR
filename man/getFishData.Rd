@@ -2,7 +2,7 @@
 % Please edit documentation in R/getFishData.R
 \name{getFishData}
 \alias{getFishData}
-\title{Access clean USGS Fish Dataset}
+\title{Access clean USGS and EPA Fish Datasets}
 \usage{
 getFishData(
   dataType = "occur",
@@ -38,10 +38,11 @@ A species by sample data frame with site, stream reach, and
   sample information.
 }
 \description{
-Access clean USGS Fish Dataset
+Access clean USGS and EPA Fish Datasets
 }
 \details{
-Note: To standardize fish abundance data, abundances were divided by
+NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
+  Note: To standardize fish abundance data, abundances were divided by
   the seconds shocked, number of seine hauls, etc. Then were divided by the
   stream length sampled. ~35% of the data have been removed,
   as these samples lacked the required standardization information.
@@ -80,7 +81,7 @@ Note: To standardize fish abundance data, abundances were divided by
   taxonLevel must be set to "Species" and dataType must be set to "occur".
 
   The \code{getFishData()} function only outputs a community (taxa x site)
-  matrix. We will include an extension of this function to return the
+  matrix. In the future, we may include an extension of this function to return the
   individual-level information (length, width, deformities, etc.).
 }
 \examples{

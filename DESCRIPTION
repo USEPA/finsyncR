@@ -1,7 +1,7 @@
 Package: StreamData
 Type: Package
 Title: Generate Cleaned and Compiled USGS and EPA River and Stream Biotic and Abiotic Datasets
-Version: 0.0.0.9302
+Version: 0.0.0.9400
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
@@ -24,7 +24,7 @@ Authors@R:
            role = c("aut"),
            email = "stkunz@uni-landau.de")
            )
-Maintainer: Michael Mahon <mmahon4@nd.edu>
+Maintainer: Michael Mahon <mahon.michael@epa.gov>
 Description: For now, this R package is to be used only by members of the
     Powell Center working group led by Samantha Rumschlag. This R package
     provides functions to generate site by taxa matrices for macroinvertebrates,
@@ -35,7 +35,7 @@ Description: For now, this R package is to be used only by members of the
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Imports: 
     magrittr,
     dplyr (>= 1.0.2),

@@ -1,4 +1,4 @@
-#' Access clean USGS Fish Dataset
+#' Access clean USGS and EPA Fish Datasets
 #'
 #' @param dataType Output data type, either \code{"abun"} or \code{"occur"}.
 #' @param taxonLevel Level of taxonomic resolution, must be one of:
@@ -19,7 +19,8 @@
 #' @return A species by sample data frame with site, stream reach, and
 #'   sample information.
 #'
-#' @details Note: To standardize fish abundance data, abundances were divided by
+#' @details NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
+#'   Note: To standardize fish abundance data, abundances were divided by
 #'   the seconds shocked, number of seine hauls, etc. Then were divided by the
 #'   stream length sampled. ~35% of the data have been removed,
 #'   as these samples lacked the required standardization information.
@@ -58,7 +59,7 @@
 #'   taxonLevel must be set to "Species" and dataType must be set to "occur".
 #'
 #'   The \code{getFishData()} function only outputs a community (taxa x site)
-#'   matrix. We will include an extension of this function to return the
+#'   matrix. In the future, we may include an extension of this function to return the
 #'   individual-level information (length, width, deformities, etc.).
 #'
 #' @references Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
@@ -98,9 +99,8 @@ getFishData <- function(dataType = "occur",
                '"Subspecies"; see "Details" in ?getFishData.'))
   }
 
-  if("EPA" %in% agency && taxonLevel != "Species"){
-    stop(paste('as of now, when EPA is included in the "agency" parameter',
-               'taxonLevel must be set to "Species"'))
+  if(taxonLevel != "Species"){
+    stop(paste('as of now, taxonLevel must be set to "Species"'))
   }
 
   fish <- utils::read.csv(base::unz(base::system.file("extdata",
@@ -228,7 +228,9 @@ getFishData <- function(dataType = "occur",
     dplyr::select(SIDNO_MethodCode,
            NumberSeineHauls, NumberStationarySetsKicks, NumberSnorkelingTransects,
            SecondsShockTime)
-
+  samplemethod <- samplemethod %>%
+    group_by(SIDNO_MethodCode) %>%
+    summarise(across(NumberSeineHauls:SecondsShockTime, ~sum(.x, na.rm = T)))
   ##Join the datasets
   fish_info = dplyr::left_join(dplyr::left_join(dplyr::left_join(fishup,
                                             site,
@@ -239,13 +241,24 @@ getFishData <- function(dataType = "occur",
   mycols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$mycols
   taxcols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$taxcols
 
+  fish_info = fish_info %>%
+    mutate(FISH_PROTOCOL = ifelse(grepl("Boat", MethodCode),
+                                  "BOATABLE",
+                                  ifelse(ReachLengthFished_m / 20 < 12.5,
+                                         "SM_WADEABLE",
+                                         ifelse(ReachLengthFished_m / 20 < 25.1,
+                                                "LG_WADEABLE",
+                                                "BOATABLE"))))
+
+
   fish_comm = fish_info %>%
     dplyr::filter(PublishedTaxonNameLevel %in% taxcols |
                     grepl(" x ", BioDataTaxonName)) %>%
     dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
     tidyr::unite(UNIQUE, c(SIDNO, MethodCode, all_of(taxonLevel)), remove = FALSE) %>%
     dplyr::group_by(UNIQUE) %>%
-    dplyr::mutate(SumAbundance = sum(SumAbundance)) %>%
+    # multi-counting below; remove!
+    # dplyr::mutate(SumAbundance = sum(SumAbundance)) %>%
     dplyr::slice(1) %>%
     dplyr::ungroup() %>%
     dplyr::select(-UNIQUE, -SIDNO_MethodCode, -PublishedTaxonName,
@@ -256,14 +269,14 @@ getFishData <- function(dataType = "occur",
                 values_from = SumAbundance,
                 values_fill = 0)
 
-  ##Need to figure out here IF this results in multiple SIDNO-MethodBasic lines
+
 
   if(dataType == "abun"){
 
   # calculate abundance matrices via raw abundance ("none"), CPUE standardization, or MGMS standardization
   if(standardize == "none"){
     fish_comm2 = fish_comm %>%
-      dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
+      dplyr::mutate(MethodBasic = ifelse(grepl("Seine|Net", MethodCode, fixed = TRUE),
                                          "Seine",
                                          ifelse(grepl("Snork", MethodCode, fixed = TRUE),
                                                 "Snorkel",
@@ -506,6 +519,12 @@ getFishData <- function(dataType = "occur",
                                             colClasses = c("UID" = "character"),
                                             stringsAsFactors = FALSE)
 
+    EMAP <- utils::read.csv(system.file("extdata",
+                                        "EMAP_FULL.csv",
+                                        package = "StreamData"),
+                            comment.char="#",
+                            stringsAsFactors = FALSE)
+
 ###
 
     #############
@@ -646,9 +665,15 @@ getFishData <- function(dataType = "occur",
     NRSA_fish_info <- NRSA_fish_sites %>%
       dplyr::left_join(NRSA_fish_sampleinfo %>%
                   filter(UID %in% NRSA_fish_sites$UID) %>%
-                  dplyr::select(-PRIM_FSHTIME, -SAMPLED_FISH), by = "UID")
+                  dplyr::select(-PRIM_FSHTIME), by = "UID")
 
-    ##Join NRSA_fish_sites with actual data
+    ##Join NRSA_fish_sites with actual data - may need to do the reverse order here
+    ##Could be that some sites aren't in fish dataset, but are in site dataset
+    ##because no fish could be sampled...; rbind these back into the dataset after the join
+
+    ##Need to reorganize the wadeable/nonwadeable thing
+    ##small, large, boatable
+    ##Specifically need size classes <12, 12-25, >25; include this as a covariate
 
     NRSA_FISH_wSite <- NRSA_FISH %>%
       dplyr::select(-FISH_PROTOCOL) %>%
@@ -658,21 +683,45 @@ getFishData <- function(dataType = "occur",
                   ungroup() %>%
                   dplyr::select(-DATE_COL, -VISIT_NO),
                 by = "UID") %>%
-      mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "",
-                                    BOAT_WADE,
-                                    FISH_PROTOCOL),
-             FISH_PROTOCOL = ifelse(grepl("NONW", FISH_PROTOCOL),
-                                    "BOATABLE",
-                                    ifelse(FISH_PROTOCOL == "BOATABLE",
-                                           "BOATABLE",
-                                           "WADEABLE")),
+      mutate(FISH_PROTOCOL = ifelse(MethodBasic == "Shocking" & FISH_PROTOCOL == "WADEABLE",
+                                    ifelse(is.na(ELECTROFISH) | ELECTROFISH == "",
+                                           ifelse(RCH_LENGTH > 499,
+                                                  "LG_WADEABLE",
+                                                  "SM_WADEABLE"),
+                                           ifelse(ELECTROFISH %in% c("BANK/TOW", "BOAT", "RAFT"),
+                                                  "LG_WADEABLE",
+                                                  "SM_WADEABLE")),
+                                    ifelse(MethodBasic == "Seine" & FISH_PROTOCOL == "WADEABLE",
+                                           ifelse(RCH_LENGTH > 499,
+                                                  "LG_WADEABLE",
+                                                  "SM_WADEABLE"),
+                                           FISH_PROTOCOL)),
              StandardMethod = ifelse(MethodBasic == "Seine",
                                      NumberSeineHauls,
-                                     MinutesShockTime)) %>%
+                                     MinutesShockTime)
+      ) %>%
       dplyr::select(-BOAT_WADE)
 
+
+    ##Add no fish collected rows
+    NRSA_FISH_wSite <-  bind_rows(NRSA_FISH_wSite,
+              NRSA_fish_info %>%
+                filter(SAMPLED_FISH == "YES-NO FISH INFERRED") %>%
+                mutate(RCH_LENGTH = 150,
+                       FISH_PROTOCOL = "SM_WADEABLE",
+                       MethodBasic = "Shocking",
+                       MinutesShockTime = 10,
+                       StandardMethod = MinutesShockTime,
+                       GENUS = "No fish",
+                       SPECIES = "No fish",
+                       SCIENTIFIC = "No fish collected") %>%
+                dplyr::select(-BOAT_WADE)
+    )
+
+
+
     NRSA_FISH_comm <- NRSA_FISH_wSite %>%
-      filter(!is.na(GENUS) & GENUS != "") %>%
+      filter(!is.na(GENUS) ) %>%
       filter(!is.na(SPECIES) & SPECIES != "") %>%
       filter(!grepl(" or ", SCIENTIFIC)) %>%
       dplyr::select(-FAMILY, -GENUS, -SPECIES, -FINAL_NAME) %>%
@@ -718,6 +767,8 @@ getFishData <- function(dataType = "occur",
 
 
     NRSA_FISH_comm <- NRSA_FISH_comm %>%
+      ##Last step is to remove those sites wihtout sufficient sampling
+      filter(!(grepl("NO-|NOT|LOST",SAMPLED_FISH))) %>%
       mutate(ProjectAssignedSampleLabel = paste(SITE_ID, UID, sep = "_"),
              CollectionYear = lubridate::year(DATE_COL),
              CollectionMonth = lubridate::month(DATE_COL),
@@ -731,16 +782,13 @@ getFishData <- function(dataType = "occur",
       rename(NAWQA.SMCOD = UID,
              SiteNumber = SITE_ID,
              SiteName = SITENAME,
-             SiteTypeName = FISH_PROTOCOL,
              CollectionDate = DATE_COL,
              Latitude_dd = LAT_DD83,
              Longitude_dd = LON_DD83,
              MethodBasic = MethodBasic,
-             Methods = MethodBasic,
              SiteVisitSampleNumber = VISIT_NO,
              ReachLengthFished_m = RCH_LENGTH) %>%
       dplyr::select(-STATE, -ELECTROFISH, -METHOD,-FISHED)
-
 
     ##Need to add the following columns to the NRSA dataset:
     ##ProjectLabel (Which bout)
@@ -760,19 +808,20 @@ getFishData <- function(dataType = "occur",
 
 
 
-full_fish <- bind_rows(fish_comm2 %>%
-  mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
-         # StandardMethod = as.character(StandardMethod),
-         Agency = "USGS") %>%
-    relocate(Agency, .after = SiteNumber) %>%
-  dplyr::select(-StateFIPSCode, -CountyFIPSCode, -MethodCode), NRSA_FISH_comm %>% mutate(Agency = "EPA")) %>%
-  mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
+    full_fish <- bind_rows(fish_comm2 %>%
+                             mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
+                                    # StandardMethod = as.character(StandardMethod),
+                                    Agency = "USGS") %>%
+                             relocate(Agency, .after = SiteNumber) %>%
+                             dplyr::select(-StateFIPSCode, -CountyFIPSCode, -MethodCode),
+                           NRSA_FISH_comm %>% mutate(Agency = "EPA")) %>%
+      mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
 
-if(dataType == "occur") {
-  full_fish = full_fish %>%
-    dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
-                                ~replace(., . > 0, 1)))
-}
+    if(dataType == "occur") {
+      full_fish = full_fish %>%
+        dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
+                                    ~replace(., . > 0, 1)))
+    }
 
 
   } else {full_fish = fish_comm2 %>%
@@ -787,9 +836,8 @@ if(dataType == "occur") {
   full_fish <- full_fish %>%
     filter(StandardMethod != 0) %>%
     dplyr::select(-tidyselect::any_of(c("NumberSeineHauls",
-                                       "NumberStationarySetsKicks", "NumberSnorkelingTransects",
-                          "MinutesShockTime", "MethodBasic", "StandardMethod",
-                          "MeanTotalCPUE")))
+                                        "NumberStationarySetsKicks", "NumberSnorkelingTransects",
+                                        "MinutesShockTime", "SecondsShockTime")))
 
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
@@ -801,13 +849,29 @@ if(dataType == "occur") {
            `Notropis spectrunculus` = `Notropis spectrunculus` + `Notropis cf. spectrunculus`,
            `Catostomus latipinnis` = `Catostomus latipinnis` + `Catostomus cf. latipinnis`,
            `Cyprinella zanema` = `Cyprinella zanema` + `Cyprinella cf. zanema`,
-           `Noturus leptacanthus` = `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`) %>%
+           `Noturus leptacanthus` = `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`,
+           `Moxostoma erythrurum` = `Moxostoma erythrurum` + `Moxostoma sp cf erythrurum`,
+           `Moxostoma lachneri` = `Moxostoma lachneri` + `Moxostoma cf. lachneri`,
+           `Moxostoma poecilurum` = `Moxostoma poecilurum` + `Moxostoma cf. poecilurum`,
+           ) %>%
     dplyr::select(-`Cottus bairdi`,
                   -`Macrhybopsis cf. aestivalis`,
                   -`Notropis cf. spectrunculus`,
                   -`Catostomus cf. latipinnis`,
                   -`Cyprinella cf. zanema`,
-                  -`Noturus sp. c.f. leptacanthus`)
+                  -`Noturus sp. c.f. leptacanthus`,
+                  -`Moxostoma cf. poecilurum`,
+                  -`Moxostoma cf. lachneri`,
+                  -`Moxostoma sp cf erythrurum`,
+                  #remove clinch sculpin (undescribed spp)
+                  -`Cottus cf. broadband sculpin`) %>%
+    ##remove boatable sites
+    filter(FISH_PROTOCOL != "BOATABLE") %>%
+    mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "SM_WADEABLE",
+                                  "Small Wadeable",
+                                  "Large Wadeable"))
+
+
 
 
   if(!isTRUE(hybrids)) {

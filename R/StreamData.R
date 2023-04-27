@@ -1,7 +1,7 @@
-#' StreamData: An R Package to Access Cleaned and Compiled Stream Data for Powell Center Working Group
+#' StreamData: An R Package to Access Cleaned and Compiled USGS and EPA Stream Data
 #'
 #' The \code{StreamData} package provides the data and functions to generate
-#'   the site by taxa datasets for macroinvertebrates, fish, and algal samples.
+#'   site by taxa datasets for macroinvertebrates, fish, and algal samples.
 #'   Additionally, the package can provide county-level pesticide use estimates.
 #'
 #' @import dplyr

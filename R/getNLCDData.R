@@ -1,4 +1,4 @@
-#' Generate NLCD Land-use/Land-cover data for each NAWQA site
+#' Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site
 #'
 #' @param data Input dataset which needs to include columns for
 #'  \code{"SiteNumber"} and \code{"CollectionYear"}.

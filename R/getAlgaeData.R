@@ -1,4 +1,4 @@
-#' Access clean USGS Algae Dataset
+#' Access clean USGS and EPA Algae Datasets
 #'
 #' @param algType Algae sample type, either \code{"peri"} or \code{"phyto"}.
 #' @param dataType Output data type, either \code{"abun"} or \code{"occur"}.

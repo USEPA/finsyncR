@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of StreamData is to provide easy access and automated data management to USGS stream BioData, pesticide county use estimates, and measured water quality data.
+The goal of StreamData is to provide easy access and automated data management to USGS and EPA stream BioData, pesticide county use estimates, and measured water quality data.
 
 
 ## Installation
@@ -45,7 +45,7 @@ This is a basic example which shows you how to use one of the *getBioData* set o
 ```{r example}
 library(StreamData)
 
-Fish <- getFishData(taxonLevel = "Family")
+Fish <- getFishData(taxonLevel = "Species")
 
 head(Fish)[,1:35]
 ```

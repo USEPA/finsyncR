@@ -2,7 +2,7 @@
 % Please edit documentation in R/getNLCDData.R
 \name{getNLCDData}
 \alias{getNLCDData}
-\title{Generate NLCD Land-use/Land-cover data for each NAWQA site}
+\title{Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site}
 \usage{
 getNLCDData(data, scale = "Cat", group = FALSE)
 }
@@ -24,7 +24,7 @@ Function returns a site by year dataframe of NLCD land-use/land-cover
   data for either the catchment or watershed scale.
 }
 \description{
-Generate NLCD Land-use/Land-cover data for each NAWQA site
+Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site
 }
 \details{
 This function has been updated to include all USGS and EPA NRSA sites.

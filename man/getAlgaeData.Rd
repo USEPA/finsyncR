@@ -2,7 +2,7 @@
 % Please edit documentation in R/getAlgaeData.R
 \name{getAlgaeData}
 \alias{getAlgaeData}
-\title{Access clean USGS Algae Dataset}
+\title{Access clean USGS and EPA Algae Datasets}
 \usage{
 getAlgaeData(
   algType = "peri",
@@ -28,7 +28,7 @@ A species by sample data frame with site, stream reach, and
   sample information.
 }
 \description{
-Access clean USGS Algae Dataset
+Access clean USGS and EPA Algae Datasets
 }
 \details{
 Note: Abundances for taxa from replicate samples taken from the
