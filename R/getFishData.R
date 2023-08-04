@@ -21,7 +21,7 @@
 #'
 #' @details NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
 #'   Note: To standardize fish abundance data, abundances were divided by
-#'   the seconds shocked, number of seine hauls, etc. Then were divided by the
+#'   the minutes shocked, number of seine hauls, etc. Then were divided by the
 #'   stream length sampled. ~35% of the data have been removed,
 #'   as these samples lacked the required standardization information.
 #'   Therefore, if you are interested in occurrence (pres/abs) data only, then
@@ -839,10 +839,16 @@ getFishData <- function(dataType = "occur",
                                         "NumberStationarySetsKicks", "NumberSnorkelingTransects",
                                         "MinutesShockTime", "SecondsShockTime")))
 
+  full_fish <- full_fish %>%
+    left_join(StreamData:::.allsitesCOMID)
+
+  full_fish <- full_fish  %>%
+    dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
+
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
 
-  ##Fix some odd taxonomy issues here
+  ##Fix some odd taxonomy issues here - mostly getting rid of subspecies
   full_fish <- full_fish %>%
     mutate(`Cottus bairdii` = `Cottus bairdii` + `Cottus bairdi`,
            `Macrhybopsis aestivalis` = `Macrhybopsis aestivalis` + `Macrhybopsis cf. aestivalis`,
@@ -853,7 +859,18 @@ getFishData <- function(dataType = "occur",
            `Moxostoma erythrurum` = `Moxostoma erythrurum` + `Moxostoma sp cf erythrurum`,
            `Moxostoma lachneri` = `Moxostoma lachneri` + `Moxostoma cf. lachneri`,
            `Moxostoma poecilurum` = `Moxostoma poecilurum` + `Moxostoma cf. poecilurum`,
+           `Moxostoma duquesnei` = `Moxostoma duquesnei` + `Moxostoma duquesnii`,
+           `Etheostoma chlorosoma` = `Etheostoma chlorosoma` + `Etheostoma chlorosomum`,
+           `Fundulus stellifer` = `Fundulus stellifer` + `Fundulus stellifera`
            ) %>%
+    rowwise() %>%
+    mutate(`Oncorhynchus clarkii` = sum(c_across(contains("Oncorhynchus clarki"))),
+           `Esox americanus` = sum(c_across(contains("Esox americanus"))),
+           `Oncorhynchus mykiss` = sum(c_across(contains("Oncorhynchus mykiss")))
+           ) %>%
+    ungroup() %>%
+    relocate(`Oncorhynchus clarkii`, .before = `Oncorhynchus clarki virginalis`) %>%
+    relocate(`Esox americanus`, .before = `Esox americanus americanus`)
     dplyr::select(-`Cottus bairdi`,
                   -`Macrhybopsis cf. aestivalis`,
                   -`Notropis cf. spectrunculus`,
@@ -864,7 +881,15 @@ getFishData <- function(dataType = "occur",
                   -`Moxostoma cf. lachneri`,
                   -`Moxostoma sp cf erythrurum`,
                   #remove clinch sculpin (undescribed spp)
-                  -`Cottus cf. broadband sculpin`) %>%
+                  -`Cottus cf. broadband sculpin`,
+                  -tidyselect::contains(" sp."),
+                  -tidyselect::contains("Oncorhynchus clarkii "),
+                  -`Oncorhynchus clarki virginalis`,
+                  -tidyselect::contains("Esox americanus "),
+                  -`Oncorhynchus mykiss gairdneri`,
+                  -`Moxostoma duquesnii`,
+                  -`Etheostoma chlorosomum`,
+                  -`Fundulus stellifera`) %>%
     ##remove boatable sites
     filter(FISH_PROTOCOL != "BOATABLE") %>%
     mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "SM_WADEABLE",
@@ -876,7 +901,7 @@ getFishData <- function(dataType = "occur",
 
   if(!isTRUE(hybrids)) {
     full_fish <- full_fish %>%
-      dplyr::select(-c(tidyselect::contains(" x ")))
+      dplyr::select(-c(tidyselect::contains(" x "), -c(tidyselect::contains(".x."))))
 
   }
 

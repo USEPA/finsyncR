@@ -43,7 +43,7 @@ Access clean USGS and EPA Fish Datasets
 \details{
 NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
   Note: To standardize fish abundance data, abundances were divided by
-  the seconds shocked, number of seine hauls, etc. Then were divided by the
+  the minutes shocked, number of seine hauls, etc. Then were divided by the
   stream length sampled. ~35% of the data have been removed,
   as these samples lacked the required standardization information.
   Therefore, if you are interested in occurrence (pres/abs) data only, then

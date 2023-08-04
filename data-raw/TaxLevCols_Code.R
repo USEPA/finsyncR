@@ -294,6 +294,24 @@ NRSA_siteIDs$MASTER_SITEID <- ifelse(NRSA_siteIDs$SITE_ID %in% NRSA_0809_sites$S
                                 MASTER_SITEID))
 
 
+.InvertIDCols <-  c("ProjectLabel", "ProjectAssignedSampleLabel", "NAWQA.SMCOD",
+                    "NAWQAStudyUnitCode", "CollectionDate", "CollectionYear",
+                    "CollectionMonth", "CollectionDayOfYear", "SiteVisitSampleNumber",
+                    "SiteNumber", "SiteName", "StudyReachName", "SiteTypeName",
+                    "Latitude_dd", "Longitude_dd", "CoordinateDatum", "SampleTypeCode",
+                    "IdentificationEntity", "GeomorphicChannelUnit", "FieldSplitRatio",
+                    "LabSubsamplingRatio", "PropID", "AreaSampTot_m2", "WettedWidth")
+
+.allsitesCOMID = allsitesCOMID
+
+usethis::use_data(.InvertIDCols,
+                  .allsitesCOMID,
+                  internal = TRUE,
+                  overwrite = FALSE)
+
+sysdata_filenames <- load("R/sysdata.rda")
+save(list = c(sysdata_filenames, ".InvertIDCols", ".allsitesCOMID"), file = "R/sysdata.rda")
+
 usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,
                   .ReorderUSGSBioDataColNames,
@@ -302,5 +320,6 @@ usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
                   .clust_labels,
                   .switch1to1,
                   .NRSA_siteIDs,
+                  .InvertIDCols,
                   internal = TRUE,
                   overwrite = TRUE)

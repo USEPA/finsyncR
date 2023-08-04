@@ -26,8 +26,7 @@ getInvertData(
 be one of: \code{"none"}, \code{"lump"}, \code{"remove"}.}
 
 \item{agency}{The agency name(s) (e.g., "USGS" and "EPA") that should be
-included in the output dataset. As of now, "USGS" must be present in the
-agency vector. See \code{Details} below for more information.}
+included in the output dataset. See \code{Details} below for more information.}
 
 \item{lifestage}{logical. Should the output dataset should include lifestage information for
 each individual? \code{TRUE} or \code{FALSE}.}
@@ -37,7 +36,8 @@ identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 below for more information.}
 
 \item{sharedTaxa}{logical. Should Genera be limited to those that appear in
-both the NRSA and USGS datasets? \code{TRUE} or \code{FALSE}.}
+both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
+\code{FALSE} when only one agency is specified.}
 
 \item{seed}{numeric. Set seed for \code{rarefy} to get consistent results with every
 iteration of the function.}
@@ -94,11 +94,11 @@ Note: There are 81 sampling events (sampling location - collection
   (2000-2004) will be included. Note that from these samples, only moving
   waters classified as "wadeable" are included and only samples that are
   "reach-wide" are included. Some information included in the USGS dataset
-  are not included in the EPA datasets, and thus will appear as "NA".
+  are not included in the EPA datasets (and vice versa) and thus will appear as "NA".
   Similar to the USGS data, there were inherent taxonomic issues with the
   EPA data. As such, we have taken the same steps as described above under
-  \code{taxonFix} to address these concerns. NOTE: As of now, \code{agency}
-  must include "USGS". This will be fixed in future versions.
+  \code{taxonFix} to address these concerns. \code{agency} can be set to either
+  "EPA" or "USGS" individually.
 
   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
