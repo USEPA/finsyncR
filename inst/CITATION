@@ -2,7 +2,7 @@ citHeader("To cite StreamData in publications use:")
 
 citEntry(
   entry = "Unpublished",
-  title = "{StreamData}: R Package to Access Cleaned and Compiled USGS Biodata",
+  title = "{StreamData}: R Package to Access Cleaned and Harmonized USGS EPA NRSA",
   author = personList(as.person("Michael Mahon"),
                                    as.person("Devin Jones"),
                                    as.person("Ethan Brown"),
@@ -13,6 +13,6 @@ citEntry(
  textVersion  =
            paste("Michael Mahon, Devin Jones, Ethan Brown, Stefan Kunz,",
                  "Samantha Rumschlag (2021). StreamData: R Package to",
-                 "Access Cleaned and Compiled USGS Biodata.",
+                 "Access Cleaned and Harmonized USGS EPA NRSA.",
                  "R package version 0.0.0.9215")
 )
