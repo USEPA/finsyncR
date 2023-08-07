@@ -8,8 +8,7 @@ getNLCDData(data, scale = "Cat", group = FALSE)
 }
 \arguments{
 \item{data}{Input dataset which needs to include columns for
-\code{"SiteNumber"} and \code{"CollectionYear"}.
-\code{"SiteNumber"} must have \code{"USGS-"} prefix.}
+\code{"SiteNumber"} and \code{"CollectionYear"}.}
 
 \item{scale}{Scale for LULC data to be generated. Must be \code{"Cat"} for
 catchment or \code{"Ws"} for watershed. See \code{Details} below for more
@@ -30,7 +29,7 @@ Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site
 This function has been updated to include all USGS and EPA NRSA sites.
   Land-use/land-cover data is extracted from the USGS National Land Cover
   Database (NLCD). These LULC data are available in the following years:
-  2001, 2004, 2006, 2008, 2011, 2013, and 2016. For instances of years in the
+  2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For instances of years in the
   input data that are not exact year matches from this list, years are
   temporally matched to the closest year with LULC data (e.g. a site sampled
   in 1995 will have LULC data from 2001). Note that for samples that fall at

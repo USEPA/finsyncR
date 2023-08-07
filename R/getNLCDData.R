@@ -2,7 +2,6 @@
 #'
 #' @param data Input dataset which needs to include columns for
 #'  \code{"SiteNumber"} and \code{"CollectionYear"}.
-#'  \code{"SiteNumber"} must have \code{"USGS-"} prefix.
 #' @param scale Scale for LULC data to be generated. Must be \code{"Cat"} for
 #'  catchment or \code{"Ws"} for watershed. See \code{Details} below for more
 #'  information.
@@ -16,7 +15,7 @@
 #' @details This function has been updated to include all USGS and EPA NRSA sites.
 #'   Land-use/land-cover data is extracted from the USGS National Land Cover
 #'   Database (NLCD). These LULC data are available in the following years:
-#'   2001, 2004, 2006, 2008, 2011, 2013, and 2016. For instances of years in the
+#'   2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For instances of years in the
 #'   input data that are not exact year matches from this list, years are
 #'   temporally matched to the closest year with LULC data (e.g. a site sampled
 #'   in 1995 will have LULC data from 2001). Note that for samples that fall at
@@ -61,19 +60,19 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
   #ItemYearScale
 
   ##Focus on only those that end in Cat (catchment) or Ws (watershed)
-  cat_ws_cols <- colnames(streamcat)[stringr::str_sub(colnames(streamcat), -3) == "Cat" |
-                                       stringr::str_sub(colnames(streamcat), -2) == "Ws"]
+  cat_ws_cols <- colnames(streamcat)[stringr::str_sub(colnames(streamcat), -3) == "CAT" |
+                                       stringr::str_sub(colnames(streamcat), -2) == "WS"]
 
   streamcat2 = streamcat %>%
     ##Select columns that are pertinent: site info, size of Ws/Cat, and above cols
-    dplyr::select(COMID, SiteNumber, CatAreaSqKm, WsAreaSqKm, all_of(cat_ws_cols)) %>%
+    dplyr::select(COMID, SiteNumber, CATAREASQKM, WSAREASQKM, all_of(cat_ws_cols)) %>%
     ##Pivot longer, so that non-site info columns are in "Info" and the values are
     ##in "value"; this will help with extraction of year and scale information
     ##In turn, this process will make it easier to join StreamCat data w/ biodata
-    tidyr::pivot_longer(cols = tidyselect::ends_with("Cat") |
-                   tidyselect::ends_with("Ws") |
-                   tidyselect::starts_with("Cat") |
-                   tidyselect::starts_with("Ws"),
+    tidyr::pivot_longer(cols = tidyselect::ends_with("CAT") |
+                   tidyselect::ends_with("WS") |
+                   tidyselect::starts_with("CAT") |
+                   tidyselect::starts_with("WS"),
                  names_to = "Info"
     ) %>%
     ##Get info on whether it is for the Ws or Cat, whether the column has specific
@@ -81,7 +80,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
     ##Extract what the data is (Info2): i.e. PctUrb, PctCrop, etc.
     ##From this, provide broad groupings for NLCD data:
     ## Urb, Crop, and Hay are HumanDominated; everything else is "Natural"
-    dplyr::mutate(Scale = ifelse(grepl("Cat", Info),
+    dplyr::mutate(Scale = ifelse(grepl("CAT", Info),
                           "Cat",
                           "Ws"),
            Y_spec = ifelse(grepl("20", Info),
@@ -94,34 +93,34 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                                 NA
                          )),
            Info2 = ifelse(is.na(Year),
-                          stringr::str_remove(Info, scale),
-                          stringr::str_remove(stringr::str_remove(Info, scale), Year))
+                          stringr::str_remove(Info, toupper(scale)),
+                          stringr::str_remove(stringr::str_remove(Info, toupper(scale)), Year))
     ) %>%
     dplyr::filter(Scale %in% scale) %>%
-    dplyr::filter(Info2 %in% c("PctBl", "PctConif", "PctCrop", "PctDecid", "PctGrs",
+    dplyr::filter(Info2 %in% toupper(c("PctBl", "PctConif", "PctCrop", "PctDecid", "PctGrs",
                         "PctHay", "PctHbWet", "PctMxFst", "PctOw", "PctShrb",
                         "PctUrbHi", "PctUrbLo", "PctUrbMd", "PctUrbOp",
-                        "PctWdWet")) %>%
+                        "PctWdWet"))) %>%
     ##Remove columns we no longer need
     dplyr::select(-Y_spec, -Info)
 
   if(isTRUE(group)){
     streamcat2 <- streamcat2 %>%
-      dplyr::mutate(Info2 = ifelse(grepl("PctUrb",
+      dplyr::mutate(Info2 = ifelse(grepl(toupper("PctUrb"),
                                    Info2),
-                             "PctUrb",
-                             ifelse(grepl(paste(c("PctDec","PctCon",
-                                                  "PctMx"),
+                                   "PctUrb",
+                             ifelse(grepl(paste(toupper(c("PctDecid","PctConif",
+                                                  "PctMxFst")),
                                                 collapse = "|"),
                                           Info2),
                                     "PctFst",
-                                    ifelse(grepl(paste(c("PctGrs", "PctShrb",
-                                                         "PctHay", "PctBl"),
+                                    ifelse(grepl(paste(toupper(c("PctGrs", "PctShrb",
+                                                         "PctHay", "PctBl")),
                                                        collapse = "|"),
                                                  Info2),
                                            "PctOpn",
-                                           ifelse(grepl(paste(c("PctOw", "PctWdWet",
-                                                                "PctHbWet"),
+                                           ifelse(grepl(paste(toupper(c("PctOw", "PctWdWet",
+                                                                "PctHbWet")),
                                                               collapse = "|"),
                                                         Info2),
                                                   "PctWater",
@@ -141,7 +140,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
     dplyr::mutate(Year = as.numeric(Year))
 
   ##Years are the NLCD years
-  Years = c(2001,2004,2006,2008,2011,2013,2016)
+  Years = c(2001,2004,2006,2008,2011,2013,2016, 2019)
 
   ##Read in datasets
 

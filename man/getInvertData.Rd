@@ -12,7 +12,8 @@ getInvertData(
   lifestage = FALSE,
   rarefy = TRUE,
   sharedTaxa = FALSE,
-  seed = 0
+  seed = 0,
+  boatableStreams = FALSE
 )
 }
 \arguments{
@@ -41,6 +42,11 @@ both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
 
 \item{seed}{numeric. Set seed for \code{rarefy} to get consistent results with every
 iteration of the function.}
+
+\item{boatableStreams}{logical. Should EPA boatable streams be included in the
+output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
+so \code{boatableStreams} should only be set to \code{TRUE} when looking at
+EPA data only.}
 }
 \value{
 A species by sample data frame with site, stream reach, and

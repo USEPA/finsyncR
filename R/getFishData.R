@@ -15,6 +15,10 @@
 #'   Multigear Mean Standardization (MGMS) values to account for catchability differences between
 #'   fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).
 #' @param hybrid logical. Should hybrid individuals be included in the output dataset? \code{TRUE} or \code{FALSE}.
+#' @param boatableStreams logical. Should EPA boatable streams be included in the
+#'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
+#'   so \code{boatableStreams} should only be set to \code{TRUE} when looking at
+#'   EPA data only.
 #'
 #' @return A species by sample data frame with site, stream reach, and
 #'   sample information.
@@ -79,7 +83,8 @@ getFishData <- function(dataType = "occur",
                         taxonLevel = "Species",
                         agency = c("USGS","EPA"),
                         standardize = "none",
-                        hybrids = TRUE) {
+                        hybrids = TRUE,
+                        boatableStreams = FALSE) {
 
   if(!(dataType %in% c("abun", "occur"))) {
     stop('dataType must be either "abun" or "occur".')}
@@ -103,260 +108,343 @@ getFishData <- function(dataType = "occur",
     stop(paste('as of now, taxonLevel must be set to "Species"'))
   }
 
-  fish <- utils::read.csv(base::unz(base::system.file("extdata",
-                                                      "20201217.0745.FishResults.zip",
-                                                      package = "StreamData"),
-                                    "20201217.0745.FishResults.csv"),
-                          colClasses = c("SiteNumber" = "character"),
-                          stringsAsFactors = FALSE)
-  if(colnames(fish)[1] != "SIDNO"){
-    colnames(fish)[1] = "SIDNO"
-  }
-  ##Remove the unzipped file from the system
-  if(file.exists(system.file("extdata",
-                             "20201217.0745.FishResults.csv",
-                             package = "StreamData"))){
-    unlink(system.file("extdata",
-                       "20201217.0745.FishResults.csv",
-                       package = "StreamData"))
-  }
-  Project <- utils::read.csv(system.file("extdata",
-                                  "20201217.0745.Project.csv",
-                                  package = "StreamData"),
-                      comment.char="#")
 
-  if(any(grepl("USGS", agency))) {
+  if(any(grepl("USGS", agency))){
+    fish <- utils::read.csv(base::unz(base::system.file("extdata",
+                                                        "20201217.0745.FishResults.zip",
+                                                        package = "StreamData"),
+                                      "20201217.0745.FishResults.csv"),
+                            colClasses = c("SiteNumber" = "character"),
+                            stringsAsFactors = FALSE)
+    if(colnames(fish)[1] != "SIDNO"){
+      colnames(fish)[1] = "SIDNO"
+    }
+    ##Remove the unzipped file from the system
+    if(file.exists(system.file("extdata",
+                               "20201217.0745.FishResults.csv",
+                               package = "StreamData"))){
+      unlink(system.file("extdata",
+                         "20201217.0745.FishResults.csv",
+                         package = "StreamData"))
+    }
+    Project <- utils::read.csv(system.file("extdata",
+                                           "20201217.0745.Project.csv",
+                                           package = "StreamData"),
+                               comment.char="#")
+
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
                   "Collection of Basic Records",
                   "Other Federal Agencies")
-  }
 
-  ##NEED TO FIGURE OUT HOW TO HANDLE HYBRIDS HERE; I THINK THERE IS A HYBRID TAG
-  ##COLUMN; SHOULD BE ABLE TO RIP STRAIGHT FROM THERE: BioDataTaxonName
+    ##NEED TO FIGURE OUT HOW TO HANDLE HYBRIDS HERE; I THINK THERE IS A HYBRID TAG
+    ##COLUMN; SHOULD BE ABLE TO RIP STRAIGHT FROM THERE: BioDataTaxonName
 
-  fishH <- data.frame(Hybrid = unique((fish %>%
-    filter(HybridFlag == "Y"))$BioDataTaxonName)) %>%
-    filter(!grepl("hybrid", Hybrid)) %>%
-    mutate(Spp1 = sub("\\ x .*", "", Hybrid),
-           Spp2 = sub(".*\\ x ", "", Hybrid),
-           Genus1 = sub("\\ .*" ,
-                        "",Spp1),
-           Species1 = sub(".*\\ " ,
-                        "",Spp1),
-           Genus2 = sub("\\ .*" ,
-                        "",Spp2),
-           Species2 = sub(".*\\ " ,
+    fishH <- data.frame(Hybrid = unique((fish %>%
+                                           filter(HybridFlag == "Y"))$BioDataTaxonName)) %>%
+      filter(!grepl("hybrid", Hybrid)) %>%
+      mutate(Spp1 = sub("\\ x .*", "", Hybrid),
+             Spp2 = sub(".*\\ x ", "", Hybrid),
+             Genus1 = sub("\\ .*" ,
+                          "",Spp1),
+             Species1 = sub(".*\\ " ,
+                            "",Spp1),
+             Genus2 = sub("\\ .*" ,
                           "",Spp2),
-           GENUS = ifelse(Genus1 == Genus2,
-                          Genus1,
-                          paste(Genus1, tolower(Genus2), sep = " x ")),
-           SPECIES = paste(Species1, Species2, sep = " x "),
-           SCIENTIFIC = paste(GENUS, SPECIES, sep = " ")
-           ) %>%
-    filter(Genus2 != Species2)
+             Species2 = sub(".*\\ " ,
+                            "",Spp2),
+             GENUS = ifelse(Genus1 == Genus2,
+                            Genus1,
+                            paste(Genus1, tolower(Genus2), sep = " x ")),
+             SPECIES = paste(Species1, Species2, sep = " x "),
+             SCIENTIFIC = paste(GENUS, SPECIES, sep = " ")
+      ) %>%
+      filter(Genus2 != Species2)
 
-  fish$Genus <- ifelse(fish$BioDataTaxonName %in% fishH$Hybrid,
-                       fishH$GENUS[match(fish$BioDataTaxonName,
-                                         fishH$Hybrid)],
-                       fish$Genus)
+    fish$Genus <- ifelse(fish$BioDataTaxonName %in% fishH$Hybrid,
+                         fishH$GENUS[match(fish$BioDataTaxonName,
+                                           fishH$Hybrid)],
+                         fish$Genus)
 
-  fish$Species <- ifelse(fish$BioDataTaxonName %in% fishH$Hybrid,
-                       fishH$SCIENTIFIC[match(fish$BioDataTaxonName,
-                                         fishH$Hybrid)],
-                       fish$Species)
+    fish$Species <- ifelse(fish$BioDataTaxonName %in% fishH$Hybrid,
+                           fishH$SCIENTIFIC[match(fish$BioDataTaxonName,
+                                                  fishH$Hybrid)],
+                           fish$Species)
 
-  fishup = fish %>%
-    dplyr::filter(ProjectLabel %in% (Project %>%
-                                       dplyr::filter(Program %in% database) %>%
-                                       dplyr::distinct(ProjectLabel,
-                                                       .keep_all = FALSE))[ , "ProjectLabel"]) %>%
-    dplyr::select(SIDNO, ProjectLabel, SiteNumber, CollectionDate, StartTime,
-                  SiteName, StudyReachName, TimeDatum, CollectionYear,
-                  CollectionMonth, CollectionDayOfYear, NAWQA.SMCOD,
-                  SiteVisitSampleNumber, ProjectAssignedSampleLabel,
-                  NAWQAStudyUnitCode, MethodCode, Abundance,
-                  PublishedTaxonNameLevel, PublishedTaxonName, BioDataTaxonName,
-                  Superclass, Class,
-                  Subclass, Superorder, Order, Superfamily, Family, Subfamily,
-                  Genus, Species, Subspecies) %>%
-    tidyr::unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
-    tidyr::unite(SampleID, c("SIDNO",
-                      "SiteNumber",
-                      "CollectionDate",
-                      "PublishedTaxonName"), remove = FALSE) %>%
-    dplyr::mutate(CollectionDate = as.Date(CollectionDate)) %>%
-    dplyr::group_by(SampleID) %>%
-    dplyr::mutate(SumAbundance = sum(Abundance, na.rm = TRUE)) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-SampleID, -Abundance)
-
-  ##Need to get Lat, Long, HUC, Drainage Area
-  site <- utils::read.csv(system.file("extdata",
-                               "20201217.0745.SiteInfo.csv",
-                               package = "StreamData"),
-                   colClasses = c("SiteNumber" = "character")) %>%
-    dplyr::select(SiteNumber, Latitude_dd, Longitude_dd,
-           CoordinateDatum,
-           HUCCode, DrainageArea_mi2,
-           SiteTypeName,
-           CountyFIPSCode,
-           StateFIPSCode)
-
-  ##
-  sample <- utils::read.csv(system.file("extdata",
-                                 "20201217.0745.FishSamp.csv",
-                                 package = "StreamData"),
-                     colClasses = c("SiteNumber" = "character"))
-  if(colnames(sample)[1] != "SIDNO"){
-    colnames(sample)[1] = "SIDNO"
-  }
-
-  sample = sample %>%
-    dplyr::select(SIDNO, ReachLengthFished_m)
-
-  samplemethod = utils::read.csv(system.file("extdata",
-                                      "20201217.0745.FishMethodAndSubreachInfo.csv",
-                                      package = "StreamData"),
-                          colClasses = c("SiteNumber" = "character"))
-
-  if(colnames(samplemethod)[1] != "SIDNO"){
-    colnames(samplemethod)[1] = "SIDNO"
-  }
-  samplemethod = samplemethod %>%
-    tidyr::unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
-    dplyr::select(SIDNO_MethodCode,
-           NumberSeineHauls, NumberStationarySetsKicks, NumberSnorkelingTransects,
-           SecondsShockTime)
-  samplemethod <- samplemethod %>%
-    group_by(SIDNO_MethodCode) %>%
-    summarise(across(NumberSeineHauls:SecondsShockTime, ~sum(.x, na.rm = T)))
-  ##Join the datasets
-  fish_info = dplyr::left_join(dplyr::left_join(dplyr::left_join(fishup,
-                                            site,
-                                            by = "SiteNumber"),
-                                  sample,
-                                  by = "SIDNO"), samplemethod, by = "SIDNO_MethodCode")
-
-  mycols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$mycols
-  taxcols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$taxcols
-
-  fish_info = fish_info %>%
-    mutate(FISH_PROTOCOL = ifelse(grepl("Boat", MethodCode),
-                                  "BOATABLE",
-                                  ifelse(ReachLengthFished_m / 20 < 12.5,
-                                         "SM_WADEABLE",
-                                         ifelse(ReachLengthFished_m / 20 < 25.1,
-                                                "LG_WADEABLE",
-                                                "BOATABLE"))))
-
-
-  fish_comm = fish_info %>%
-    dplyr::filter(PublishedTaxonNameLevel %in% taxcols |
-                    grepl(" x ", BioDataTaxonName)) %>%
-    dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
-    tidyr::unite(UNIQUE, c(SIDNO, MethodCode, all_of(taxonLevel)), remove = FALSE) %>%
-    dplyr::group_by(UNIQUE) %>%
-    # multi-counting below; remove!
-    # dplyr::mutate(SumAbundance = sum(SumAbundance)) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(-UNIQUE, -SIDNO_MethodCode, -PublishedTaxonName,
-           -PublishedTaxonNameLevel, -BioDataTaxonName) %>%
-    dplyr::select(-tidyselect::any_of(mycols)) %>%
-    tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
-                names_prefix = "tax_",
-                values_from = SumAbundance,
-                values_fill = 0)
-
-
-
-  if(dataType == "abun"){
-
-  # calculate abundance matrices via raw abundance ("none"), CPUE standardization, or MGMS standardization
-  if(standardize == "none"){
-    fish_comm2 = fish_comm %>%
-      dplyr::mutate(MethodBasic = ifelse(grepl("Seine|Net", MethodCode, fixed = TRUE),
-                                         "Seine",
-                                         ifelse(grepl("Snork", MethodCode, fixed = TRUE),
-                                                "Snorkel",
-                                                "Shocking"))) %>%
-      dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
-      dplyr::group_by(SIDNO, MethodBasic) %>%
-      dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-                                  sum)) %>%
-      dplyr::slice(1) %>%
+    fishup = fish %>%
+      dplyr::filter(ProjectLabel %in% (Project %>%
+                                         dplyr::filter(Program %in% database) %>%
+                                         dplyr::distinct(ProjectLabel,
+                                                         .keep_all = FALSE))[ , "ProjectLabel"]) %>%
+      dplyr::select(SIDNO, ProjectLabel, SiteNumber, CollectionDate, StartTime,
+                    SiteName, StudyReachName, TimeDatum, CollectionYear,
+                    CollectionMonth, CollectionDayOfYear, NAWQA.SMCOD,
+                    SiteVisitSampleNumber, ProjectAssignedSampleLabel,
+                    NAWQAStudyUnitCode, MethodCode, Abundance,
+                    PublishedTaxonNameLevel, PublishedTaxonName, BioDataTaxonName,
+                    Superclass, Class,
+                    Subclass, Superorder, Order, Superfamily, Family, Subfamily,
+                    Genus, Species, Subspecies) %>%
+      tidyr::unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
+      tidyr::unite(SampleID, c("SIDNO",
+                               "SiteNumber",
+                               "CollectionDate",
+                               "PublishedTaxonName"), remove = FALSE) %>%
+      dplyr::mutate(CollectionDate = as.Date(CollectionDate)) %>%
+      dplyr::group_by(SampleID) %>%
+      dplyr::mutate(SumAbundance = sum(Abundance, na.rm = TRUE)) %>%
       dplyr::ungroup() %>%
-      dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
-                                            rowSums(across(c("NumberSeineHauls",
-                                                             "NumberStationarySetsKicks")),
-                                                    na.rm = TRUE),
-                                            ifelse(MethodBasic == "Shocking",
-                                                   MinutesShockTime,
-                                                   NumberSnorkelingTransects))) %>%
-      dplyr::relocate(tidyselect::contains("tax_"),
-                      .after = tidyselect::last_col())
+      dplyr::select(-SampleID, -Abundance)
 
-  }
-    ####ISSUE HERE
-    ##For some reason there are some zeros for standardize method
-  if (standardize == "CPUE"){
-    fish_comm2 <- fish_comm %>%
-      dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
-               !is.na(NumberStationarySetsKicks) |
-               !is.na(NumberSnorkelingTransects)) %>%
-      dplyr::filter(!is.na(ReachLengthFished_m))%>%
-      dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
-                                  "Seine",
-                                  ifelse(grepl("Snork", MethodCode, fixed = TRUE),
-                                         "Snorkel",
-                                         "Shocking"))) %>%
-      dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
-      dplyr::group_by(SIDNO, MethodBasic) %>%
-      dplyr::mutate(across(contains("tax_"),
-                    sum)) %>%
-      dplyr::mutate(MinutesShockTime = sum(MinutesShockTime, na.rm = TRUE)) %>%
-      dplyr::slice(1) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(NumberSeineHauls = ifelse(NumberSeineHauls == 0,
-                                              1,
-                                              NumberSeineHauls)) %>%
-      dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
-                                     rowSums(across(c("NumberSeineHauls",
-                                                      "NumberStationarySetsKicks")),
-                                             na.rm = TRUE),
-                                     ifelse(MethodBasic == "Shocking",
-                                            MinutesShockTime,
-                                            NumberSnorkelingTransects))) %>%
-      dplyr::relocate(tidyselect::contains("tax_"),
-               .after = tidyselect::last_col()) %>%
-      dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-                    ~. / StandardMethod / ReachLengthFished_m ))
+    ##Need to get Lat, Long, HUC, Drainage Area
+    site <- utils::read.csv(system.file("extdata",
+                                        "20201217.0745.SiteInfo.csv",
+                                        package = "StreamData"),
+                            colClasses = c("SiteNumber" = "character")) %>%
+      dplyr::select(SiteNumber, Latitude_dd, Longitude_dd,
+                    CoordinateDatum,
+                    HUCCode, DrainageArea_mi2,
+                    SiteTypeName,
+                    CountyFIPSCode,
+                    StateFIPSCode)
 
-    # sum CPUE for replicate methods (e.g. "Seine x2" or "Shock x2")
-    siteInfo = fish_comm2 %>%
-      dplyr::select(-tidyselect::contains("tax_")) %>%
-      dplyr::group_by(CollectionDate, SiteNumber)
-
-    condensedCPUEdata = fish_comm2 %>%
-      dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber, MethodBasic) %>%
-      dplyr::group_by(CollectionDate, SiteNumber, MethodBasic) %>%
-      dplyr::summarise_all(.funs = sum)
-
-    suppressMessages({fish_comm2 = siteInfo %>%
-      dplyr::left_join(condensedCPUEdata) %>%
-      dplyr::group_by(CollectionDate,SiteNumber,MethodBasic) %>%
-      dplyr::slice(1)})
-
+    ##
+    sample <- utils::read.csv(system.file("extdata",
+                                          "20201217.0745.FishSamp.csv",
+                                          package = "StreamData"),
+                              colClasses = c("SiteNumber" = "character"))
+    if(colnames(sample)[1] != "SIDNO"){
+      colnames(sample)[1] = "SIDNO"
     }
 
-    # alternative standardization method, multigear mean standardization (Gibson-Reinemer et al. 2017)
-  if (standardize == "MGMS"){
-      fish_comm2 <- fish_comm %>%
-        dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
-                        !is.na(NumberStationarySetsKicks) |
-                        !is.na(NumberSnorkelingTransects)) %>%
-        dplyr::filter(!is.na(ReachLengthFished_m))%>%
+    sample = sample %>%
+      dplyr::select(SIDNO, ReachLengthFished_m)
+
+    samplemethod = utils::read.csv(system.file("extdata",
+                                               "20201217.0745.FishMethodAndSubreachInfo.csv",
+                                               package = "StreamData"),
+                                   colClasses = c("SiteNumber" = "character"))
+
+    if(colnames(samplemethod)[1] != "SIDNO"){
+      colnames(samplemethod)[1] = "SIDNO"
+    }
+    samplemethod = samplemethod %>%
+      tidyr::unite(SIDNO_MethodCode, c("SIDNO", "MethodCode"), remove = FALSE) %>%
+      dplyr::select(SIDNO_MethodCode,
+                    NumberSeineHauls, NumberStationarySetsKicks, NumberSnorkelingTransects,
+                    SecondsShockTime)
+    samplemethod <- samplemethod %>%
+      group_by(SIDNO_MethodCode) %>%
+      summarise(across(NumberSeineHauls:SecondsShockTime, ~sum(.x, na.rm = T)))
+    ##Join the datasets
+    fish_info = dplyr::left_join(dplyr::left_join(dplyr::left_join(fishup,
+                                                                   site,
+                                                                   by = "SiteNumber"),
+                                                  sample,
+                                                  by = "SIDNO"), samplemethod, by = "SIDNO_MethodCode")
+
+    mycols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$mycols
+    taxcols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$taxcols
+
+    fish_info = fish_info %>%
+      mutate(FISH_PROTOCOL = ifelse(grepl("Boat", MethodCode),
+                                    "BOATABLE",
+                                    ifelse(ReachLengthFished_m / 20 < 12.5,
+                                           "SM_WADEABLE",
+                                           ifelse(ReachLengthFished_m / 20 < 25.1,
+                                                  "LG_WADEABLE",
+                                                  "BOATABLE"))))
+
+
+    fish_comm = fish_info %>%
+      dplyr::filter(PublishedTaxonNameLevel %in% taxcols |
+                      grepl(" x ", BioDataTaxonName)) %>%
+      dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel)), dplyr::any_vars(. != "")) %>%
+      tidyr::unite(UNIQUE, c(SIDNO, MethodCode, all_of(taxonLevel)), remove = FALSE) %>%
+      dplyr::group_by(UNIQUE) %>%
+      # multi-counting below; remove!
+      # dplyr::mutate(SumAbundance = sum(SumAbundance)) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(-UNIQUE, -SIDNO_MethodCode, -PublishedTaxonName,
+                    -PublishedTaxonNameLevel, -BioDataTaxonName) %>%
+      dplyr::select(-tidyselect::any_of(mycols)) %>%
+      tidyr::pivot_wider(names_from = tidyselect::all_of(taxonLevel),
+                         names_prefix = "tax_",
+                         values_from = SumAbundance,
+                         values_fill = 0)
+
+
+
+    if(dataType == "abun"){
+
+      # calculate abundance matrices via raw abundance ("none"), CPUE standardization, or MGMS standardization
+      if(standardize == "none"){
+        fish_comm2 = fish_comm %>%
+          dplyr::mutate(MethodBasic = ifelse(grepl("Seine|Net", MethodCode, fixed = TRUE),
+                                             "Seine",
+                                             ifelse(grepl("Snork", MethodCode, fixed = TRUE),
+                                                    "Snorkel",
+                                                    "Shocking"))) %>%
+          dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
+          dplyr::group_by(SIDNO, MethodBasic) %>%
+          dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                      sum)) %>%
+          dplyr::slice(1) %>%
+          dplyr::ungroup() %>%
+          dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
+                                                rowSums(across(c("NumberSeineHauls",
+                                                                 "NumberStationarySetsKicks")),
+                                                        na.rm = TRUE),
+                                                ifelse(MethodBasic == "Shocking",
+                                                       MinutesShockTime,
+                                                       NumberSnorkelingTransects))) %>%
+          dplyr::relocate(tidyselect::contains("tax_"),
+                          .after = tidyselect::last_col())
+
+      }
+      ####ISSUE HERE
+      ##For some reason there are some zeros for standardize method
+      if (standardize == "CPUE"){
+        fish_comm2 <- fish_comm %>%
+          dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
+                          !is.na(NumberStationarySetsKicks) |
+                          !is.na(NumberSnorkelingTransects)) %>%
+          dplyr::filter(!is.na(ReachLengthFished_m))%>%
+          dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
+                                             "Seine",
+                                             ifelse(grepl("Snork", MethodCode, fixed = TRUE),
+                                                    "Snorkel",
+                                                    "Shocking"))) %>%
+          dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
+          dplyr::group_by(SIDNO, MethodBasic) %>%
+          dplyr::mutate(across(contains("tax_"),
+                               sum)) %>%
+          dplyr::mutate(MinutesShockTime = sum(MinutesShockTime, na.rm = TRUE)) %>%
+          dplyr::slice(1) %>%
+          dplyr::ungroup() %>%
+          dplyr::mutate(NumberSeineHauls = ifelse(NumberSeineHauls == 0,
+                                                  1,
+                                                  NumberSeineHauls)) %>%
+          dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
+                                                rowSums(across(c("NumberSeineHauls",
+                                                                 "NumberStationarySetsKicks")),
+                                                        na.rm = TRUE),
+                                                ifelse(MethodBasic == "Shocking",
+                                                       MinutesShockTime,
+                                                       NumberSnorkelingTransects))) %>%
+          dplyr::relocate(tidyselect::contains("tax_"),
+                          .after = tidyselect::last_col()) %>%
+          dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                      ~. / StandardMethod / ReachLengthFished_m ))
+
+        # sum CPUE for replicate methods (e.g. "Seine x2" or "Shock x2")
+        siteInfo = fish_comm2 %>%
+          dplyr::select(-tidyselect::contains("tax_")) %>%
+          dplyr::group_by(CollectionDate, SiteNumber)
+
+        condensedCPUEdata = fish_comm2 %>%
+          dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber, MethodBasic) %>%
+          dplyr::group_by(CollectionDate, SiteNumber, MethodBasic) %>%
+          dplyr::summarise_all(.funs = sum)
+
+        suppressMessages({fish_comm2 = siteInfo %>%
+          dplyr::left_join(condensedCPUEdata) %>%
+          dplyr::group_by(CollectionDate,SiteNumber,MethodBasic) %>%
+          dplyr::slice(1)})
+
+      }
+
+      # alternative standardization method, multigear mean standardization (Gibson-Reinemer et al. 2017)
+      if (standardize == "MGMS"){
+        fish_comm2 <- fish_comm %>%
+          dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
+                          !is.na(NumberStationarySetsKicks) |
+                          !is.na(NumberSnorkelingTransects)) %>%
+          dplyr::filter(!is.na(ReachLengthFished_m))%>%
+          dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
+                                             "Seine",
+                                             ifelse(grepl("Snork", MethodCode, fixed = TRUE),
+                                                    "Snorkel",
+                                                    "Shocking"))) %>%
+          dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
+          dplyr::group_by(SIDNO, MethodBasic) %>%
+          dplyr::mutate(across(contains("tax_"),
+                               sum)) %>%
+          dplyr::mutate(MinutesShockTime = sum(MinutesShockTime, na.rm = TRUE)) %>%
+          dplyr::slice(1) %>%
+          dplyr::ungroup() %>%
+          dplyr::mutate(NumberSeineHauls = ifelse(NumberSeineHauls == 0,
+                                                  1,
+                                                  NumberSeineHauls)) %>%
+          dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
+                                                rowSums(across(c("NumberSeineHauls",
+                                                                 "NumberStationarySetsKicks")),
+                                                        na.rm = TRUE),
+                                                ifelse(MethodBasic == "Shocking",
+                                                       MinutesShockTime,
+                                                       NumberSnorkelingTransects))) %>%
+          dplyr::relocate(tidyselect::contains("tax_"),
+                          .after = tidyselect::last_col()) %>%
+          dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                      ~. / StandardMethod / ReachLengthFished_m ))
+
+        # sum CPUE for replicate methods (e.g. "Seine x2" or "Shock x2")
+        siteInfo = fish_comm2 %>%
+          dplyr::select(-tidyselect::contains("tax_")) %>%
+          dplyr::group_by(CollectionDate, SiteNumber)
+
+        condensedCPUEdata = fish_comm2 %>%
+          dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber, MethodBasic) %>%
+          dplyr::group_by(CollectionDate, SiteNumber, MethodBasic) %>%
+          dplyr::summarise_all(.funs = sum)
+
+        suppressMessages({fish_comm2 = siteInfo %>%
+          dplyr::left_join(condensedCPUEdata) %>%
+          dplyr::group_by(CollectionDate,SiteNumber,MethodBasic) %>%
+          dplyr::slice(1)})
+
+        TotalCPUE.df = fish_comm2 %>%
+          dplyr::mutate(TotalCPUE = rowSums(dplyr::across(tidyselect::contains("tax_")))) # sum CPUE for all taxa
+
+        # Remove TotalCPUE NAs to avoid producing NaN in Mean Total CPUE calculations
+        # (this only seems to be a problem for ~10 Shocking data points)
+
+        MeanTotalCPUE = TotalCPUE.df[!is.na(TotalCPUE.df$TotalCPUE),] %>%
+          dplyr::group_by(MethodBasic) %>%
+          dplyr::summarise(MeanTotalCPUE = mean(TotalCPUE)) # calculate avg CPUE for each sampling method
+
+        fish_comm2 = dplyr::left_join(fish_comm2, MeanTotalCPUE, by = "MethodBasic")
+
+        fish_comm2 = fish_comm2 %>%
+          dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                      .fns = ~./MeanTotalCPUE)) %>% # divide each row by the mean CPUE for its respective sampling method
+          # (this is now in units of MGMS)
+          dplyr::ungroup()
+
+        siteInfo = fish_comm2 %>%
+          dplyr::select(-tidyselect::contains("tax_")) %>%
+          dplyr::group_by(CollectionDate, SiteNumber) %>%
+          dplyr::mutate(Methods = paste(MethodBasic, collapse = ", ")) %>%
+          # include only unique site-date combinations
+          dplyr::slice(1) %>%
+          dplyr::ungroup()
+
+        # sum MGMS values for rows with same collection date and site number (combining methods since they are now standardized)
+        condensedMGMSdata = fish_comm2 %>%
+          dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber) %>%
+          dplyr::group_by(CollectionDate, SiteNumber) %>%
+          dplyr::summarise_all(.funs = mean) %>%
+          dplyr::ungroup()
+
+        suppressMessages({fish_comm2 = siteInfo %>%
+          dplyr::left_join(condensedMGMSdata)})
+
+      }
+    }
+
+    if(dataType == "occur") {
+      fish_comm2 = fish_comm %>%
         dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
                                            "Seine",
                                            ifelse(grepl("Snork", MethodCode, fixed = TRUE),
@@ -364,14 +452,11 @@ getFishData <- function(dataType = "occur",
                                                   "Shocking"))) %>%
         dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
         dplyr::group_by(SIDNO, MethodBasic) %>%
-        dplyr::mutate(across(contains("tax_"),
-                             sum)) %>%
-        dplyr::mutate(MinutesShockTime = sum(MinutesShockTime, na.rm = TRUE)) %>%
+        dplyr::mutate(Methods = paste(MethodBasic, collapse = ", ")) %>%
+        dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
+                                    sum)) %>%
         dplyr::slice(1) %>%
         dplyr::ungroup() %>%
-        dplyr::mutate(NumberSeineHauls = ifelse(NumberSeineHauls == 0,
-                                                1,
-                                                NumberSeineHauls)) %>%
         dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
                                               rowSums(across(c("NumberSeineHauls",
                                                                "NumberStationarySetsKicks")),
@@ -381,93 +466,14 @@ getFishData <- function(dataType = "occur",
                                                      NumberSnorkelingTransects))) %>%
         dplyr::relocate(tidyselect::contains("tax_"),
                         .after = tidyselect::last_col()) %>%
-        dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-                                    ~. / StandardMethod / ReachLengthFished_m ))
-
-      # sum CPUE for replicate methods (e.g. "Seine x2" or "Shock x2")
-      siteInfo = fish_comm2 %>%
-        dplyr::select(-tidyselect::contains("tax_")) %>%
-        dplyr::group_by(CollectionDate, SiteNumber)
-
-      condensedCPUEdata = fish_comm2 %>%
-        dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber, MethodBasic) %>%
-        dplyr::group_by(CollectionDate, SiteNumber, MethodBasic) %>%
-        dplyr::summarise_all(.funs = sum)
-
-      suppressMessages({fish_comm2 = siteInfo %>%
-        dplyr::left_join(condensedCPUEdata) %>%
-        dplyr::group_by(CollectionDate,SiteNumber,MethodBasic) %>%
-        dplyr::slice(1)})
-
-      TotalCPUE.df = fish_comm2 %>%
-        dplyr::mutate(TotalCPUE = rowSums(dplyr::across(tidyselect::contains("tax_")))) # sum CPUE for all taxa
-
-      # Remove TotalCPUE NAs to avoid producing NaN in Mean Total CPUE calculations
-      # (this only seems to be a problem for ~10 Shocking data points)
-
-      MeanTotalCPUE = TotalCPUE.df[!is.na(TotalCPUE.df$TotalCPUE),] %>%
-        dplyr::group_by(MethodBasic) %>%
-        dplyr::summarise(MeanTotalCPUE = mean(TotalCPUE)) # calculate avg CPUE for each sampling method
-
-      fish_comm2 = dplyr::left_join(fish_comm2, MeanTotalCPUE, by = "MethodBasic")
-
-      fish_comm2 = fish_comm2 %>%
-        dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-                                    .fns = ~./MeanTotalCPUE)) %>% # divide each row by the mean CPUE for its respective sampling method
-                                                                  # (this is now in units of MGMS)
-        dplyr::ungroup()
-
-      siteInfo = fish_comm2 %>%
-        dplyr::select(-tidyselect::contains("tax_")) %>%
-        dplyr::group_by(CollectionDate, SiteNumber) %>%
-        dplyr::mutate(Methods = paste(MethodBasic, collapse = ", ")) %>%
-        # include only unique site-date combinations
-        dplyr::slice(1) %>%
-        dplyr::ungroup()
-
-      # sum MGMS values for rows with same collection date and site number (combining methods since they are now standardized)
-      condensedMGMSdata = fish_comm2 %>%
-        dplyr::select(tidyselect::contains("tax_"), CollectionDate, SiteNumber) %>%
-        dplyr::group_by(CollectionDate, SiteNumber) %>%
-        dplyr::summarise_all(.funs = mean) %>%
-        dplyr::ungroup()
-
-      suppressMessages({fish_comm2 = siteInfo %>%
-        dplyr::left_join(condensedMGMSdata)})
-
-  }
-}
-
-  if(dataType == "occur") {
-    fish_comm2 = fish_comm %>%
-      dplyr::mutate(MethodBasic = ifelse(grepl("Seine", MethodCode, fixed = TRUE),
-                                         "Seine",
-                                         ifelse(grepl("Snork", MethodCode, fixed = TRUE),
-                                                "Snorkel",
-                                                "Shocking"))) %>%
-      dplyr::mutate(MinutesShockTime = SecondsShockTime / 60) %>%
-      dplyr::group_by(SIDNO, MethodBasic) %>%
-      dplyr::mutate(Methods = paste(MethodBasic, collapse = ", ")) %>%
-      dplyr::mutate(dplyr::across(tidyselect::contains("tax_"),
-                                  sum)) %>%
-      dplyr::slice(1) %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate(StandardMethod = ifelse(MethodBasic == "Seine",
-                                            rowSums(across(c("NumberSeineHauls",
-                                                             "NumberStationarySetsKicks")),
-                                                    na.rm = TRUE),
-                                            ifelse(MethodBasic == "Shocking",
-                                                   MinutesShockTime,
-                                                   NumberSnorkelingTransects))) %>%
-      dplyr::relocate(tidyselect::contains("tax_"),
-                      .after = tidyselect::last_col()) %>%
-      dplyr::select(-SecondsShockTime,
-                    -SIDNO) %>%
-      dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
+        dplyr::select(-SecondsShockTime,
+                      -SIDNO) %>%
+        dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
+    }
   }
 
   if(any(grepl("EPA", agency))){
-##EPA ONLY WORKS WITH SPECIES FOR NOW; NOT GOING TO TAKE THE TIME TO MAKE IT WORK OTHERWISE
+    ##EPA ONLY WORKS WITH SPECIES FOR NOW; NOT GOING TO TAKE THE TIME TO MAKE IT WORK OTHERWISE
 
     #READ IN STUFF
     ##Read in datasets directly from EPA website - may want a more stable source
@@ -482,9 +488,9 @@ getFishData <- function(dataType = "occur",
 
     ##FIX 1819 COUNT UIDs
     NRSA_1819_fishcnt$UID <- NRSA_1819_sites$UID[match(paste(NRSA_1819_fishcnt$SITE_ID,
-                                    NRSA_1819_fishcnt$DATE_COL, sep = "_"),
-                              paste(NRSA_1819_sites$SITE_ID,
-                                    NRSA_1819_sites$DATE_COL, sep = "_"))]
+                                                             NRSA_1819_fishcnt$DATE_COL, sep = "_"),
+                                                       paste(NRSA_1819_sites$SITE_ID,
+                                                             NRSA_1819_sites$DATE_COL, sep = "_"))]
 
     # NRSA_1819_sampinfo <- read.csv("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-sampling-information-data.csv",
     #                                colClasses = c("UID" = "character"),
@@ -525,7 +531,7 @@ getFishData <- function(dataType = "occur",
                             comment.char="#",
                             stringsAsFactors = FALSE)
 
-###
+    ###
 
     #############
     ##2008/2009
@@ -664,8 +670,8 @@ getFishData <- function(dataType = "occur",
 
     NRSA_fish_info <- NRSA_fish_sites %>%
       dplyr::left_join(NRSA_fish_sampleinfo %>%
-                  filter(UID %in% NRSA_fish_sites$UID) %>%
-                  dplyr::select(-PRIM_FSHTIME), by = "UID")
+                         filter(UID %in% NRSA_fish_sites$UID) %>%
+                         dplyr::select(-PRIM_FSHTIME), by = "UID")
 
     ##Join NRSA_fish_sites with actual data - may need to do the reverse order here
     ##Could be that some sites aren't in fish dataset, but are in site dataset
@@ -705,17 +711,17 @@ getFishData <- function(dataType = "occur",
 
     ##Add no fish collected rows
     NRSA_FISH_wSite <-  bind_rows(NRSA_FISH_wSite,
-              NRSA_fish_info %>%
-                filter(SAMPLED_FISH == "YES-NO FISH INFERRED") %>%
-                mutate(RCH_LENGTH = 150,
-                       FISH_PROTOCOL = "SM_WADEABLE",
-                       MethodBasic = "Shocking",
-                       MinutesShockTime = 10,
-                       StandardMethod = MinutesShockTime,
-                       GENUS = "No fish",
-                       SPECIES = "No fish",
-                       SCIENTIFIC = "No fish collected") %>%
-                dplyr::select(-BOAT_WADE)
+                                  NRSA_fish_info %>%
+                                    filter(SAMPLED_FISH == "YES-NO FISH INFERRED") %>%
+                                    mutate(RCH_LENGTH = 150,
+                                           FISH_PROTOCOL = "SM_WADEABLE",
+                                           MethodBasic = "Shocking",
+                                           MinutesShockTime = 10,
+                                           StandardMethod = MinutesShockTime,
+                                           GENUS = "No fish",
+                                           SPECIES = "No fish",
+                                           SCIENTIFIC = "No fish collected") %>%
+                                    dplyr::select(-BOAT_WADE)
     )
 
 
@@ -806,7 +812,25 @@ getFishData <- function(dataType = "occur",
     ##MethodBasic (Method - Siene or Shocking)
     ##StandardMethod (FISHED)
 
+  }
 
+
+  if(all(grepl("EPA", agency))) {
+
+    full_fish <- NRSA_FISH_comm %>%
+      mutate(Agency = "EPA") %>%
+      mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
+
+  } else if(all(grepl("USGS", agency))){
+    full_fish = fish_comm2 %>%
+      mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
+             # StandardMethod = as.character(StandardMethod),
+             Agency = "USGS")%>%
+      relocate(Agency, .after = SiteNumber) %>%
+      dplyr::select(-StateFIPSCode, -CountyFIPSCode)  %>%
+      mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
+
+  } else if(any(grepl("EPA", agency)) & any(grepl("USGS", agency))) {
 
     full_fish <- bind_rows(fish_comm2 %>%
                              mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
@@ -816,21 +840,14 @@ getFishData <- function(dataType = "occur",
                              dplyr::select(-StateFIPSCode, -CountyFIPSCode, -MethodCode),
                            NRSA_FISH_comm %>% mutate(Agency = "EPA")) %>%
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
-
-    if(dataType == "occur") {
-      full_fish = full_fish %>%
-        dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
-                                    ~replace(., . > 0, 1)))
-    }
+  } else {}
 
 
-  } else {full_fish = fish_comm2 %>%
-    mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
-           # StandardMethod = as.character(StandardMethod),
-           Agency = "USGS")%>%
-    relocate(Agency, .after = SiteNumber) %>%
-    dplyr::select(-StateFIPSCode, -CountyFIPSCode)}
-
+  if(dataType == "occur") {
+    full_fish = full_fish %>%
+      dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
+                                  ~replace(., . > 0, 1)))
+  }
 
   ##Remove those observations with 0s in their StandardMethod
   full_fish <- full_fish %>%
@@ -840,64 +857,123 @@ getFishData <- function(dataType = "occur",
                                         "MinutesShockTime", "SecondsShockTime")))
 
   full_fish <- full_fish %>%
-    left_join(StreamData:::.allsitesCOMID)
+    left_join(StreamData:::.allsitesCOMID, by = dplyr::join_by(SiteNumber))
 
   full_fish <- full_fish  %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
+  if(!isTRUE(boatableStreams)){
+    full_fish <- full_fish %>%
+      ##remove boatable sites
+      filter(FISH_PROTOCOL != "BOATABLE")
+  }
 
   ##Fix some odd taxonomy issues here - mostly getting rid of subspecies
   full_fish <- full_fish %>%
-    mutate(`Cottus bairdii` = `Cottus bairdii` + `Cottus bairdi`,
-           `Macrhybopsis aestivalis` = `Macrhybopsis aestivalis` + `Macrhybopsis cf. aestivalis`,
-           `Notropis spectrunculus` = `Notropis spectrunculus` + `Notropis cf. spectrunculus`,
-           `Catostomus latipinnis` = `Catostomus latipinnis` + `Catostomus cf. latipinnis`,
-           `Cyprinella zanema` = `Cyprinella zanema` + `Cyprinella cf. zanema`,
-           `Noturus leptacanthus` = `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`,
-           `Moxostoma erythrurum` = `Moxostoma erythrurum` + `Moxostoma sp cf erythrurum`,
-           `Moxostoma lachneri` = `Moxostoma lachneri` + `Moxostoma cf. lachneri`,
-           `Moxostoma poecilurum` = `Moxostoma poecilurum` + `Moxostoma cf. poecilurum`,
-           `Moxostoma duquesnei` = `Moxostoma duquesnei` + `Moxostoma duquesnii`,
-           `Etheostoma chlorosoma` = `Etheostoma chlorosoma` + `Etheostoma chlorosomum`,
-           `Fundulus stellifer` = `Fundulus stellifer` + `Fundulus stellifera`
-           ) %>%
+    mutate(`Cottus bairdii` = ifelse(all(c("Cottus bairdii", "Cottus bairdi") %in% names(.)),
+                                      `Cottus bairdii` + `Cottus bairdi`,
+                                     c("Cottus bairdii", "Cottus bairdi")[(c("Cottus bairdii", "Cottus bairdi") %in% names(.))]),
+           `Macrhybopsis aestivalis` = ifelse(all(c("Macrhybopsis aestivalis",
+                                                    "Macrhybopsis cf. aestivalis") %in% names(.)),
+                                              `Macrhybopsis aestivalis` + `Macrhybopsis cf. aestivalis`,
+                                              c("Macrhybopsis aestivalis",
+                                                "Macrhybopsis cf. aestivalis")[(c("Macrhybopsis aestivalis",
+                                                                                  "Macrhybopsis cf. aestivalis") %in% names(.))]),
+           `Notropis spectrunculus` = ifelse(all(c("Notropis spectrunculus",
+                                                    "Notropis cf. spectrunculuss") %in% names(.)),
+                                             `Notropis spectrunculus` + `Notropis cf. spectrunculus`,
+                                              c("Notropis spectrunculus",
+                                                "Notropis cf. spectrunculuss")[(c("Notropis spectrunculus",
+                                                                                  "Notropis cf. spectrunculuss") %in% names(.))]),
+           `Catostomus latipinnis` = ifelse(all(c("Catostomus latipinnis",
+                                                   "Catostomus cf. latipinnis") %in% names(.)),
+                                             `Catostomus latipinnis` + `Catostomus cf. latipinnis`,
+                                            c("Catostomus latipinnis",
+                                              "Catostomus cf. latipinnis")[(c("Catostomus latipinnis",
+                                                                              "Catostomus cf. latipinnis") %in% names(.))]),
+           `Cyprinella zanema` = ifelse(all(c("Cyprinella zanema",
+                                                  "Cyprinella cf. zanema") %in% names(.)),
+                                            `Cyprinella zanema` + `Cyprinella cf. zanema`,
+                                        c("Cyprinella zanema",
+                                          "Cyprinella cf. zanema")[(c("Cyprinella zanema",
+                                                                      "Cyprinella cf. zanema") %in% names(.))]),
+           `Noturus leptacanthus` = ifelse(all(c("Noturus leptacanthus",
+                                              "Noturus sp. c.f. leptacanthus") %in% names(.)),
+                                        `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`,
+                                        c("Noturus leptacanthus",
+                                          "Noturus sp. c.f. leptacanthus")[(c("Noturus leptacanthus",
+                                                                              "Noturus sp. c.f. leptacanthus") %in% names(.))]),
+           `Moxostoma erythrurum` = ifelse(all(c("Moxostoma erythrurum",
+                                                 "Moxostoma sp cf erythrurum") %in% names(.)),
+                                           `Moxostoma erythrurum` + `Moxostoma sp cf erythrurum`,
+                                           c("Moxostoma erythrurum",
+                                             "Moxostoma sp cf erythrurum")[(c("Moxostoma erythrurum",
+                                                                              "Moxostoma sp cf erythrurum") %in% names(.))]),
+           `Moxostoma lachneri` = ifelse(all(c("Moxostoma lachneri",
+                                                 "Moxostoma cf. lachneri") %in% names(.)),
+                                           `Moxostoma lachneri` + `Moxostoma cf. lachneri`,
+                                           c("Moxostoma lachneri",
+                                             "Moxostoma cf. lachneri")[(c("Moxostoma lachneri",
+                                                                              "Moxostoma cf. lachneri") %in% names(.))]),
+           `Moxostoma poecilurum` = ifelse(all(c("Moxostoma poecilurum",
+                                               "Moxostoma cf. poecilurum") %in% names(.)),
+                                         `Moxostoma poecilurum` + `Moxostoma cf. poecilurum`,
+                                         c("Moxostoma poecilurum",
+                                           "Moxostoma cf. poecilurum")[(c("Moxostoma poecilurum",
+                                                                        "Moxostoma cf. poecilurum") %in% names(.))]),
+           `Moxostoma duquesnei` = ifelse(all(c("Moxostoma duquesnei",
+                                                 "Moxostoma duquesnii") %in% names(.)),
+                                           `Moxostoma duquesnei` + `Moxostoma duquesnii`,
+                                           c("Moxostoma duquesnei",
+                                             "Moxostoma duquesnii")[(c("Moxostoma duquesnei",
+                                                                            "Moxostoma duquesnii") %in% names(.))]),
+           `Etheostoma chlorosoma` = ifelse(all(c("Etheostoma chlorosoma",
+                                                "Etheostoma chlorosomum") %in% names(.)),
+                                          `Etheostoma chlorosoma` + `Etheostoma chlorosomum`,
+                                          c("Etheostoma chlorosoma",
+                                            "Etheostoma chlorosomum")[(c("Etheostoma chlorosoma",
+                                                                      "Etheostoma chlorosomum") %in% names(.))]),
+           `Fundulus stellifer` = ifelse(all(c("Fundulus stellifer",
+                                                  "Fundulus stellifera") %in% names(.)),
+                                            `Fundulus stellifer` + `Fundulus stellifera`,
+                                            c("Fundulus stellifer",
+                                              "Fundulus stellifera")[(c("Fundulus stellifer",
+                                                                           "Fundulus stellifera") %in% names(.))])) %>%
     rowwise() %>%
     mutate(`Oncorhynchus clarkii` = sum(c_across(contains("Oncorhynchus clarki"))),
            `Esox americanus` = sum(c_across(contains("Esox americanus"))),
            `Oncorhynchus mykiss` = sum(c_across(contains("Oncorhynchus mykiss")))
-           ) %>%
+    ) %>%
     ungroup() %>%
     relocate(`Oncorhynchus clarkii`, .before = `Oncorhynchus clarki virginalis`) %>%
-    relocate(`Esox americanus`, .before = `Esox americanus americanus`)
-    dplyr::select(-`Cottus bairdi`,
-                  -`Macrhybopsis cf. aestivalis`,
-                  -`Notropis cf. spectrunculus`,
-                  -`Catostomus cf. latipinnis`,
-                  -`Cyprinella cf. zanema`,
-                  -`Noturus sp. c.f. leptacanthus`,
-                  -`Moxostoma cf. poecilurum`,
-                  -`Moxostoma cf. lachneri`,
-                  -`Moxostoma sp cf erythrurum`,
-                  #remove clinch sculpin (undescribed spp)
-                  -`Cottus cf. broadband sculpin`,
-                  -tidyselect::contains(" sp."),
-                  -tidyselect::contains("Oncorhynchus clarkii "),
-                  -`Oncorhynchus clarki virginalis`,
-                  -tidyselect::contains("Esox americanus "),
-                  -`Oncorhynchus mykiss gairdneri`,
-                  -`Moxostoma duquesnii`,
-                  -`Etheostoma chlorosomum`,
-                  -`Fundulus stellifera`) %>%
-    ##remove boatable sites
-    filter(FISH_PROTOCOL != "BOATABLE") %>%
+    relocate(`Esox americanus`, .before = `Esox americanus americanus`) %>%
+  dplyr::select(-c(tidyselect::contains("Esox americanus ")),
+                -c(tidyselect::contains(" sp.")),
+                -c(tidyselect::contains("Oncorhynchus clarkii ")),
+                -tidyselect::any_of(c("Cottus bairdi",
+                                     "Macrhybopsis cf. aestivalis",
+                                     "Notropis cf. spectrunculus",
+                                     "Catostomus cf. latipinnis",
+                                     "Cyprinella cf. zanema",
+                                     "Noturus sp. c.f. leptacanthus",
+                                     "Moxostoma cf. poecilurum",
+                                     "Moxostoma cf. lachneri",
+                                     "Moxostoma sp cf erythrurum",
+                                     #remove clinch sculpin (undescribed spp)
+                                     "Cottus cf. broadband sculpin",
+                                     "Oncorhynchus clarki virginalis",
+                                     "Oncorhynchus mykiss gairdneri",
+                                     "Moxostoma duquesnii",
+                                     "Etheostoma chlorosomum",
+                                     "Fundulus stellifera"
+                                     )))  %>%
     mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "SM_WADEABLE",
                                   "Small Wadeable",
-                                  "Large Wadeable"))
-
-
-
+                                  ifelse(FISH_PROTOCOL == "BOATABLE",
+                                         "Boatable",
+                                         "Large Wadeable")))
 
   if(!isTRUE(hybrids)) {
     full_fish <- full_fish %>%
