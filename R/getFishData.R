@@ -1,29 +1,28 @@
-#' Access clean USGS and EPA Fish Datasets
+#' Access harmonized USGS and EPA Fish datasets
 #'
 #' @param dataType Output data type, either \code{"abun"} or \code{"occur"}.
 #' @param taxonLevel Level of taxonomic resolution, must be one of:
-#'   \code{"Superclass"}, \code{"Class"}, \code{"Subclass"}, \code{"Superorder"},
-#'   \code{"Order"}, \code{"Superfamily"}, \code{"Family"}, \code{"Subfamily"},
-#'   \code{"Genus"}, \code{"Species"}, or \code{"Subspecies"}.
+#'   \code{"Class"}, \code{"Subclass"}, \code{"Order"}, \code{"Family"},
+#'   \code{"Genus"}, or \code{"Species"}.
 #' @param agency The agency name(s) (e.g., "USGS" and "EPA") that should be
-#'   included in the output dataset. As of now, "USGS" must be present in the
-#'   agency vector. See \code{Details} below for more information.
+#'   included in the output dataset. See \code{Details} below for more information.
 #' @param standardize Standardization method to use for calculating fish abundance matrices.
 #'   Default is \code{standardize = "none"}, which returns raw fish abundance values. Other options include
 #'   \code{standardize = "CPUE"}, which returns standardized abundances in Catch per Unit Effort.
 #'   An alternative standardization method is \code{standardize = "MGMS"}, which calculates
 #'   Multigear Mean Standardization (MGMS) values to account for catchability differences between
 #'   fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).
-#' @param hybrid logical. Should hybrid individuals be included in the output dataset? \code{TRUE} or \code{FALSE}.
+#' @param hybrid logical. Should hybrid individuals be included in the output dataset?
+#' \code{TRUE} or \code{FALSE}.
 #' @param boatableStreams logical. Should EPA boatable streams be included in the
 #'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
-#'   so \code{boatableStreams} should only be set to \code{TRUE} when looking at
+#'   so \code{boatableStreams} should only be set to \code{TRUE} when gathering
 #'   EPA data only.
 #'
-#' @return A species by sample data frame with site, stream reach, and
+#' @return A taxa by sample data frame with site, stream reach, and
 #'   sample information.
 #'
-#' @details NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
+#' @details
 #'   Note: To standardize fish abundance data, abundances were divided by
 #'   the minutes shocked, number of seine hauls, etc. Then were divided by the
 #'   stream length sampled. ~35% of the data have been removed,
@@ -46,25 +45,16 @@
 #'   because the function is standardizing by sampling method in addition to standardizing by
 #'   time and area sampled.
 #'
-#'   \code{agency} refers to agency that collected the invertebrate samples. If
+#'   \code{agency} refers to the federal agency that collected the fish samples. If
 #'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
-#'   For the "USGS" dataset, this includes all programs with SampleMethodCodes
-#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
-#'   includes "EPA", samples from the EPA National Stream and River
-#'   Assessment programs (2018-2019, 2013-2014, 2008-2009) will be included.
-#'   Note that from these samples, only moving waters classified as "wadeable"
-#'   are included and only samples that are "reach-wide" are included. Some
-#'   information included in the USGS dataset are not included in the EPA
-#'   datasets, and thus will appear as "NA". Similar to the USGS data, there
-#'   were inherent taxonomic issues with the EPA data. As such, we have taken
-#'   the same steps as described above under \code{taxonFix} to address these
-#'   concerns. NOTE: As of now, \code{agency} must include "USGS". This will be
-#'   fixed in future versions. NOTE2: As of now, when \code{agency = c("USGS", "EPA")},
-#'   taxonLevel must be set to "Species" and dataType must be set to "occur".
-#'
-#'   The \code{getFishData()} function only outputs a community (taxa x site)
-#'   matrix. In the future, we may include an extension of this function to return the
-#'   individual-level information (length, width, deformities, etc.).
+#'   For the "USGS" dataset, this includes all programs that collected fish data
+#'   within the larger USGS database. For the "EPA"  dataset, samples from the
+#'   National Stream and River Assessment programs (2018-2019, 2013-2014,
+#'   2008-2009) will be included. Note that by default, only moving waters
+#'   classified as "wadeable" are included and only samples that are "reach-wide"
+#'   are included. Some information included in the USGS dataset are not included
+#'   in the EPA datasets, and vice-versa, and thus will appear as "NA". NOTE:
+#'   As of now, taxonLevel must be set to "Species".
 #'
 #' @references Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
 #' catch per unit effort data from different fish sampling gears: multigear mean standardization (MGMS).
@@ -83,7 +73,7 @@ getFishData <- function(dataType = "occur",
                         taxonLevel = "Species",
                         agency = c("USGS","EPA"),
                         standardize = "none",
-                        hybrids = TRUE,
+                        hybrids = FALSE,
                         boatableStreams = FALSE) {
 
   if(!(dataType %in% c("abun", "occur"))) {
@@ -525,14 +515,6 @@ getFishData <- function(dataType = "occur",
                                             colClasses = c("UID" = "character"),
                                             stringsAsFactors = FALSE)
 
-    EMAP <- utils::read.csv(system.file("extdata",
-                                        "EMAP_FULL.csv",
-                                        package = "StreamData"),
-                            comment.char="#",
-                            stringsAsFactors = FALSE)
-
-    ###
-
     #############
     ##2008/2009
     suppressMessages({NRSA_0809 <- NRSA_0809_fishcnts %>%
@@ -940,7 +922,25 @@ getFishData <- function(dataType = "occur",
                                             `Fundulus stellifer` + `Fundulus stellifera`,
                                             c("Fundulus stellifer",
                                               "Fundulus stellifera")[(c("Fundulus stellifer",
-                                                                           "Fundulus stellifera") %in% names(.))])) %>%
+                                                                           "Fundulus stellifera") %in% names(.))]),
+           `Lepomis gulosus` = ifelse(all(c("Lepomis gulosus",
+                                               "Chaenobryttus gulosus") %in% names(.)),
+                                         `Lepomis gulosus` + `Chaenobryttus gulosus`,
+                                         c("Lepomis gulosus",
+                                           "Chaenobryttus gulosus")[(c("Lepomis gulosus",
+                                                                       "Chaenobryttus gulosus") %in% names(.))]),
+           `Notropis dorsalis` = ifelse(all(c("Notropis dorsalis",
+                                               "Hybopsis dorsalis") %in% names(.)),
+                                         `Notropis dorsalis` + `Hybopsis dorsalis`,
+                                         c("Notropis dorsalis",
+                                           "Hybopsis dorsalis")[(c("Notropis dorsalis",
+                                                                   "Hybopsis dorsalis") %in% names(.))]),
+           `Cyprinella zanema` = ifelse(all(c("Cyprinella zanema",
+                                               "Hybopsis zanema") %in% names(.)),
+                                         `Cyprinella zanema` + `Hybopsis zanema`,
+                                         c("Cyprinella zanema",
+                                           "Hybopsis zanema")[(c("Cyprinella zanema",
+                                                                 "Hybopsis zanema") %in% names(.))])) %>%
     rowwise() %>%
     mutate(`Oncorhynchus clarkii` = sum(c_across(contains("Oncorhynchus clarki"))),
            `Esox americanus` = sum(c_across(contains("Esox americanus"))),
@@ -967,13 +967,18 @@ getFishData <- function(dataType = "occur",
                                      "Oncorhynchus mykiss gairdneri",
                                      "Moxostoma duquesnii",
                                      "Etheostoma chlorosomum",
-                                     "Fundulus stellifera"
+                                     "Fundulus stellifera",
+                                     "Hybopsis zanema",
+                                     "Hybopsis dorsalis",
+                                     "Chaenobryttus gulosus"
                                      )))  %>%
     mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "SM_WADEABLE",
                                   "Small Wadeable",
                                   ifelse(FISH_PROTOCOL == "BOATABLE",
                                          "Boatable",
                                          "Large Wadeable")))
+
+
 
   if(!isTRUE(hybrids)) {
     full_fish <- full_fish %>%
@@ -985,14 +990,3 @@ getFishData <- function(dataType = "occur",
   return(data.frame(full_fish))
 
 }
-
-##~11% of observations do not have area sampled associated with the sample
-##Likely will need to drop those observations if we look at density/abundance
-##But, not an issue if just doing pres/abs
-
-##
-
-
-##Individual fish info
-## To do
-
