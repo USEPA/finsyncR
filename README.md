@@ -26,7 +26,7 @@ You can install the released version of `StreamData` from
     
     devtools::install_github("StreamData/StreamData",
                              auth_token = "tokenstring",
-                             build_vignette = TRUE
+                             build_vignette = FALSE
                              )
 
 ## Example
