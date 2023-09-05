@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # StreamData
 
 <!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 The goal of StreamData is to provide easy access and automated data management to USGS and EPA stream BioData, pesticide county use estimates, and measured water quality data.
@@ -33,7 +34,7 @@ library(devtools)
 
 devtools::install_github("StreamData/StreamData",
                          auth_token = "tokenstring",
-                         build_vignette = TRUE
+                         build_vignette = FALSE
                          )
 ```
 
