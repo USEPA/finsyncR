@@ -36,6 +36,8 @@
 #'   See the following internal dataset for pesticide compounds, classes, and types
 #'   \code{StreamData:::.pest.info}.
 #'
+#' @author Samantha Rumschlag, Michael Mahon
+#'
 #' @examples
 #' \dontrun{
 #' ## Code to generate the sum of the county-level use estimates (high estimate)

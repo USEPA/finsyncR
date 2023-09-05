@@ -33,6 +33,10 @@
 #'   barren land, grassland, and hay/pasture), and "crop" (no grouping, just the
 #'   crop landuse).
 #'
+#'   Function pings StreamCat API.
+#'
+#' @author Michael Mahon, Ryan Hill, Samantha Rumschlag
+#'
 #' @examples
 #' \dontrun{
 #' ## Code to generate the percent land-use/land-cover in the catchment for
@@ -50,10 +54,42 @@
 
 getNLCDData <- function(data, scale = "Cat", group = FALSE){
 
-  ##Read in NLCD data from streamcat dataset from Ryan Hill
-  streamcat <- read.csv(base::system.file("extdata",
-                                          "streamcat_all.csv",
-                                          package = "StreamData"))
+  if(!(scale %in% c("Cat","Ws"))){
+    stop('scale must be either "Cat" or "Ws".')
+  }
+
+  if(httr::POST("https://java.epa.gov/StreamCAT/metrics?")$status_code != 200){
+    stop('Connection to StreamCat API cannot be established')
+  }
+
+
+  ##set up streamcat call for NLCD data
+  nlcd <- c("PctMxFst", "PctOw", "PctShrb", "PctUrbHi", "PctUrbLo",
+            "PctUrbMd", "PctUrbOp", "PctWdWet", "PctBl", "PctConif",
+            "PctCrop", "PctDecid", "PctGrs", "PctHay", "PctHbWet",
+            "PctIce")
+  years <- c("2001", "2004", "2006", "2008", "2011",
+            "2013", "2016", "2019")
+  nlcd_mets = paste(paste(rep(nlcd, each = length(year)), year, sep = ""), collapse = ",")
+
+  ##attach COMIDs to site-numbers
+  data = dplyr::left_join(data, (StreamData:::.allsitesCOMID[,-3] %>% dplyr::filter(SiteNumber %in% data$SiteNumber)))
+
+  comid = paste(data$COMID, collapse = ",")
+
+  post_body = ""
+  post_body <- paste0(post_body, "name=", nlcd_mets)
+  post_body <- paste0(post_body, "&areaOfInterest=",
+                      ifelse(scale == "Cat",
+                             'catchment',
+                             'watershed'))
+  post_body <- paste0(post_body, "&comid=", comid)
+
+  streamcat <- httr::content(httr::POST("https://java.epa.gov/StreamCAT/metrics?",
+                                        body = post_body),
+                             type = "text/csv", encoding = "UTF-8",
+                             show_col_types = FALSE)
+
 
   ##Naming scheme
   #ItemYearScale
@@ -64,7 +100,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
 
   streamcat2 = streamcat %>%
     ##Select columns that are pertinent: site info, size of Ws/Cat, and above cols
-    dplyr::select(COMID, SiteNumber, CATAREASQKM, WSAREASQKM, all_of(cat_ws_cols)) %>%
+    dplyr::select(COMID, CATAREASQKM, WSAREASQKM, tidyselect::all_of(cat_ws_cols)) %>%
     ##Pivot longer, so that non-site info columns are in "Info" and the values are
     ##in "value"; this will help with extraction of year and scale information
     ##In turn, this process will make it easier to join StreamCat data w/ biodata
@@ -133,13 +169,13 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
   ##Join Area of Ws and Cat with LULC data
   USGS_streamcat <- streamcat2 %>%
     tidyr::unite(InfoBroadScale, c("Info2", "Scale"), sep = "_", remove = T) %>%
-    tidyr::pivot_wider(id_cols = c("COMID", "SiteNumber", "Year"),
+    tidyr::pivot_wider(id_cols = c("COMID", "Year"),
                 names_from = "InfoBroadScale",
                 values_from = "value") %>%
     dplyr::mutate(Year = as.numeric(Year))
 
   ##Years are the NLCD years
-  Years = c(2001,2004,2006,2008,2011,2013,2016, 2019)
+  Years = c(2001,2004,2006,2008,2011,2013,2016,2019)
 
   ##Read in datasets
 
@@ -151,13 +187,11 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
     data$ClosestYear[i] = as.numeric(Years[which.min(abs(Years-data$CollectionYear[i]))])
   }
 
-
-
   ##Join the datasets
   data = data %>%
     dplyr::left_join(USGS_streamcat,
-              by = c("SiteNumber" = "SiteNumber",
-                     "ClosestYear" = "Year")) %>%
+              by = join_by("COMID" == "COMID",
+                     "ClosestYear" == "Year")) %>%
     dplyr::select(-ClosestYear, -COMID)
 
   return(data)

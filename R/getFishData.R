@@ -56,6 +56,8 @@
 #'   in the EPA datasets, and vice-versa, and thus will appear as "NA". NOTE:
 #'   As of now, taxonLevel must be set to "Species".
 #'
+#' @author Michael Mahon, Ethan Brown, Samantha Rumschlag
+#'
 #' @references Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
 #' catch per unit effort data from different fish sampling gears: multigear mean standardization (MGMS).
 #' Can. J. Fish. Aquat. Sci. 74:8-14.

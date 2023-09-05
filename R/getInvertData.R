@@ -88,6 +88,7 @@
 #'   a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
 #'   the measure that you are interested in using.
 #'
+#' @author Michael Mahon, Devin Jones, Samantha Rumschlag
 #'
 #' @examples
 #' \dontrun{

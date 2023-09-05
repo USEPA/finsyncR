@@ -55,3 +55,6 @@ are named like: 'TraitGroup_individualtrait' (e.g. Voltinism_abbrev_Semivoltine)
 If \code{meta} is set \code{TRUE} than the Conus trait database
 and the trait definitions are returned as a list object.
 }
+\author{
+Stefan Kunz, Michael Mahon, Samantha Rumschlag
+}

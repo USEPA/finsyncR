@@ -1,12 +1,12 @@
 Package: StreamData
 Type: Package
-Title: Generate Cleaned and Compiled USGS and EPA River and Stream Biotic Datasets
-Version: 0.0.0.9402
+Title: Generate Cleaned and Compiled USGS and EPA Aquatic Biomonitoring Datasets
+Version: 0.0.0.9410
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
            role = c("aut"),
-           email = "mike.mahon92@gmail.com"),
+           email = "mahon.michael@epa.gov"),
       person(given = "Devin",
            family = "Jones",
            role = c("aut"),
@@ -31,8 +31,8 @@ Authors@R:
 Maintainer: Michael Mahon <mahon.michael@epa.gov>
 Description: For now, this R package is to be used only by members of the
     Powell Center working group led by Samantha Rumschlag. This R package
-    provides functions to generate site by taxa matrices for macroinvertebrates,
-    fish, and algae from USGS and EPA datasets along with the pertinent sample- and
+    provides functions to generate site by taxa matrices for macroinvertebrates and
+    fish from USGS and EPA datasets along with the pertinent sample- and
     site-level information. Additionally, this R package provides functions to
     generate site-level information that may be of use in understanding the
     abiotic, contaminant, and land use drivers of dynamics of these communities.
@@ -46,9 +46,10 @@ Imports:
     tidyr (>= 1.1.2),
     stringr (>= 1.4.0),
     utils,
-    tidyselect (>= 1.1.0)
+    tidyselect (>= 1.1.0),
+    httr
 Depends:
-    R (>= 3.5.0)
+    R (>= 3.6.0)
 Suggests: 
     knitr,
     rmarkdown

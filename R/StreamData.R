@@ -9,6 +9,7 @@
 #' @import stringr
 #' @import tidyselect
 #' @import lubridate
+#' @import httr
 #' @rawNamespace import(data.table, except = c(last, first, between, month, hour, quarter, week, year, wday, second, minute, mday, yday, isoweek))
 #' @importFrom utils read.csv
 #' @importFrom utils read.table

@@ -16,7 +16,7 @@
 #'
 #' @return A taxa by trait data frame with taxa and trait information.
 #'
-#'
+#' @author Stefan Kunz, Michael Mahon, Samantha Rumschlag
 #'
 #' @details
 #' \code{database} Returns either the Conus trait database retrieved from

@@ -151,46 +151,15 @@ Description: Number of transects snorkeled within a reach.
 Note: This column will only have non-zero values for snorkel samples.
 
 #### MinutesShockTime
-Description: Actual time (in minutes) that electrofisher is on; the time electricity is being transmitted to the water.
+Description: Actual time (in minutes) that shocking unit is on; the time electricity is being transmitted to the water.
 
 Note: This column will only have non-zero values for electroshocking samples.
 
 #### StandardMethod
 Description: The value by which the number of individuals of each species is divided to obtain an abundance value that is standardized by unit effort. Specifically, this number is `ReachLengthFished_m` multiplied by the effort (values in one of `NumberSeineHauls`, `NumberStationarySetsKicks`, `NumberSnorkelingTransects`, or `MinutesShockTime`). 
 
-Note: This column will only be present when `standardize = TRUE` in the `getFishData()` function.
+Note: This column will only be present when `standardize` is not set to `"none"` in the `getFishData()` function.
 
-
-### Algae
-
-#### SampleTypeCode
-Description: Code indicating the type of sample collected
-Domain:
-
-* Phytoplankton samples    
-    + ARTH - NAWQA Periphyton Richest Targeted Habitat
-    + ADTH - NAWQA Periphyton Depositional Targeted Habitat
-    + AQMH - NAWQA Periphyton Multiple Habitat **These samples only appear when** `AlgType = "Peri"` **AND** `AbunType = "Occur"`
-   
-* Periphyton samples
-    + APHY - NAWQA Phytoplankton
-
-#### SamplingMethodOrDevice
-Description: Method or device for collecting sample. 
-
-#### PeriphytonHabitatsSampled
-Description: The benthic habitat upon which the organisms were attached or loosely associated (Epilithic, Epidendric, Epiphytic, Epipsammic, Epipelic, Artificial substrate).
-
-Note: This column only appears when `AlgType = "Peri"`.
-
-#### SubsurfaceGrabDepth_m
-Description: Depth of subsurface grab sample, in meters.
-
-Note: This column only appears when `AlgType = "Phyto"`.
-
-
-## Information on taxa columns
-Following all of the above columns are an unknown number of columns that code for the unique taxa found in each dataset at the specific taxonomic resolution (phylum through subspecies). The values in these columns will either code for abundance or occurrence (presence/absence, coded as 1/0). These values default to density estimates for each taxa. For inverts, it is individuals per m^2^; for periphyton, it is cells per cm^2^; for phytoplankton, it is cells per mL; and for fish, it is individuals per unit effort per meter(i.e., for electroshocking: individuals per minute shocking per meter). Further, within `getFishData()`, when standardize = "FALSE", the values become individuals per meter, but using unstandardized data here is not recommended. 
 
 ```{r example, warning = FALSE, message = FALSE}
 # library(StreamData)

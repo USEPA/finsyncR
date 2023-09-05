@@ -2,7 +2,7 @@
 % Please edit documentation in R/getInvertData.R
 \name{getInvertData}
 \alias{getInvertData}
-\title{Access clean USGS Macro-Invertebrate Dataset}
+\title{Access harmonized USGS and EPA Macromnvertebrate datasets}
 \usage{
 getInvertData(
   dataType = "occur",
@@ -53,7 +53,7 @@ A species by sample data frame with site, stream reach, and
   sample information.
 }
 \description{
-Access clean USGS Macro-Invertebrate Dataset
+Access harmonized USGS and EPA Macromnvertebrate datasets
 }
 \details{
 Note: There are 81 sampling events (sampling location - collection
@@ -66,15 +66,13 @@ Note: There are 81 sampling events (sampling location - collection
   ratio. As a result, duplicate taxa were combined (abundances summed)
   following adjustments for lab subsampling.
 
-  Currently, lab large rares are removed from all samples.
-
   \code{taxonFix} provides ways to handle changes in taxonomy across time,
   especially in instances in which species have been reorganized into new
   genera. \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
   makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
   by giving a unified genera name to all species and genera that have been linked
   through changes in taxonomy (e.g. genera1/genera2/genera3). Note: of 98
-  problematic genera that exist throughout all BioData, \code{taxonFix = "lump"}
+  problematic genera that exist throughout both datasets, \code{taxonFix = "lump"}
   results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
   One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
   \code{taxonFix = "remove"} prioritizes accurate identification by dropping
@@ -96,7 +94,7 @@ Note: There are 81 sampling events (sampling location - collection
   For the "USGS" dataset, this includes all programs with SampleMethodCodes
   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
   includes "EPA", samples from the EPA National Stream and River
-  Assessment programs (2018-2019, 2013-2014, 2008-2009) and Wadeable Stream Assessment
+  Assessment programs (2018-2019, 2013-2014, 2008-2009) and EPA Wadeable Stream Assessment
   (2000-2004) will be included. Note that from these samples, only moving
   waters classified as "wadeable" are included and only samples that are
   "reach-wide" are included. Some information included in the USGS dataset
@@ -129,4 +127,7 @@ RarefyInverts <- getInvertData(taxonLevel = "Genus",
                                seed = 10)
 }
 
+}
+\author{
+Michael Mahon, Devin Jones, Samantha Rumschlag
 }

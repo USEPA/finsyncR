@@ -2,14 +2,14 @@
 % Please edit documentation in R/getFishData.R
 \name{getFishData}
 \alias{getFishData}
-\title{Access clean USGS and EPA Fish Datasets}
+\title{Access harmonized USGS and EPA Fish datasets}
 \usage{
 getFishData(
   dataType = "occur",
   taxonLevel = "Species",
   agency = c("USGS", "EPA"),
   standardize = "none",
-  hybrids = TRUE,
+  hybrids = FALSE,
   boatableStreams = FALSE
 )
 }
@@ -17,13 +17,11 @@ getFishData(
 \item{dataType}{Output data type, either \code{"abun"} or \code{"occur"}.}
 
 \item{taxonLevel}{Level of taxonomic resolution, must be one of:
-\code{"Superclass"}, \code{"Class"}, \code{"Subclass"}, \code{"Superorder"},
-\code{"Order"}, \code{"Superfamily"}, \code{"Family"}, \code{"Subfamily"},
-\code{"Genus"}, \code{"Species"}, or \code{"Subspecies"}.}
+\code{"Class"}, \code{"Subclass"}, \code{"Order"}, \code{"Family"},
+\code{"Genus"}, or \code{"Species"}.}
 
 \item{agency}{The agency name(s) (e.g., "USGS" and "EPA") that should be
-included in the output dataset. As of now, "USGS" must be present in the
-agency vector. See \code{Details} below for more information.}
+included in the output dataset. See \code{Details} below for more information.}
 
 \item{standardize}{Standardization method to use for calculating fish abundance matrices.
 Default is \code{standardize = "none"}, which returns raw fish abundance values. Other options include
@@ -34,21 +32,21 @@ fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more i
 
 \item{boatableStreams}{logical. Should EPA boatable streams be included in the
 output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
-so \code{boatableStreams} should only be set to \code{TRUE} when looking at
+so \code{boatableStreams} should only be set to \code{TRUE} when gathering
 EPA data only.}
 
-\item{hybrid}{logical. Should hybrid individuals be included in the output dataset? \code{TRUE} or \code{FALSE}.}
+\item{hybrid}{logical. Should hybrid individuals be included in the output dataset?
+\code{TRUE} or \code{FALSE}.}
 }
 \value{
-A species by sample data frame with site, stream reach, and
+A taxa by sample data frame with site, stream reach, and
   sample information.
 }
 \description{
-Access clean USGS and EPA Fish Datasets
+Access harmonized USGS and EPA Fish datasets
 }
 \details{
-NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
-  Note: To standardize fish abundance data, abundances were divided by
+Note: To standardize fish abundance data, abundances were divided by
   the minutes shocked, number of seine hauls, etc. Then were divided by the
   stream length sampled. ~35% of the data have been removed,
   as these samples lacked the required standardization information.
@@ -70,25 +68,16 @@ NOTE: ONLY WORKS WITH SPECIES CURRENTLY.
   because the function is standardizing by sampling method in addition to standardizing by
   time and area sampled.
 
-  \code{agency} refers to agency that collected the invertebrate samples. If
+  \code{agency} refers to the federal agency that collected the fish samples. If
   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
-  For the "USGS" dataset, this includes all programs with SampleMethodCodes
-  of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
-  includes "EPA", samples from the EPA National Stream and River
-  Assessment programs (2018-2019, 2013-2014, 2008-2009) will be included.
-  Note that from these samples, only moving waters classified as "wadeable"
-  are included and only samples that are "reach-wide" are included. Some
-  information included in the USGS dataset are not included in the EPA
-  datasets, and thus will appear as "NA". Similar to the USGS data, there
-  were inherent taxonomic issues with the EPA data. As such, we have taken
-  the same steps as described above under \code{taxonFix} to address these
-  concerns. NOTE: As of now, \code{agency} must include "USGS". This will be
-  fixed in future versions. NOTE2: As of now, when \code{agency = c("USGS", "EPA")},
-  taxonLevel must be set to "Species" and dataType must be set to "occur".
-
-  The \code{getFishData()} function only outputs a community (taxa x site)
-  matrix. In the future, we may include an extension of this function to return the
-  individual-level information (length, width, deformities, etc.).
+  For the "USGS" dataset, this includes all programs that collected fish data
+  within the larger USGS database. For the "EPA"  dataset, samples from the
+  National Stream and River Assessment programs (2018-2019, 2013-2014,
+  2008-2009) will be included. Note that by default, only moving waters
+  classified as "wadeable" are included and only samples that are "reach-wide"
+  are included. Some information included in the USGS dataset are not included
+  in the EPA datasets, and vice-versa, and thus will appear as "NA". NOTE:
+  As of now, taxonLevel must be set to "Species".
 }
 \examples{
 \dontrun{
@@ -102,4 +91,7 @@ Fish <- getFishData(taxonLevel = "Species")
 Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
 catch per unit effort data from different fish sampling gears: multigear mean standardization (MGMS).
 Can. J. Fish. Aquat. Sci. 74:8-14.
+}
+\author{
+Michael Mahon, Ethan Brown, Samantha Rumschlag
 }

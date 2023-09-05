@@ -78,3 +78,6 @@ Note: Pesticide classes and types taken from PAN Pesticide Database.
   }
 
 }
+\author{
+Samantha Rumschlag, Michael Mahon
+}

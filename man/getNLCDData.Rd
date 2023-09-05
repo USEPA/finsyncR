@@ -26,8 +26,7 @@ Function returns a site by year dataframe of NLCD land-use/land-cover
 Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site
 }
 \details{
-This function has been updated to include all USGS and EPA NRSA sites.
-  Land-use/land-cover data is extracted from the USGS National Land Cover
+Land-use/land-cover data is extracted from the USGS National Land Cover
   Database (NLCD). These LULC data are available in the following years:
   2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For instances of years in the
   input data that are not exact year matches from this list, years are
@@ -47,6 +46,8 @@ This function has been updated to include all USGS and EPA NRSA sites.
   of deciduous, coniferous, and mixed forests), "open" (grouping of shrub,
   barren land, grassland, and hay/pasture), and "crop" (no grouping, just the
   crop landuse).
+
+  Function pings StreamCat API.
 }
 \examples{
 \dontrun{
@@ -61,4 +62,7 @@ This function has been updated to include all USGS and EPA NRSA sites.
   group = FALSE
   }
 
+}
+\author{
+Michael Mahon, Ryan Hill, Samantha Rumschlag
 }
