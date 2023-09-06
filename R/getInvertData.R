@@ -1102,7 +1102,7 @@ getInvertData <- function(dataType = "occur",
     ##First step:
     ##Filter SAMPLE_TYPE to "BERW", "BERWW", or "REACHWIDE" in NRSA_inverts if not boatable
     if(isTRUE(boatableStreams)) {
-      sampletype = c("BERW", "BERWW", "REACHWIDE", "BELGB", "BETB")
+      sampletype = c("BERW", "BERWW", "REACHWIDE", "BELGB", "BETB", "BOATABLE")
     } else {
       sampletype = c("BERW", "BERWW", "REACHWIDE")
     }
@@ -1245,7 +1245,7 @@ getInvertData <- function(dataType = "occur",
                                                      package = "StreamData"),
                                    colClasses = c("SITE_ID" = "character"),
                                    stringsAsFactors = FALSE) %>%
-      dplyr::select(-ABUNDCNT, -TOTLDENS, -UNIQUE_ID)
+      dplyr::select(-UNIQUE_ID,-SAMPLE_TYPE)
 
     ##Pair down the EPA dataset to only those site-year-visit_no combinations
     ##that appear in the NRSA_inverts dataset
@@ -1299,9 +1299,10 @@ getInvertData <- function(dataType = "occur",
 
       ##Join the datasets together; convert TOTAL to density, using the
       ##DenAbunRatio; multiple this by 10.76 to convert from ind ft^-2 to ind m^-2
+      ##Use CONVS to convert transect number to ft^2
       ##Remove the DenAbunRatio from the final dataset; and output
       NRSA_inverts <- NRSA_inverts %>%
-        dplyr::mutate(TOTAL = round(((TOTAL / PCTCOUNT) / NUMTRANS) * 10.76, 4))
+        dplyr::mutate(TOTAL = round(((TOTAL / PCTCOUNT) / (NUMTRANS * CONVS)) * 10.76, 4))
 
     }
 
@@ -1580,13 +1581,13 @@ getInvertData <- function(dataType = "occur",
                     FieldSplitRatio = NA,
                     LabSubsamplingRatio = NA,
                     PropID = PCTCOUNT,
-                    AreaSampTot_m2 = round(NUMTRANS / 10.76, 3),
+                    AreaSampTot_m2 = round((NUMTRANS*CONVS) / 10.76, 3),
                     WettedWidth = XWIDTH
       ) %>%
       dplyr::select(-SAMPLE_TYPE, -LAT_DD83, -LON_DD83, -SITETYPE,
                     -SITE_ID, -MASTER_SITEID, -UID, -UNIQUEID, -DATE_COL,
                     -YEAR, -PSTL_CODE, -US_L3CODE, -US_L3NAME, -VISIT_NO,
-                    -AG_ECO9, -NRS13_URBN, -RT_NRSA, -PCTCOUNT, -NUMTRANS,
+                    -AG_ECO9, -NRS13_URBN, -RT_NRSA, -PCTCOUNT, -NUMTRANS,-CONVS,
                     -XWIDTH) %>%
       dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 
