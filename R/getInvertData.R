@@ -1,4 +1,4 @@
-#' Access harmonized USGS and EPA Macromnvertebrate datasets
+#' Access harmonized USGS and EPA Macroinvertebrate datasets
 #'
 #' @param dataType Output data type, either \code{"abun"} or \code{"occur"}.
 #' @param taxonLevel Level of taxonomic resolution, must be one of:
@@ -64,7 +64,7 @@
 #'   For the "USGS" dataset, this includes all programs with SampleMethodCodes
 #'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
 #'   includes "EPA", samples from the EPA National Stream and River
-#'   Assessment programs (2018-2019, 2013-2014, 2008-2009) and EPA Wadeable Stream Assessment
+#'   Assessment programs (2018-2019, 2013-2014, 2008-2009) and EPA Wadeable Stream Assessment and WEMAP
 #'   (2000-2004) will be included. Note that from these samples, only moving
 #'   waters classified as "wadeable" are included and only samples that are
 #'   "reach-wide" are included. Some information included in the USGS dataset

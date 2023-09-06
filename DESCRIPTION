@@ -11,32 +11,40 @@ Authors@R:
            family = "Jones",
            role = c("aut"),
            email = "devin.k.jones@gmail.com"),
-      person(given = "Stefan",
-           family = "Kunz",
-           role = c("aut"),
-           email = "stkunz@uni-landau.de"),
-      person(given = "Ryan",
-           family = "Hill",
-           role = c("aut"),
-           email = "hill.ryan@epa.gov"),
       person(given = "Ethan",
            family = "Brown",
            role = c("aut"),
            email = "ebrown23@nd.edu"),
+      person(given = "Terry",
+           family = "Brown",
+           role = c("aut"),
+           email = "brown.terryn@epa.gov"),
+      person(given = "Ryan",
+           family = "Hill",
+           role = c("aut"),
+           email = "hill.ryan@epa.gov"),
+      person(given = "Stefan",
+           family = "Kunz",
+           role = c("aut"),
+           email = "stkunz@uni-landau.de"),     
       person(given = "Samantha",
            family = "Rumschlag",
            role = c("aut", "cre"),
            email = "rumschlag.samantha@epa.gov")
            )
 Maintainer: Michael Mahon <mahon.michael@epa.gov>
-Description: For now, this R package is to be used only by members of the
-    Powell Center working group led by Samantha Rumschlag. This R package
-    provides functions to generate site by taxa matrices for macroinvertebrates and
-    fish from USGS and EPA datasets along with the pertinent sample- and
-    site-level information. Additionally, this R package provides functions to
-    generate site-level information that may be of use in understanding the
-    abiotic, contaminant, and land use drivers of dynamics of these communities.
-License: file LICENSE
+Description:
+    The package includes functions to access, extract, manipulate, and harmonize
+    United States federal aquatic biomonitoring data, with a focus on
+    macroinvertebrates and fish. This R package also provides functions to
+    generate site-level information that may be of use in understanding the abiotic,
+    contaminant, and land use drivers of dynamics of these biomonitoring data.
+    The package streamlines the process of retrieving and working with these
+    biomonitoring data, making it easier for researchers to utilize these
+    unparalleled resources.
+License: CC0
+Copyright: This software is in the public domain because it contains materials
+    that originally came from the U.S. Environmental Protection Agency.
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
