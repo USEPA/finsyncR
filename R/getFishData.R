@@ -102,12 +102,14 @@ getFishData <- function(dataType = "occur",
 
 
   if(any(grepl("USGS", agency))){
-    fish <- data.table::fread(base::unz(base::system.file("extdata",
-                                                        "20201217.0745.FishResults.zip",
-                                                        package = "StreamData"),
-                                      "20201217.0745.FishResults.csv"),
-                            colClasses = c("SiteNumber" = "character"),
-                            stringsAsFactors = FALSE)
+    fish <- data.table::fread(cmd = paste("unzip -cq",shQuote(base::system.file("extdata",
+                                                                                "20201217.0745.FishResults.zip",
+                                                                                package = "StreamData"))),
+                              colClasses = c("SiteNumber" = "character"),
+                              stringsAsFactors = FALSE,
+                              showProgress = F,
+                              data.table = F)
+
     if(colnames(fish)[1] != "SIDNO"){
       colnames(fish)[1] = "SIDNO"
     }

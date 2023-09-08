@@ -149,20 +149,25 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("USGS", agency))){
-    Inverts <- data.table::fread(base::unz(base::system.file("extdata",
-                                                           "20201217.0749.InvertResults.zip",
-                                                           package = "StreamData"),
-                                         "20201217.0749.InvertResults.csv"),
-                               colClasses = c("SiteNumber" = "character"),
-                               stringsAsFactors = FALSE)
+    Inverts <- data.table::fread(cmd = paste("unzip -cq",shQuote(base::system.file("extdata",
+                                                                                   "20201217.0749.InvertResults.zip",
+                                                                                   package = "StreamData"))),
+                                 colClasses = c("SiteNumber" = "character"),
+                                 stringsAsFactors = FALSE,
+                                 showProgress = F,
+                                 data.table = F)
+
     if(colnames(Inverts)[1] != "SIDNO"){
       colnames(Inverts)[1] = "SIDNO"
     }
 
     Project <- data.table::fread(base::system.file("extdata",
-                                                 "20201217.0749.Project.csv",
-                                                 package = "StreamData"),
-                               stringsAsFactors = FALSE)
+                                                   "20201217.0749.Project.csv",
+                                                   package = "StreamData"),
+                                 colClasses = c("SiteNumber" = "character"),
+                                 stringsAsFactors = FALSE,
+                                 showProgress = F,
+                                 data.table = F)
 
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
