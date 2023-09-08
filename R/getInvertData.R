@@ -164,7 +164,6 @@ getInvertData <- function(dataType = "occur",
     Project <- data.table::fread(base::system.file("extdata",
                                                    "20201217.0749.Project.csv",
                                                    package = "StreamData"),
-                                 colClasses = c("SiteNumber" = "character"),
                                  stringsAsFactors = FALSE,
                                  showProgress = F,
                                  data.table = F)
@@ -976,7 +975,7 @@ getInvertData <- function(dataType = "occur",
                                 "Ratio", 'X', "NumbEntries", "SampleGrouping", "LabRecordIDs",
                                 "Ratios", "Note", "UNIQUEID", "PublishedTaxonNameLevel",
                                 "SamplerType", "DatasetPortion", "TotAreaSampled_m2"))) %>%
-        dplyr::select(-tidyselect::any_of(mycols))
+        dplyr::select(-tidyselect::any_of(mycols)) %>%
       dplyr::select(-tidyselect::any_of(notMeasure)) %>%
         tidyr::unite(Taxon_Life, c(tidyselect::all_of(taxonLevel), Lifestage), sep = "_") %>%
         tidyr::pivot_wider(names_from = tidyselect::all_of(Taxon_Life),
