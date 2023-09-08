@@ -102,7 +102,7 @@ getFishData <- function(dataType = "occur",
 
 
   if(any(grepl("USGS", agency))){
-    fish <- utils::read.csv(base::unz(base::system.file("extdata",
+    fish <- data.table::fread(base::unz(base::system.file("extdata",
                                                         "20201217.0745.FishResults.zip",
                                                         package = "StreamData"),
                                       "20201217.0745.FishResults.csv"),
@@ -119,10 +119,9 @@ getFishData <- function(dataType = "occur",
                          "20201217.0745.FishResults.csv",
                          package = "StreamData"))
     }
-    Project <- utils::read.csv(system.file("extdata",
+    Project <- data.table::fread(system.file("extdata",
                                            "20201217.0745.Project.csv",
-                                           package = "StreamData"),
-                               comment.char="#")
+                                           package = "StreamData"))
 
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
@@ -189,7 +188,7 @@ getFishData <- function(dataType = "occur",
       dplyr::select(-SampleID, -Abundance)
 
     ##Need to get Lat, Long, HUC, Drainage Area
-    site <- utils::read.csv(system.file("extdata",
+    site <- data.table::fread(system.file("extdata",
                                         "20201217.0745.SiteInfo.csv",
                                         package = "StreamData"),
                             colClasses = c("SiteNumber" = "character")) %>%
@@ -201,7 +200,7 @@ getFishData <- function(dataType = "occur",
                     StateFIPSCode)
 
     ##
-    sample <- utils::read.csv(system.file("extdata",
+    sample <- data.table::fread(system.file("extdata",
                                           "20201217.0745.FishSamp.csv",
                                           package = "StreamData"),
                               colClasses = c("SiteNumber" = "character"))
@@ -212,7 +211,7 @@ getFishData <- function(dataType = "occur",
     sample = sample %>%
       dplyr::select(SIDNO, ReachLengthFished_m)
 
-    samplemethod = utils::read.csv(system.file("extdata",
+    samplemethod = data.table::fread(system.file("extdata",
                                                "20201217.0745.FishMethodAndSubreachInfo.csv",
                                                package = "StreamData"),
                                    colClasses = c("SiteNumber" = "character"))
@@ -470,13 +469,17 @@ getFishData <- function(dataType = "occur",
     #READ IN STUFF
     ##Read in datasets directly from EPA website - may want a more stable source
     ##in the future (github repo?)
-    NRSA_1819_fishcnt = read.csv("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-count-data.csv",
-                                 colClasses = c("UID" = "character"),
-                                 stringsAsFactors = FALSE)
+    NRSA_1819_fishcnt = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-count-data.csv",
+                                                                                 add_headers(`User-Agent` = UA)),
+                                                                       encoding = "UTF-8", as = "text"),
+                                                         colClasses = c("UID" = "character"),
+                                                         stringsAsFactors = FALSE))
 
-    NRSA_1819_sites = read.csv("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
-                               colClasses = c("UID" = "character"),
-                               stringsAsFactors = FALSE)
+    NRSA_1819_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
+                                                                           add_headers(`User-Agent` = UA)),
+                                                                 encoding = "UTF-8", as = "text"),
+                                                   colClasses = c("UID" = "character"),
+                                                   stringsAsFactors = FALSE))
 
     ##FIX 1819 COUNT UIDs
     NRSA_1819_fishcnt$UID <- NRSA_1819_sites$UID[match(paste(NRSA_1819_fishcnt$SITE_ID,
@@ -484,36 +487,38 @@ getFishData <- function(dataType = "occur",
                                                        paste(NRSA_1819_sites$SITE_ID,
                                                              NRSA_1819_sites$DATE_COL, sep = "_"))]
 
-    # NRSA_1819_sampinfo <- read.csv("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-sampling-information-data.csv",
-    #                                colClasses = c("UID" = "character"),
-    #                                stringsAsFactors = FALSE)
 
-    NRSA_1314_fishcnt = read.csv("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_fishcts_04232019.csv",
-                                 colClasses = c("UID" = "character"),
-                                 stringsAsFactors = FALSE)
+    NRSA_1314_fishcnt = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_fishcts_04232019.csv",
+                                                                             add_headers(`User-Agent` = UA)),
+                                                                   encoding = "UTF-8", as = "text"),
+                                                     colClasses = c("UID" = "character"),
+                                                     stringsAsFactors = FALSE))
 
-    NRSA_1314_sites = read.csv("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
-                               colClasses = c("UID" = "character",
-                                              "STATECTY" = "character"),
-                               stringsAsFactors = FALSE)
+    NRSA_1314_sites = suppressMessages(data.frame(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
+                                                                          add_headers(`User-Agent` = UA)),
+                                                                encoding = "UTF-8",
+                                                                show_col_types = FALSE)) %>%
+                                         dplyr::mutate(UID = as.character(UID)))
 
-    NRSA_0809_fishcnts = read.csv("https://www.epa.gov/sites/default/files/2015-09/fishcts.csv",
-                                  colClasses = c("UID" = "character"),
-                                  stringsAsFactors = FALSE)
+    NRSA_0809_fishcnts = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2015-09/fishcts.csv",
+                                                                              add_headers(`User-Agent` = UA)),
+                                                                    encoding = "UTF-8", as = "text"),
+                                                      colClasses = c("UID" = "character"),
+                                                      stringsAsFactors = FALSE))
 
-    NRSA_0809_sites = read.csv("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
-                               colClasses = c("UID" = "character"),
-                               stringsAsFactors = FALSE)
+    NRSA_0809_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
+                                                                           add_headers(`User-Agent` = UA)),
+                                                                 encoding = "UTF-8", as = "text"),
+                                                   colClasses = c("UID" = "character"),
+                                                   stringsAsFactors = FALSE))
 
-    NRSA_1314_fishtax <- utils::read.csv(system.file("extdata",
+    NRSA_1314_fishtax <- data.table::fread(system.file("extdata",
                                                      "updateNRSAfishtax.csv",
-                                                     package = "StreamData"),
-                                         comment.char="#")
+                                                     package = "StreamData"))
 
-    NRSA_fish_sampleinfo <- utils::read.csv(system.file("extdata",
+    NRSA_fish_sampleinfo <- data.table::fread(system.file("extdata",
                                                         "NRSA_Fish_SamplingInfo.csv",
                                                         package = "StreamData"),
-                                            comment.char="#",
                                             colClasses = c("UID" = "character"),
                                             stringsAsFactors = FALSE)
 

@@ -149,7 +149,7 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("USGS", agency))){
-    Inverts <- utils::read.csv(base::unz(base::system.file("extdata",
+    Inverts <- data.table::fread(base::unz(base::system.file("extdata",
                                                            "20201217.0749.InvertResults.zip",
                                                            package = "StreamData"),
                                          "20201217.0749.InvertResults.csv"),
@@ -159,10 +159,9 @@ getInvertData <- function(dataType = "occur",
       colnames(Inverts)[1] = "SIDNO"
     }
 
-    Project <- utils::read.csv(base::system.file("extdata",
+    Project <- data.table::fread(base::system.file("extdata",
                                                  "20201217.0749.Project.csv",
                                                  package = "StreamData"),
-                               comment.char="#",
                                stringsAsFactors = FALSE)
 
     database <- c("National Water Quality Assessment",
@@ -207,7 +206,7 @@ getInvertData <- function(dataType = "occur",
     ## "PublishedTaxonName" as the basis for the "SampleGrouping".
 
     ## Need to get the SamplingMethodReference data from invertsamp
-    invertSampleRef = utils::read.csv(system.file("extdata",
+    invertSampleRef = data.table::fread(system.file("extdata",
                                                   "20201217.0749.InvertSamp.csv",
                                                   package = "StreamData"),
                                       colClasses = c("SiteNumber" = "character"),
@@ -650,7 +649,7 @@ getInvertData <- function(dataType = "occur",
     ## columns, and change the data type
 
     ##Gather sample information
-    invertsamp = utils::read.csv(system.file("extdata",
+    invertsamp = data.table::fread(system.file("extdata",
                                              "20201217.0749.InvertSamp.csv",
                                              package = "StreamData"),
                                  colClasses = c("SiteNumber" = "character"),
@@ -664,7 +663,7 @@ getInvertData <- function(dataType = "occur",
                     ChannelFeatures)
 
     ##Gather Sample inventory information (specifically, just replicate type)
-    invertsampinv = utils::read.csv(system.file("extdata",
+    invertsampinv = data.table::fread(system.file("extdata",
                                                 "20201217.0749.SampleInv.csv",
                                                 package = "StreamData"),
                                     colClasses = c("SiteNumber" = "character"),
@@ -674,7 +673,7 @@ getInvertData <- function(dataType = "occur",
                     ReplicateType)
 
     ##Gather site level information
-    invertsite = utils::read.csv(system.file("extdata",
+    invertsite = data.table::fread(system.file("extdata",
                                              "20201217.0749.SiteInfo.csv",
                                              package = "StreamData"),
                                  colClasses = c("SiteNumber" = "character"),
@@ -1045,57 +1044,89 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("EPA", agency))){
-
+    UA <- paste('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0)',
+                'Gecko/20100101 Firefox/98.0')
     ##Read in datasets directly from EPA website - may want a more stable source
     ##in the future (github repo?)
-    NRSA_1819_inverts = read.csv("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv",
-                                 colClasses = c("UID" = "character"),
-                                 stringsAsFactors = FALSE)
-    NRSA_1819_sites = read.csv("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
-                               colClasses = c("UID" = "character"),
-                               stringsAsFactors = FALSE)
+    NRSA_1819_inverts = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2021-04/nrsa_1819_benthic_macroinvertebrate_count_-_data.csv",
+                                                                             add_headers(`User-Agent` = UA)),
+                                                                   encoding = "UTF-8", as = "text"),
+                                                     colClasses = c("UID" = "character"),
+                                                     stringsAsFactors = FALSE))
 
-    NRSA_1314_inverts = read.csv("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_bentcnts_04232019.csv",
-                                 colClasses = c("UID" = "character"),
-                                 stringsAsFactors = FALSE)
-    NRSA_1314_sites = read.csv("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
-                               colClasses = c("UID" = "character",
-                                              "STATECTY" = "character"),
-                               stringsAsFactors = FALSE)
+    NRSA_1819_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
+                                                                           add_headers(`User-Agent` = UA)),
+                                                                 encoding = "UTF-8", as = "text"),
+                                                   colClasses = c("UID" = "character"),
+                                                   stringsAsFactors = FALSE))
 
-    NRSA_0809_inverts = read.csv("https://www.epa.gov/sites/production/files/2016-11/nrsa0809bentcts.csv",
-                                 colClasses = c("UID" = "character"),
-                                 stringsAsFactors = FALSE)
-    NRSA_0809_inverts_tax = read.csv("https://www.epa.gov/sites/production/files/2016-06/nrsa_0809_benttaxa.csv",
-                                     stringsAsFactors = FALSE)
+    NRSA_1314_inverts = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_bentcnts_04232019.csv",
+                                                                             add_headers(`User-Agent` = UA)),
+                                                                   encoding = "UTF-8", as = "text"),
+                                                     colClasses = c("UID" = "character"),
+                                                     stringsAsFactors = FALSE))
 
-    NRSA_0809_sites = read.csv("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
-                               colClasses = c("UID" = "character"),
-                               stringsAsFactors = FALSE)
+    ##ISSUE when as = "text", so allow it to parse automatically for now
+    NRSA_1314_sites = suppressMessages(data.frame(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
+                                                                           add_headers(`User-Agent` = UA)),
+                                                                 encoding = "UTF-8",
+                                               show_col_types = FALSE)) %>%
+      dplyr::mutate(UID = as.character(UID)))
 
-    NRSA_0304_inverts = rbind(read.csv("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part1.csv",
-                                       stringsAsFactors = FALSE),
-                              read.csv("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part2.csv",
-                                       stringsAsFactors = FALSE))
-    NRSA_0304_sites = read.csv("https://www.epa.gov/sites/production/files/2014-10/wsa_siteinfo_ts_final.csv",
-                               stringsAsFactors = FALSE)
+    NRSA_0809_inverts = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2016-11/nrsa0809bentcts.csv",
+                                                                             add_headers(`User-Agent` = UA)),
+                                                                   encoding = "UTF-8", as = "text"),
+                                                     colClasses = c("UID" = "character"),
+                                                     stringsAsFactors = FALSE))
+
+    NRSA_0809_inverts_tax = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2016-06/nrsa_0809_benttaxa.csv",
+                                                                                 add_headers(`User-Agent` = UA)),
+                                                                       encoding = "UTF-8", as = "text"),
+                                                         stringsAsFactors = FALSE))
+
+    NRSA_0809_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
+                                                                           add_headers(`User-Agent` = UA)),
+                                                                 encoding = "UTF-8", as = "text"),
+                                                   stringsAsFactors = FALSE))
+
+    NRSA_0304_inverts = rbind(data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part1.csv",
+                                                                             add_headers(`User-Agent` = UA)),
+                                                                   encoding = "UTF-8", as = "text"),
+                                                     stringsAsFactors = FALSE)),
+                              data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part2.csv",
+                                                                        add_headers(`User-Agent` = UA)),
+                                                              encoding = "UTF-8", as = "text"),
+                                                stringsAsFactors = FALSE))
+
+    NRSA_0304_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2014-10/wsa_siteinfo_ts_final.csv",
+                                                                           add_headers(`User-Agent` = UA)),
+                                                                 encoding = "UTF-8", as = "text"),
+                                                   stringsAsFactors = FALSE))
+
 
     ##add wetted width to datasets
-    WSAhab <- read.csv("https://www.epa.gov/sites/default/files/2014-10/phabbest.csv",
-                       stringsAsFactors = FALSE) %>%
+    WSAhab <- data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2014-10/phabbest.csv",
+                                                                   add_headers(`User-Agent` = UA)),
+                                                         encoding = "UTF-8", as = "text"),
+                                           stringsAsFactors = FALSE)) %>%
       dplyr::select(SITE_ID, YEAR, VISIT_NO, XWIDTH)
 
-    hab0809 <- read.csv("https://www.epa.gov/sites/default/files/2015-09/phabmed.csv",
-                        stringsAsFactors = FALSE) %>%
+    hab0809 <- data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2015-09/phabmed.csv",
+                                                                    add_headers(`User-Agent` = UA)),
+                                                          encoding = "UTF-8", as = "text"),
+                                            stringsAsFactors = FALSE)) %>%
       dplyr::select(SITE_ID, YEAR, VISIT_NO, XWIDTH)
 
-    hab1314 <- read.csv("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_phabmed_04232019.csv",
-                        colClasses = c("UID" = "character"),
-                        stringsAsFactors = FALSE) %>%
+    hab1314 <- data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_phabmed_04232019.csv",
+                                                                    add_headers(`User-Agent` = UA)),
+                                                          encoding = "UTF-8", as = "text"),
+                                            stringsAsFactors = FALSE)) %>%
       dplyr::select(SITE_ID, UID, VISIT_NO, XWIDTH)
 
-    hab1819 <- read.csv("https://www.epa.gov/sites/default/files/2021-04/nrsa_1819_physical_habitat_larger_set_of_metrics_-_data.csv",
-                        stringsAsFactors = FALSE) %>%
+    hab1819 <- data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2021-04/nrsa_1819_physical_habitat_larger_set_of_metrics_-_data.csv",
+                                                                    add_headers(`User-Agent` = UA)),
+                                                          encoding = "UTF-8", as = "text"),
+                                            stringsAsFactors = FALSE)) %>%
       dplyr::select(SITE_ID, DATE_COL, VISIT_NO, XWIDTH)
 
     #############
@@ -1240,7 +1271,7 @@ getInvertData <- function(dataType = "occur",
                                  NRSA_inverts$GENUS)
 
     ##Read in the density conversion dataset from the EPA
-    NRSADenconv <- utils::read.csv(base::system.file("extdata",
+    NRSADenconv <- data.table::fread(base::system.file("extdata",
                                                      "EPA_DensityConv.csv",
                                                      package = "StreamData"),
                                    colClasses = c("SITE_ID" = "character"),
