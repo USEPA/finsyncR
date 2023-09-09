@@ -149,13 +149,12 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("USGS", agency))){
-    Inverts <- data.table::fread(cmd = paste("unzip -cq",shQuote(base::system.file("extdata",
-                                                                                   "20201217.0749.InvertResults.zip",
-                                                                                   package = "StreamData"))),
-                                 colClasses = c("SiteNumber" = "character"),
-                                 stringsAsFactors = FALSE,
-                                 showProgress = F,
-                                 data.table = F)
+    Inverts <- utils::read.csv(base::unz(base::system.file("extdata",
+                                                           "20201217.0749.InvertResults.zip",
+                                                           package = "StreamData"),
+                                         "20201217.0749.InvertResults.csv"),
+                               colClasses = c("SiteNumber" = "character"),
+                               stringsAsFactors = FALSE)
 
     if(colnames(Inverts)[1] != "SIDNO"){
       colnames(Inverts)[1] = "SIDNO"
