@@ -149,13 +149,12 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("USGS", agency))){
-    Inverts <- data.table::fread(cmd = paste("unzip -cq",shQuote(base::system.file("extdata",
-                                                                                   "20201217.0749.InvertResults.zip",
-                                                                                   package = "StreamData"))),
-                                 colClasses = c("SiteNumber" = "character"),
-                                 stringsAsFactors = FALSE,
-                                 showProgress = F,
-                                 data.table = F)
+    Inverts <- utils::read.csv(base::unz(base::system.file("extdata",
+                                                           "20201217.0749.InvertResults.zip",
+                                                           package = "StreamData"),
+                                         "20201217.0749.InvertResults.csv"),
+                               colClasses = c("SiteNumber" = "character"),
+                               stringsAsFactors = FALSE)
 
     if(colnames(Inverts)[1] != "SIDNO"){
       colnames(Inverts)[1] = "SIDNO"
@@ -1125,7 +1124,8 @@ getInvertData <- function(dataType = "occur",
                                                                     add_headers(`User-Agent` = UA)),
                                                           encoding = "UTF-8", as = "text"),
                                             stringsAsFactors = FALSE)) %>%
-      dplyr::select(SITE_ID, UID, VISIT_NO, XWIDTH)
+      dplyr::select(SITE_ID, UID, VISIT_NO, XWIDTH) %>%
+      dplyr::mutate(UID = as.character(UID))
 
     hab1819 <- data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2021-04/nrsa_1819_physical_habitat_larger_set_of_metrics_-_data.csv",
                                                                     add_headers(`User-Agent` = UA)),
