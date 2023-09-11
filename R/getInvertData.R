@@ -1090,6 +1090,7 @@ getInvertData <- function(dataType = "occur",
     NRSA_0809_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
                                                                            add_headers(`User-Agent` = UA)),
                                                                  encoding = "UTF-8", as = "text"),
+                                                   colClasses = c("UID" = "character"),
                                                    stringsAsFactors = FALSE))
 
     NRSA_0304_inverts = rbind(data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2014-10/wsa_bencnt_genus_ts_final_part1.csv",
@@ -1463,7 +1464,7 @@ getInvertData <- function(dataType = "occur",
                "FAMILY",
                "GENUS")
 
-    mycols <- mycols[!(mycols %in% tidyselect::all_of(taxonLevel.nrsa))]
+    mycols <- mycols[!(mycols %in% (taxonLevel.nrsa))]
 
     nrsa_comms1 = NRSA_inverts %>%
       dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel.nrsa)), dplyr::any_vars(. != "")) %>%
