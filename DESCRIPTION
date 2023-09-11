@@ -50,7 +50,7 @@ LazyData: true
 RoxygenNote: 7.2.3
 Imports: 
     magrittr,
-    dplyr (>= 1.0.2),
+    dplyr (>= 1.1.0),
     tidyr (>= 1.1.2),
     stringr (>= 1.4.0),
     utils,

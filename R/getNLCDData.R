@@ -70,7 +70,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
             "PctIce")
   years <- c("2001", "2004", "2006", "2008", "2011",
             "2013", "2016", "2019")
-  nlcd_mets = paste(paste(rep(nlcd, each = length(year)), year, sep = ""), collapse = ",")
+  nlcd_mets = paste(paste(rep(nlcd, each = length(years)), years, sep = ""), collapse = ",")
 
   ##attach COMIDs to site-numbers
   data = dplyr::left_join(data, (StreamData:::.allsitesCOMID[,-3] %>% dplyr::filter(SiteNumber %in% data$SiteNumber)))
@@ -161,7 +161,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                                                   "PctWater",
                                                   "PctCrop"))))
       ) %>%
-      dplyr::group_by(COMID, SiteNumber, Scale, Year, Info2) %>%
+      dplyr::group_by(COMID, Scale, Year, Info2) %>%
       dplyr::summarize(value = sum(value)) %>%
       dplyr::ungroup()
   }
