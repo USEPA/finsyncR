@@ -113,7 +113,8 @@ Inverts <- getInvertData(dataType = "occur",
                          agency = "USGS",
                          lifestage = FALSE,
                          rarefy = TRUE,
-                         seed = 1)
+                         seed = 1,
+                         boatableStreams = FALSE)
 
 head(Inverts)[,1:35]
 

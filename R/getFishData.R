@@ -122,7 +122,8 @@ getFishData <- function(dataType = "occur",
     }
     Project <- data.table::fread(system.file("extdata",
                                            "20201217.0745.Project.csv",
-                                           package = "StreamData"))
+                                           package = "StreamData"),
+                                 data.table = F)
 
     database <- c("National Water Quality Assessment",
                   "Cooperative Water Program",
@@ -192,7 +193,8 @@ getFishData <- function(dataType = "occur",
     site <- data.table::fread(system.file("extdata",
                                         "20201217.0745.SiteInfo.csv",
                                         package = "StreamData"),
-                            colClasses = c("SiteNumber" = "character")) %>%
+                            colClasses = c("SiteNumber" = "character"),
+                            data.table = F) %>%
       dplyr::select(SiteNumber, Latitude_dd, Longitude_dd,
                     CoordinateDatum,
                     HUCCode, DrainageArea_mi2,
@@ -204,7 +206,8 @@ getFishData <- function(dataType = "occur",
     sample <- data.table::fread(system.file("extdata",
                                           "20201217.0745.FishSamp.csv",
                                           package = "StreamData"),
-                              colClasses = c("SiteNumber" = "character"))
+                              colClasses = c("SiteNumber" = "character"),
+                              data.table = F)
     if(colnames(sample)[1] != "SIDNO"){
       colnames(sample)[1] = "SIDNO"
     }
@@ -215,7 +218,8 @@ getFishData <- function(dataType = "occur",
     samplemethod = data.table::fread(system.file("extdata",
                                                "20201217.0745.FishMethodAndSubreachInfo.csv",
                                                package = "StreamData"),
-                                   colClasses = c("SiteNumber" = "character"))
+                                   colClasses = c("SiteNumber" = "character"),
+                                   data.table = F)
 
     if(colnames(samplemethod)[1] != "SIDNO"){
       colnames(samplemethod)[1] = "SIDNO"
@@ -466,18 +470,19 @@ getFishData <- function(dataType = "occur",
 
   if(any(grepl("EPA", agency))){
     ##EPA ONLY WORKS WITH SPECIES FOR NOW; NOT GOING TO TAKE THE TIME TO MAKE IT WORK OTHERWISE
-
+    UA <- paste('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:98.0)',
+                'Gecko/20100101 Firefox/98.0')
     #READ IN STUFF
     ##Read in datasets directly from EPA website - may want a more stable source
     ##in the future (github repo?)
     NRSA_1819_fishcnt = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-count-data.csv",
-                                                                                 add_headers(`User-Agent` = UA)),
+                                                                                 httr::add_headers(`User-Agent` = UA)),
                                                                        encoding = "UTF-8", as = "text"),
                                                          colClasses = c("UID" = "character"),
                                                          stringsAsFactors = FALSE))
 
     NRSA_1819_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
-                                                                           add_headers(`User-Agent` = UA)),
+                                                                           httr::add_headers(`User-Agent` = UA)),
                                                                  encoding = "UTF-8", as = "text"),
                                                    colClasses = c("UID" = "character"),
                                                    stringsAsFactors = FALSE))
@@ -490,25 +495,25 @@ getFishData <- function(dataType = "occur",
 
 
     NRSA_1314_fishcnt = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_fishcts_04232019.csv",
-                                                                             add_headers(`User-Agent` = UA)),
+                                                                             httr::add_headers(`User-Agent` = UA)),
                                                                    encoding = "UTF-8", as = "text"),
                                                      colClasses = c("UID" = "character"),
                                                      stringsAsFactors = FALSE))
 
     NRSA_1314_sites = suppressMessages(data.frame(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
-                                                                          add_headers(`User-Agent` = UA)),
+                                                                          httr::add_headers(`User-Agent` = UA)),
                                                                 encoding = "UTF-8",
                                                                 show_col_types = FALSE)) %>%
                                          dplyr::mutate(UID = as.character(UID)))
 
     NRSA_0809_fishcnts = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2015-09/fishcts.csv",
-                                                                              add_headers(`User-Agent` = UA)),
+                                                                              httr::add_headers(`User-Agent` = UA)),
                                                                     encoding = "UTF-8", as = "text"),
                                                       colClasses = c("UID" = "character"),
                                                       stringsAsFactors = FALSE))
 
     NRSA_0809_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
-                                                                           add_headers(`User-Agent` = UA)),
+                                                                           httr::add_headers(`User-Agent` = UA)),
                                                                  encoding = "UTF-8", as = "text"),
                                                    colClasses = c("UID" = "character"),
                                                    stringsAsFactors = FALSE))
