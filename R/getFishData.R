@@ -960,8 +960,8 @@ getFishData <- function(dataType = "occur",
            `Oncorhynchus mykiss` = sum(c_across(contains("Oncorhynchus mykiss")))
     ) %>%
     ungroup() %>%
-    relocate(`Oncorhynchus clarkii`, .before = `Oncorhynchus clarki virginalis`) %>%
-    relocate(`Esox americanus`, .before = `Esox americanus americanus`) %>%
+    relocate(`Oncorhynchus clarkii`, .before = `Oncorhynchus nerka`) %>%
+    relocate(`Esox americanus`, .before = `Esox masquinongy`) %>%
   dplyr::select(-c(tidyselect::contains("Esox americanus ")),
                 -c(tidyselect::contains(" sp.")),
                 -c(tidyselect::contains("Oncorhynchus clarkii ")),

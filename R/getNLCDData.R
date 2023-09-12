@@ -47,7 +47,7 @@
 #'
 #'   getNLCDData(data=dat,
 #'   scale = "Cat",
-#'   group = FALSE
+#'   group = FALSE)
 #'   }
 #'
 #' @export
@@ -73,7 +73,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
   nlcd_mets = paste(paste(rep(nlcd, each = length(years)), years, sep = ""), collapse = ",")
 
   ##attach COMIDs to site-numbers
-  data = dplyr::left_join(data, (StreamData:::.allsitesCOMID[,-3] %>% dplyr::filter(SiteNumber %in% data$SiteNumber)))
+  data = suppressMessages(dplyr::left_join(data, (StreamData:::.allsitesCOMID[,-3] %>% dplyr::filter(SiteNumber %in% data$SiteNumber))))
 
   comid = paste(data$COMID, collapse = ",")
 
@@ -190,7 +190,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
   ##Join the datasets
   data = data %>%
     dplyr::left_join(USGS_streamcat,
-              by = join_by("COMID" == "COMID",
+              by = dplyr::join_by("COMID" == "COMID",
                      "ClosestYear" == "Year")) %>%
     dplyr::select(-ClosestYear, -COMID)
 

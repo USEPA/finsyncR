@@ -59,7 +59,7 @@ Land-use/land-cover data is extracted from the USGS National Land Cover
 
   getNLCDData(data=dat,
   scale = "Cat",
-  group = FALSE
+  group = FALSE)
   }
 
 }
