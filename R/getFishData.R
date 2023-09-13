@@ -12,7 +12,7 @@
 #'   An alternative standardization method is \code{standardize = "MGMS"}, which calculates
 #'   Multigear Mean Standardization (MGMS) values to account for catchability differences between
 #'   fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).
-#' @param hybrid logical. Should hybrid individuals be included in the output dataset?
+#' @param hybrids logical. Should hybrid individuals be included in the output dataset?
 #' \code{TRUE} or \code{FALSE}.
 #' @param boatableStreams logical. Should EPA boatable streams be included in the
 #'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
@@ -91,7 +91,7 @@ getFishData <- function(dataType = "occur",
     stop('standardize must be "none", "CPUE", or "MGMS"')
   }
 
-  if(!(taxonLevel %in% StreamData:::.TaxLevCols_Fish$Superclass$taxcols)){
+  if(!(taxonLevel %in% .TaxLevCols_Fish$Superclass$taxcols)){
     stop(paste('taxonLevel must be set between ranks "Superclass" and',
                '"Subspecies"; see "Details" in ?getFishData.'))
   }
@@ -239,8 +239,8 @@ getFishData <- function(dataType = "occur",
                                                   sample,
                                                   by = "SIDNO"), samplemethod, by = "SIDNO_MethodCode")
 
-    mycols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$mycols
-    taxcols = StreamData:::.TaxLevCols_Fish[[which(names(StreamData:::.TaxLevCols_Fish) == taxonLevel)]]$taxcols
+    mycols = .TaxLevCols_Fish[[which(names(.TaxLevCols_Fish) == taxonLevel)]]$mycols
+    taxcols = .TaxLevCols_Fish[[which(names(.TaxLevCols_Fish) == taxonLevel)]]$taxcols
 
     fish_info = fish_info %>%
       mutate(FISH_PROTOCOL = ifelse(grepl("Boat", MethodCode),
@@ -464,7 +464,7 @@ getFishData <- function(dataType = "occur",
                         .after = tidyselect::last_col()) %>%
         dplyr::select(-SecondsShockTime,
                       -SIDNO) %>%
-        dplyr::relocate(tidyselect::any_of(StreamData:::.ReorderUSGSBioDataColNames))
+        dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
     }
   }
 
@@ -638,17 +638,17 @@ getFishData <- function(dataType = "occur",
       relocate(SITENAME, .after = VISIT_NO)
 
     ##MASTER ID LIST
-    NRSA_fish_sites$UNIQUE_ID <- ifelse(NRSA_fish_sites$SITE_ID %in% StreamData:::.NRSA_siteIDs$SITE_ID,
-                                        StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(NRSA_fish_sites$SITE_ID,
-                                                                                   StreamData:::.NRSA_siteIDs$SITE_ID)],
+    NRSA_fish_sites$UNIQUE_ID <- ifelse(NRSA_fish_sites$SITE_ID %in% .NRSA_siteIDs$SITE_ID,
+                                        .NRSA_siteIDs$UNIQUE_ID[match(NRSA_fish_sites$SITE_ID,
+                                                                                   .NRSA_siteIDs$SITE_ID)],
                                         NA)
 
     ##if site number in nrsa_comms1 is in the MASTER_SITEID in the master crosswalk list,
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else give the current UNIQUE ID
-    NRSA_fish_sites$UNIQUE_ID <- ifelse(NRSA_fish_sites$SITE_ID %in% StreamData:::.NRSA_siteIDs$MASTER_SITEID,
-                                        StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(NRSA_fish_sites$SITE_ID,
-                                                                                   StreamData:::.NRSA_siteIDs$MASTER_SITEID)],
+    NRSA_fish_sites$UNIQUE_ID <- ifelse(NRSA_fish_sites$SITE_ID %in% .NRSA_siteIDs$MASTER_SITEID,
+                                        .NRSA_siteIDs$UNIQUE_ID[match(NRSA_fish_sites$SITE_ID,
+                                                                                   .NRSA_siteIDs$MASTER_SITEID)],
                                         NRSA_fish_sites$UNIQUE_ID)
 
     ##if there are any NA values in UNIQUE ID, replace these with the SiteNumber
@@ -852,7 +852,7 @@ getFishData <- function(dataType = "occur",
                                         "MinutesShockTime", "SecondsShockTime")))
 
   full_fish <- full_fish %>%
-    left_join(StreamData:::.allsitesCOMID, by = dplyr::join_by(SiteNumber))
+    left_join(.allsitesCOMID, by = dplyr::join_by(SiteNumber))
 
   full_fish <- full_fish  %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())

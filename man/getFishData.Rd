@@ -30,13 +30,13 @@ An alternative standardization method is \code{standardize = "MGMS"}, which calc
 Multigear Mean Standardization (MGMS) values to account for catchability differences between
 fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).}
 
+\item{hybrids}{logical. Should hybrid individuals be included in the output dataset?
+\code{TRUE} or \code{FALSE}.}
+
 \item{boatableStreams}{logical. Should EPA boatable streams be included in the
 output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
 so \code{boatableStreams} should only be set to \code{TRUE} when gathering
 EPA data only.}
-
-\item{hybrid}{logical. Should hybrid individuals be included in the output dataset?
-\code{TRUE} or \code{FALSE}.}
 }
 \value{
 A taxa by sample data frame with site, stream reach, and

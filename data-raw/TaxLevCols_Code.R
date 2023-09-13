@@ -127,11 +127,11 @@ taxnamesFISH = c("Superclass", "Class", "Subclass",
 
 ## Load in 'Proprietary' dataset provided by USGS personnel
 ##NEED TO GET THIS IN.
-# Proprietary <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/StreamData/inst/extdata/Proprietary.csv")
-Proprietary <- read.csv("C:/Users/mikem/Documents/R Package Builds/USGS_Invert_Functions/data/Proprietary.csv")
+# Proprietary <- read.csv("./data/Proprietary.csv")
+# Proprietary <- read.csv("./data/Proprietary.csv")
 
 ## Create a character ratio to avoid reading in the file and generating decimal ratios
-Proprietary$Ratio <- paste('"', Proprietary$NWQLSubsamplingCode, '"', sep = " ")
+# Proprietary$Ratio <- paste('"', Proprietary$NWQLSubsamplingCode, '"', sep = " ")
 
 ## Load in 'Sampler' dataset generated from 'Proprietary' dataset
 ## 'Sampler' contains all unique "Ratio" entries
@@ -141,13 +141,13 @@ Proprietary$Ratio <- paste('"', Proprietary$NWQLSubsamplingCode, '"', sep = " ")
 ## National Water Quality Laboratory -- Processing, taxonomy, and quality
 ## control of benthic macroinvertebrate samples)
 ## 'SamplerType' decided by DKJ
-# Sampler <- read.csv("/Users/samantharumschlag/Documents/PowellCenter/Code/StreamData/inst/extdata/Grotheer -- Ratio&SamplerType.csv")
-Sampler <- read.csv("C:/Users/mikem/Documents/R Package Builds/USGS_Invert_Functions/data/Grotheer -- Ratio&SamplerType.csv")
-
-Sampler$Ratio <- as.character(Sampler$Ratio)
+# Sampler <- read.csv("./data/Grotheer -- Ratio&SamplerType.csv")
+# Sampler <- read.csv("./data/Grotheer -- Ratio&SamplerType.csv")
+#
+# Sampler$Ratio <- as.character(Sampler$Ratio)
 
 ## Combine 'Proprietary' and 'Sampler' using the "Ratio" character
-.SamplingRatio_SamplerType <- left_join(Proprietary, Sampler, by = "Ratio")
+# .SamplingRatio_SamplerType <- left_join(Proprietary, Sampler, by = "Ratio")
 
 
 
@@ -304,23 +304,36 @@ NRSA_siteIDs$MASTER_SITEID <- ifelse(NRSA_siteIDs$SITE_ID %in% NRSA_0809_sites$S
 
 .allsitesCOMID = allsitesCOMID
 
+
 # usethis::use_data(.InvertIDCols,
 #                   .allsitesCOMID,
 #                   internal = TRUE,
 #                   overwrite = FALSE)
+# save(list = c(sysdata_filenames[-12], ".allsitesCOMID"), file = "R/sysdata.rda")
+
+# .pest.dat <- utils::read.table(base::unz(base::system.file("extdata",
+#                                                              "pestCountyEstYrs.zip",
+#                                                              package = "StreamData"),
+#                                            "pestCountyEstYrs.txt"),
+#                                  sep = "\t", header= T,
+#                                  colClasses = c("STATE_FIPS_CODE" = "character",
+#                                                 "COUNTY_FIPS_CODE" = "character"))  %>%
+#   mutate(compound = stringr::str_to_lower(COMPOUND))
+
 
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames[-12], ".allsitesCOMID"), file = "R/sysdata.rda")
+save(list = c(sysdata_filenames, ".pest.dat"), file = "R/sysdata.rda",
+     compress = "xz")
 
-usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
-                  .TaxLevCols_Fish, .SamplingRatio_SamplerType,
-                  .ReorderUSGSBioDataColNames,
-                  .site.info,
-                  .pest.info,
-                  .clust_labels,
-                  .switch1to1,
-                  .NRSA_siteIDs,
-                  .InvertIDCols,
-                  .allsitesCOMID,
-                  internal = TRUE,
-                  overwrite = TRUE)
+# usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
+#                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,
+#                   .ReorderUSGSBioDataColNames,
+#                   .site.info,
+#                   .pest.info,
+#                   .clust_labels,
+#                   .switch1to1,
+#                   .NRSA_siteIDs,
+#                   .InvertIDCols,
+#                   .allsitesCOMID,
+#                   internal = TRUE,
+#                   overwrite = TRUE)

@@ -114,7 +114,7 @@ getInvertData <- function(dataType = "occur",
   if(!(dataType %in% c("abun", "occur"))) {
     stop('dataType must be either "abun" or "occur".')}
 
-  if(!(taxonLevel %in% StreamData:::.TaxLevCols_Inverts$Phylum$taxcols)){
+  if(!(taxonLevel %in% .TaxLevCols_Inverts$Phylum$taxcols)){
     stop(paste('taxonLevel must be set between ranks "Phylum" and "Subspecies";',
                'see "Details" in ?getInvertData.'))
   }
@@ -186,7 +186,7 @@ getInvertData <- function(dataType = "occur",
                                          dplyr::distinct(ProjectLabel,
                                                          .keep_all = FALSE))[ , "ProjectLabel"])
 
-    SamplingRatio_SamplerType <- StreamData:::.SamplingRatio_SamplerType
+    SamplingRatio_SamplerType <- .SamplingRatio_SamplerType
 
     Inverts <- dplyr::left_join(Inverts,
                                 SamplingRatio_SamplerType,
@@ -717,8 +717,8 @@ getInvertData <- function(dataType = "occur",
     ##These are the column names that should be removed (mycols) and which rows
     ##of data should be retained based on taxonomic resolution
     ##(eg if taxonLevel == "Family", retain ALL taxonomic levels at Family and Below)
-    mycols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$mycols
-    taxcols = StreamData:::.TaxLevCols_Inverts[[which(names(StreamData:::.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
+    mycols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$mycols
+    taxcols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
 
     ##Before any final data manipulation, if dataset is occurence and rarify is true
     ##then rarify based on the RAWCOUNT (individuals actually identified)
@@ -773,8 +773,8 @@ getInvertData <- function(dataType = "occur",
       ## appear in the clust_labels dataset
       ##First, match the group information based on the genera present in both the dat1
       ## and clust_labels dataset
-      dat1$group <- StreamData:::.clust_labels[match(dat1$Genus,
-                                                     StreamData:::.clust_labels$genus),]$group
+      dat1$group <- .clust_labels[match(dat1$Genus,
+                                                     .clust_labels$genus),]$group
 
       #There are some problems here, since there are multiple "slash" genera per
       #individual genus, so need to lump these
@@ -835,12 +835,12 @@ getInvertData <- function(dataType = "occur",
 
       ##Third, pull the "lump" information from clust_labels based on the "group"
       ## from dat1L
-      dat1L$lump <- StreamData:::.clust_labels[match(dat1L$group,
-                                                     StreamData:::.clust_labels$group),]$lump
+      dat1L$lump <- .clust_labels[match(dat1L$group,
+                                                     .clust_labels$group),]$lump
 
       ##Finally, join these datasets, so that all slashes will be successfully pulled
       ## into the appropriate "lump" group
-      slashlump <- dplyr::bind_rows(list(StreamData:::.clust_labels,
+      slashlump <- dplyr::bind_rows(list(.clust_labels,
                                          dat1L))
 
       ##Fix a naming issue with "Einfeldia" groups
@@ -1043,7 +1043,7 @@ getInvertData <- function(dataType = "occur",
       dplyr::select(-Identifier,
                     -SIDNO,
                     -ReleaseCategory) %>%
-      dplyr::relocate(tidyselect::any_of(c(StreamData:::.ReorderUSGSBioDataColNames[-26],
+      dplyr::relocate(tidyselect::any_of(c(.ReorderUSGSBioDataColNames[-26],
                                            "FieldSplitRatio", "LabSubsamplingRatio",
                                            "PropID", "AreaSampTot_m2"))) %>%
       dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
@@ -1051,7 +1051,7 @@ getInvertData <- function(dataType = "occur",
     invert_comms1 <- invert_comms1  %>%
       mutate(WettedWidth = NA,
              Agency = "USGS") %>%
-      select(Agency, tidyselect::any_of(StreamData:::.InvertIDCols), tidyselect::contains("tax_"))
+      select(Agency, tidyselect::any_of(.InvertIDCols), tidyselect::contains("tax_"))
   }
 
   if(any(grepl("EPA", agency))){
@@ -1385,9 +1385,9 @@ getInvertData <- function(dataType = "occur",
     if(taxonLevel == "Genus") {
 
       ##Convert those genera that need to be updated
-      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% StreamData:::.switch1to1$BenchGenus,
-                                   StreamData:::.switch1to1$Genus[match(NRSA_inverts$GENUS,
-                                                                        StreamData:::.switch1to1$BenchGenus)],
+      NRSA_inverts$GENUS <- ifelse(NRSA_inverts$GENUS %in% .switch1to1$BenchGenus,
+                                   .switch1to1$Genus[match(NRSA_inverts$GENUS,
+                                                                        .switch1to1$BenchGenus)],
                                    NRSA_inverts$GENUS)
 
       ##This is the same code as the NAWQA taxonomy fix
@@ -1419,7 +1419,7 @@ getInvertData <- function(dataType = "occur",
 
         #filter out rows that have bench genus from problem list & no species ID
         NRSA_inverts <- NRSA_inverts %>%
-          dplyr::filter(!(GENUS %in% StreamData:::.clust_labels$genus)) %>%
+          dplyr::filter(!(GENUS %in% .clust_labels$genus)) %>%
           dplyr::filter(!(grepl("/", GENUS)))
       }
 
@@ -1642,17 +1642,17 @@ getInvertData <- function(dataType = "occur",
     ##if site number in nrsa_comms1 is in the SITEID in the master crosswalk list,
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else provide an NA
-    nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$SITE_ID,
-                                    StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
-                                                                               StreamData:::.NRSA_siteIDs$SITE_ID)],
+    nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% .NRSA_siteIDs$SITE_ID,
+                                    .NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
+                                                                               .NRSA_siteIDs$SITE_ID)],
                                     NA)
 
     ##if site number in nrsa_comms1 is in the MASTER_SITEID in the master crosswalk list,
     ##match the numbers and pull the corresponding unique id, which is the crosswalked site id,
     ##else give the current UNIQUE ID
-    nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% StreamData:::.NRSA_siteIDs$MASTER_SITEID,
-                                    StreamData:::.NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
-                                                                               StreamData:::.NRSA_siteIDs$MASTER_SITEID)],
+    nrsa_comms1$UNIQUE_ID <- ifelse(nrsa_comms1$SiteNumber %in% .NRSA_siteIDs$MASTER_SITEID,
+                                    .NRSA_siteIDs$UNIQUE_ID[match(nrsa_comms1$SiteNumber,
+                                                                               .NRSA_siteIDs$MASTER_SITEID)],
                                     nrsa_comms1$UNIQUE_ID)
 
     ##if there are any NA values in UNIQUE ID, replace these with the SiteNumber
@@ -1664,7 +1664,7 @@ getInvertData <- function(dataType = "occur",
     nrsa_comms1 <- nrsa_comms1 %>%
       mutate(Agency = "EPA") %>%
       select(-UNIQUE_ID)%>%
-      select(Agency, tidyselect::any_of(StreamData:::.InvertIDCols), tidyselect::contains("tax_"))
+      select(Agency, tidyselect::any_of(.InvertIDCols), tidyselect::contains("tax_"))
 
   }
 
@@ -1685,7 +1685,7 @@ getInvertData <- function(dataType = "occur",
                                         .x)))
 
   invert_comms1 <- invert_comms1 %>%
-    left_join(StreamData:::.allsitesCOMID, by = dplyr::join_by(SiteNumber))
+    left_join(.allsitesCOMID, by = dplyr::join_by(SiteNumber))
 
   invert_comms1 <- invert_comms1  %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())

@@ -108,11 +108,11 @@ We recommend using `sharedTaxa = TRUE` when comparing across agencies, so that s
 ##This code will generate density estimates at the family level for all samples
 ##in the NAWQA database. Lifestage information will be ignored.
 
-Inverts <- getInvertData(dataType = "occur",
+Inverts <- getInvertData(dataType = "abun",
                          taxonLevel = "Genus",
                          agency = "USGS",
                          lifestage = FALSE,
-                         rarefy = TRUE,
+                         rarefy = FALSE,
                          seed = 1,
                          boatableStreams = FALSE)
 

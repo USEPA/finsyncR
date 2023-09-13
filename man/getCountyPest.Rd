@@ -49,7 +49,7 @@ Note: Pesticide classes and types taken from PAN Pesticide Database.
   were designated as herbicides, and insect growth regulators were designated as
   insecticides. Fungicides were split into antibiotic fungicides, biologic fungicides,
   copper fungicides, mineral fungicides, and synthetic fungicides. To access the original PAN
-  type designations see \code{Type1} in \code{StreamData:::.pest.info}.
+  type designations see \code{Type1} in \code{.pest.info}.
 
   Not every county has an estimate for each of the 483 pesticides in every
   year. We have set \code{na.rm = TRUE} when means and sums are calculated,
@@ -58,7 +58,7 @@ Note: Pesticide classes and types taken from PAN Pesticide Database.
   estimates are based on agriculture alone.
 
   See the following internal dataset for pesticide compounds, classes, and types
-  \code{StreamData:::.pest.info}.
+  \code{.pest.info}.
 }
 \examples{
 \dontrun{

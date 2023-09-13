@@ -1,7 +1,7 @@
 Package: StreamData
 Type: Package
 Title: Generate Cleaned and Compiled USGS and EPA Aquatic Biomonitoring Datasets
-Version: 0.0.0.9412
+Version: 0.0.0.9420
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
@@ -56,7 +56,8 @@ Imports:
     utils,
     tidyselect (>= 1.1.0),
     httr,
-    data.table
+    data.table,
+    lubridate
 Depends:
     R (>= 3.6.0)
 Suggests: 

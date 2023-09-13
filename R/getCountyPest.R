@@ -25,7 +25,7 @@
 #'   were designated as herbicides, and insect growth regulators were designated as
 #'   insecticides. Fungicides were split into antibiotic fungicides, biologic fungicides,
 #'   copper fungicides, mineral fungicides, and synthetic fungicides. To access the original PAN
-#'   type designations see \code{Type1} in \code{StreamData:::.pest.info}.
+#'   type designations see \code{Type1} in \code{.pest.info}.
 #'
 #'   Not every county has an estimate for each of the 483 pesticides in every
 #'   year. We have set \code{na.rm = TRUE} when means and sums are calculated,
@@ -34,7 +34,7 @@
 #'   estimates are based on agriculture alone.
 #'
 #'   See the following internal dataset for pesticide compounds, classes, and types
-#'   \code{StreamData:::.pest.info}.
+#'   \code{.pest.info}.
 #'
 #' @author Samantha Rumschlag, Michael Mahon
 #'
@@ -61,22 +61,9 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
                           pestLevel, pestLevelName){
   if (lagTime != 0 & !exists("lagType")){stop("Provide lagType as 'sum' (sum across years) or 'mean' (average across years) ")}
 
-  pest.dat <- utils::read.table(base::unz(base::system.file("extdata",
-                                                            "pestCountyEstYrs.zip",
-                                                            package = "StreamData"),
-                                          "pestCountyEstYrs.txt"),
-                                sep = "\t", header= T,
-                                colClasses = c("STATE_FIPS_CODE" = "character",
-                                               "COUNTY_FIPS_CODE" = "character"))  %>%
-    mutate(compound = stringr::str_to_lower(COMPOUND))
+  pest.dat <- .pest.dat
 
   ##Remove the unzipped file from the system
-  if(file.exists(system.file("extdata",
-                             "pestCountyEstYrs.txt",
-                             package = "StreamData"))){
-    unlink(system.file("extdata",
-                       "pestCountyEstYrs.txt",
-                       package = "StreamData"))}
 
   if(ePest == "low"){
     ePest = "EPEST_LOW_KG"
@@ -91,7 +78,7 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
   data = data.frame(data)
 
   #takes input data and links cnty and state FIPS
-  site.dat <- data %>% dplyr::left_join(StreamData:::.site.info, by = "SiteNumber")
+  site.dat <- data %>% dplyr::left_join(.site.info, by = "SiteNumber")
 
   if(lagTime !=0){
     site.dat.nrw = nrow(site.dat)
@@ -111,7 +98,7 @@ getCountyPest <- function(data, ePest = "low", lagTime = 0, lagType,
     # LOW estimates
     dplyr::select(-tidyselect::any_of(dropC)) %>%
     # GROUP by pesticide types (e.g. insecticides, herbicides, fungicides)
-    dplyr::left_join(StreamData:::.pest.info, by = c("compound" = "Name")) %>%
+    dplyr::left_join(.pest.info, by = c("compound" = "Name")) %>%
     dplyr::filter_at(vars(any_of(pestLevel)), any_vars(. %in% pestLevelName)) %>%
     # SUM (or average) by "insecticides", "herbicides", "fungicides" in each
     # County-Yr-GROUP combo
