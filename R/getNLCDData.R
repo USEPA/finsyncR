@@ -85,10 +85,11 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
                              'watershed'))
   post_body <- paste0(post_body, "&comid=", comid)
 
-  streamcat <- httr::content(httr::POST("https://java.epa.gov/StreamCAT/metrics?",
+  streamcat <- data.table::fread(httr::content(httr::POST("https://java.epa.gov/StreamCAT/metrics?",
                                         body = post_body),
-                             type = "text/csv", encoding = "UTF-8",
-                             show_col_types = FALSE)
+                             as = "text", encoding = "UTF-8",
+                             show_col_types = FALSE),
+                             data.table = FALSE)
 
 
   ##Naming scheme
