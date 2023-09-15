@@ -1,25 +1,22 @@
 ##To-do:
 ##Must be done
 #double check function documentation
-#update Vignettes
-#make tests
+#continue work on Vignettes
 #Come up with list of covariates that need to be included; drop ALL others
 
 ##Maybe wait
 ##Fish stuff
 #Conductivity?
 #Fish traits? - optional for initial pub
-
+# Add NLA data? – Not “streamdata” then
 ##Inverts
 # InvertTrait – optional for initial pub, for genus
 
 #General
 # Make Hex sticker - optional
-# Code Checker? – Kelsey? Nathan?
-#   Vignettes
-# Function documentation
+# Code Checker – Terry Brown
 
-# Add NLA data? – Not “streamdata” then
+
 
 
 #Include

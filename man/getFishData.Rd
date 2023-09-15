@@ -17,8 +17,7 @@ getFishData(
 \item{dataType}{Output data type, either \code{"abun"} or \code{"occur"}.}
 
 \item{taxonLevel}{Level of taxonomic resolution, must be one of:
-\code{"Class"}, \code{"Subclass"}, \code{"Order"}, \code{"Family"},
-\code{"Genus"}, or \code{"Species"}.}
+\code{"Family"}, \code{"Genus"}, or \code{"Species"}.}
 
 \item{agency}{The agency name(s) (e.g., "USGS" and "EPA") that should be
 included in the output dataset. See \code{Details} below for more information.}

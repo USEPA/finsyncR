@@ -2,17 +2,19 @@ citHeader("To cite StreamData in publications use:")
 
 citEntry(
   entry = "Unpublished",
-  title = "{StreamData}: R Package to Access Cleaned and Harmonized USGS EPA NRSA",
+  title = "{StreamData}: R Package to Access Harmonized USGS and EPA Aquatic Biomonitoring Datasets",
   author = personList(as.person("Michael Mahon"),
                                    as.person("Devin Jones"),
                                    as.person("Ethan Brown"),
+                                   as.person("Terry Brown"),
+                                   as.person("Ryan Hill"),
                                    as.person("Stefan Kunz"),
                                    as.person("Samantha Rumschlag")),
-  year = "2021",
-  note        = "R package version 0.0.0.9215",
+  year = "2023",
+  note        = "R package version 0.0.0.9421",
  textVersion  =
-           paste("Michael Mahon, Devin Jones, Ethan Brown, Stefan Kunz,",
-                 "Samantha Rumschlag (2021). StreamData: R Package to",
-                 "Access Cleaned and Harmonized USGS EPA NRSA.",
-                 "R package version 0.0.0.9215")
+           paste("Michael Mahon, Devin Jones, Ethan Brown, Terry Brown, Ryan Hill,",
+                 "Stefan Kunz, Samantha Rumschlag (2023). {StreamData}: R Package",
+                 "to Access Harmonized USGS and EPA Aquatic Biomonitoring Datasets.",
+                 "R package version 0.0.0.9421")
 )

@@ -2,8 +2,7 @@
 #'
 #' @param dataType Output data type, either \code{"abun"} or \code{"occur"}.
 #' @param taxonLevel Level of taxonomic resolution, must be one of:
-#'   \code{"Class"}, \code{"Subclass"}, \code{"Order"}, \code{"Family"},
-#'   \code{"Genus"}, or \code{"Species"}.
+#'   \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
 #' @param agency The agency name(s) (e.g., "USGS" and "EPA") that should be
 #'   included in the output dataset. See \code{Details} below for more information.
 #' @param standardize Standardization method to use for calculating fish abundance matrices.
@@ -96,8 +95,8 @@ getFishData <- function(dataType = "occur",
                '"Subspecies"; see "Details" in ?getFishData.'))
   }
 
-  if(taxonLevel != "Species"){
-    stop(paste('as of now, taxonLevel must be set to "Species"'))
+  if(!taxonLevel %in% c("Family","Genus","Species")){
+    stop(paste('taxonLevel must be set to Family, Genus, or Species'))
   }
 
 
@@ -713,6 +712,7 @@ getFishData <- function(dataType = "occur",
                                            MethodBasic = "Shocking",
                                            MinutesShockTime = 10,
                                            StandardMethod = MinutesShockTime,
+                                           FAMILY = "No Fish",
                                            GENUS = "No fish",
                                            SPECIES = "No fish",
                                            SCIENTIFIC = "No fish collected") %>%
@@ -721,12 +721,36 @@ getFishData <- function(dataType = "occur",
 
 
 
+    ##this is where we need to bring in different levels of the fish taxonomy
+    ##When "taxonLevel" isn't in all caps (in the function), create a NRSA specific
+    ##taxonLevel that is in all caps
+    taxonLevel.nrsa <- base::toupper(taxonLevel)
+    taxonLevel.nrsa = ifelse(taxonLevel.nrsa == "SPECIES",
+                             "SCIENTIFIC",
+                             taxonLevel.nrsa)
+    ##UPDATE THIS FOR NRSA_MYCOLS
+    mycols = c("FAMILY",
+               "GENUS",
+               "SPECIES",
+               "SCIENTIFIC",
+               "FINAL_NAME")
+
+    mycols <- mycols[!(mycols %in% (taxonLevel.nrsa))]
+
     NRSA_FISH_comm <- NRSA_FISH_wSite %>%
-      filter(!is.na(GENUS) ) %>%
-      filter(!is.na(SPECIES) & SPECIES != "") %>%
-      filter(!grepl(" or ", SCIENTIFIC)) %>%
-      dplyr::select(-FAMILY, -GENUS, -SPECIES, -FINAL_NAME) %>%
-      pivot_wider(names_from = SCIENTIFIC,
+      dplyr::filter(!is.na(GENUS) ) %>%
+      dplyr::filter(!is.na(SPECIES) & SPECIES != "") %>%
+      dplyr::filter(!grepl(" or ", SCIENTIFIC)) %>%
+      dplyr::filter_at(dplyr::vars(tidyselect::all_of(taxonLevel.nrsa)), dplyr::any_vars(. != "")) %>%
+      tidyr::unite(UNIQUEID, c(UID, SITE_ID, DATE_COL, VISIT_NO, all_of(taxonLevel.nrsa)),
+                   sep = "_", remove = FALSE) %>%
+      dplyr::group_by(UNIQUEID) %>%
+      dplyr::mutate(TOTAL = sum(TOTAL)) %>%
+      dplyr::slice(1) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(-UNIQUEID) %>%
+      dplyr::select(-tidyselect::any_of(mycols)) %>%
+      pivot_wider(names_from = tidyselect::all_of(taxonLevel.nrsa),
                   names_prefix = "tax_",
                   values_from = TOTAL,
                   values_fn = sum,
@@ -865,133 +889,136 @@ getFishData <- function(dataType = "occur",
       filter(FISH_PROTOCOL != "BOATABLE")
   }
 
-  ##Fix some odd taxonomy issues here - mostly getting rid of subspecies
-  full_fish <- full_fish %>%
-    mutate(`Cottus bairdii` = ifelse(all(c("Cottus bairdii", "Cottus bairdi") %in% names(.)),
-                                      `Cottus bairdii` + `Cottus bairdi`,
-                                     c("Cottus bairdii", "Cottus bairdi")[(c("Cottus bairdii", "Cottus bairdi") %in% names(.))]),
-           `Macrhybopsis aestivalis` = ifelse(all(c("Macrhybopsis aestivalis",
-                                                    "Macrhybopsis cf. aestivalis") %in% names(.)),
-                                              `Macrhybopsis aestivalis` + `Macrhybopsis cf. aestivalis`,
-                                              c("Macrhybopsis aestivalis",
-                                                "Macrhybopsis cf. aestivalis")[(c("Macrhybopsis aestivalis",
-                                                                                  "Macrhybopsis cf. aestivalis") %in% names(.))]),
-           `Notropis spectrunculus` = ifelse(all(c("Notropis spectrunculus",
-                                                    "Notropis cf. spectrunculuss") %in% names(.)),
-                                             `Notropis spectrunculus` + `Notropis cf. spectrunculus`,
-                                              c("Notropis spectrunculus",
-                                                "Notropis cf. spectrunculuss")[(c("Notropis spectrunculus",
-                                                                                  "Notropis cf. spectrunculuss") %in% names(.))]),
-           `Catostomus latipinnis` = ifelse(all(c("Catostomus latipinnis",
-                                                   "Catostomus cf. latipinnis") %in% names(.)),
-                                             `Catostomus latipinnis` + `Catostomus cf. latipinnis`,
-                                            c("Catostomus latipinnis",
-                                              "Catostomus cf. latipinnis")[(c("Catostomus latipinnis",
-                                                                              "Catostomus cf. latipinnis") %in% names(.))]),
-           `Cyprinella zanema` = ifelse(all(c("Cyprinella zanema",
-                                                  "Cyprinella cf. zanema") %in% names(.)),
-                                            `Cyprinella zanema` + `Cyprinella cf. zanema`,
-                                        c("Cyprinella zanema",
-                                          "Cyprinella cf. zanema")[(c("Cyprinella zanema",
-                                                                      "Cyprinella cf. zanema") %in% names(.))]),
-           `Noturus leptacanthus` = ifelse(all(c("Noturus leptacanthus",
-                                              "Noturus sp. c.f. leptacanthus") %in% names(.)),
-                                        `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`,
-                                        c("Noturus leptacanthus",
-                                          "Noturus sp. c.f. leptacanthus")[(c("Noturus leptacanthus",
-                                                                              "Noturus sp. c.f. leptacanthus") %in% names(.))]),
-           `Moxostoma erythrurum` = ifelse(all(c("Moxostoma erythrurum",
-                                                 "Moxostoma sp cf erythrurum") %in% names(.)),
-                                           `Moxostoma erythrurum` + `Moxostoma sp cf erythrurum`,
-                                           c("Moxostoma erythrurum",
-                                             "Moxostoma sp cf erythrurum")[(c("Moxostoma erythrurum",
-                                                                              "Moxostoma sp cf erythrurum") %in% names(.))]),
-           `Moxostoma lachneri` = ifelse(all(c("Moxostoma lachneri",
+  if(taxonLevel == "Species"){
+    ##Fix some odd taxonomy issues here - mostly getting rid of subspecies
+    full_fish <- full_fish %>%
+      mutate(`Cottus bairdii` = ifelse(all(c("Cottus bairdii", "Cottus bairdi") %in% names(.)),
+                                       `Cottus bairdii` + `Cottus bairdi`,
+                                       c("Cottus bairdii", "Cottus bairdi")[(c("Cottus bairdii", "Cottus bairdi") %in% names(.))]),
+             `Macrhybopsis aestivalis` = ifelse(all(c("Macrhybopsis aestivalis",
+                                                      "Macrhybopsis cf. aestivalis") %in% names(.)),
+                                                `Macrhybopsis aestivalis` + `Macrhybopsis cf. aestivalis`,
+                                                c("Macrhybopsis aestivalis",
+                                                  "Macrhybopsis cf. aestivalis")[(c("Macrhybopsis aestivalis",
+                                                                                    "Macrhybopsis cf. aestivalis") %in% names(.))]),
+             `Notropis spectrunculus` = ifelse(all(c("Notropis spectrunculus",
+                                                     "Notropis cf. spectrunculuss") %in% names(.)),
+                                               `Notropis spectrunculus` + `Notropis cf. spectrunculus`,
+                                               c("Notropis spectrunculus",
+                                                 "Notropis cf. spectrunculuss")[(c("Notropis spectrunculus",
+                                                                                   "Notropis cf. spectrunculuss") %in% names(.))]),
+             `Catostomus latipinnis` = ifelse(all(c("Catostomus latipinnis",
+                                                    "Catostomus cf. latipinnis") %in% names(.)),
+                                              `Catostomus latipinnis` + `Catostomus cf. latipinnis`,
+                                              c("Catostomus latipinnis",
+                                                "Catostomus cf. latipinnis")[(c("Catostomus latipinnis",
+                                                                                "Catostomus cf. latipinnis") %in% names(.))]),
+             `Cyprinella zanema` = ifelse(all(c("Cyprinella zanema",
+                                                "Cyprinella cf. zanema") %in% names(.)),
+                                          `Cyprinella zanema` + `Cyprinella cf. zanema`,
+                                          c("Cyprinella zanema",
+                                            "Cyprinella cf. zanema")[(c("Cyprinella zanema",
+                                                                        "Cyprinella cf. zanema") %in% names(.))]),
+             `Noturus leptacanthus` = ifelse(all(c("Noturus leptacanthus",
+                                                   "Noturus sp. c.f. leptacanthus") %in% names(.)),
+                                             `Noturus leptacanthus` + `Noturus sp. c.f. leptacanthus`,
+                                             c("Noturus leptacanthus",
+                                               "Noturus sp. c.f. leptacanthus")[(c("Noturus leptacanthus",
+                                                                                   "Noturus sp. c.f. leptacanthus") %in% names(.))]),
+             `Moxostoma erythrurum` = ifelse(all(c("Moxostoma erythrurum",
+                                                   "Moxostoma sp cf erythrurum") %in% names(.)),
+                                             `Moxostoma erythrurum` + `Moxostoma sp cf erythrurum`,
+                                             c("Moxostoma erythrurum",
+                                               "Moxostoma sp cf erythrurum")[(c("Moxostoma erythrurum",
+                                                                                "Moxostoma sp cf erythrurum") %in% names(.))]),
+             `Moxostoma lachneri` = ifelse(all(c("Moxostoma lachneri",
                                                  "Moxostoma cf. lachneri") %in% names(.)),
                                            `Moxostoma lachneri` + `Moxostoma cf. lachneri`,
                                            c("Moxostoma lachneri",
                                              "Moxostoma cf. lachneri")[(c("Moxostoma lachneri",
-                                                                              "Moxostoma cf. lachneri") %in% names(.))]),
-           `Moxostoma poecilurum` = ifelse(all(c("Moxostoma poecilurum",
-                                               "Moxostoma cf. poecilurum") %in% names(.)),
-                                         `Moxostoma poecilurum` + `Moxostoma cf. poecilurum`,
-                                         c("Moxostoma poecilurum",
-                                           "Moxostoma cf. poecilurum")[(c("Moxostoma poecilurum",
-                                                                        "Moxostoma cf. poecilurum") %in% names(.))]),
-           `Moxostoma duquesnei` = ifelse(all(c("Moxostoma duquesnei",
-                                                 "Moxostoma duquesnii") %in% names(.)),
-                                           `Moxostoma duquesnei` + `Moxostoma duquesnii`,
-                                           c("Moxostoma duquesnei",
-                                             "Moxostoma duquesnii")[(c("Moxostoma duquesnei",
-                                                                            "Moxostoma duquesnii") %in% names(.))]),
-           `Etheostoma chlorosoma` = ifelse(all(c("Etheostoma chlorosoma",
-                                                "Etheostoma chlorosomum") %in% names(.)),
-                                          `Etheostoma chlorosoma` + `Etheostoma chlorosomum`,
-                                          c("Etheostoma chlorosoma",
-                                            "Etheostoma chlorosomum")[(c("Etheostoma chlorosoma",
-                                                                      "Etheostoma chlorosomum") %in% names(.))]),
-           `Fundulus stellifer` = ifelse(all(c("Fundulus stellifer",
-                                                  "Fundulus stellifera") %in% names(.)),
-                                            `Fundulus stellifer` + `Fundulus stellifera`,
-                                            c("Fundulus stellifer",
-                                              "Fundulus stellifera")[(c("Fundulus stellifer",
-                                                                           "Fundulus stellifera") %in% names(.))]),
-           `Lepomis gulosus` = ifelse(all(c("Lepomis gulosus",
-                                               "Chaenobryttus gulosus") %in% names(.)),
-                                         `Lepomis gulosus` + `Chaenobryttus gulosus`,
-                                         c("Lepomis gulosus",
-                                           "Chaenobryttus gulosus")[(c("Lepomis gulosus",
-                                                                       "Chaenobryttus gulosus") %in% names(.))]),
-           `Notropis dorsalis` = ifelse(all(c("Notropis dorsalis",
-                                               "Hybopsis dorsalis") %in% names(.)),
-                                         `Notropis dorsalis` + `Hybopsis dorsalis`,
-                                         c("Notropis dorsalis",
-                                           "Hybopsis dorsalis")[(c("Notropis dorsalis",
-                                                                   "Hybopsis dorsalis") %in% names(.))]),
-           `Cyprinella zanema` = ifelse(all(c("Cyprinella zanema",
-                                               "Hybopsis zanema") %in% names(.)),
-                                         `Cyprinella zanema` + `Hybopsis zanema`,
-                                         c("Cyprinella zanema",
-                                           "Hybopsis zanema")[(c("Cyprinella zanema",
-                                                                 "Hybopsis zanema") %in% names(.))])) %>%
-    rowwise() %>%
-    mutate(`Oncorhynchus clarkii` = sum(c_across(contains("Oncorhynchus clarki"))),
-           `Esox americanus` = sum(c_across(contains("Esox americanus"))),
-           `Oncorhynchus mykiss` = sum(c_across(contains("Oncorhynchus mykiss")))
-    ) %>%
-    ungroup() %>%
-    relocate(`Oncorhynchus clarkii`, .before = `Oncorhynchus nerka`) %>%
-    relocate(`Esox americanus`, .before = `Esox masquinongy`) %>%
-  dplyr::select(-c(tidyselect::contains("Esox americanus ")),
-                -c(tidyselect::contains(" sp.")),
-                -c(tidyselect::contains("Oncorhynchus clarkii ")),
-                -tidyselect::any_of(c("Cottus bairdi",
-                                     "Macrhybopsis cf. aestivalis",
-                                     "Notropis cf. spectrunculus",
-                                     "Catostomus cf. latipinnis",
-                                     "Cyprinella cf. zanema",
-                                     "Noturus sp. c.f. leptacanthus",
-                                     "Moxostoma cf. poecilurum",
-                                     "Moxostoma cf. lachneri",
-                                     "Moxostoma sp cf erythrurum",
-                                     #remove clinch sculpin (undescribed spp)
-                                     "Cottus cf. broadband sculpin",
-                                     "Oncorhynchus clarki virginalis",
-                                     "Oncorhynchus mykiss gairdneri",
-                                     "Moxostoma duquesnii",
-                                     "Etheostoma chlorosomum",
-                                     "Fundulus stellifera",
-                                     "Hybopsis zanema",
-                                     "Hybopsis dorsalis",
-                                     "Chaenobryttus gulosus"
-                                     )))  %>%
+                                                                          "Moxostoma cf. lachneri") %in% names(.))]),
+             `Moxostoma poecilurum` = ifelse(all(c("Moxostoma poecilurum",
+                                                   "Moxostoma cf. poecilurum") %in% names(.)),
+                                             `Moxostoma poecilurum` + `Moxostoma cf. poecilurum`,
+                                             c("Moxostoma poecilurum",
+                                               "Moxostoma cf. poecilurum")[(c("Moxostoma poecilurum",
+                                                                              "Moxostoma cf. poecilurum") %in% names(.))]),
+             `Moxostoma duquesnei` = ifelse(all(c("Moxostoma duquesnei",
+                                                  "Moxostoma duquesnii") %in% names(.)),
+                                            `Moxostoma duquesnei` + `Moxostoma duquesnii`,
+                                            c("Moxostoma duquesnei",
+                                              "Moxostoma duquesnii")[(c("Moxostoma duquesnei",
+                                                                        "Moxostoma duquesnii") %in% names(.))]),
+             `Etheostoma chlorosoma` = ifelse(all(c("Etheostoma chlorosoma",
+                                                    "Etheostoma chlorosomum") %in% names(.)),
+                                              `Etheostoma chlorosoma` + `Etheostoma chlorosomum`,
+                                              c("Etheostoma chlorosoma",
+                                                "Etheostoma chlorosomum")[(c("Etheostoma chlorosoma",
+                                                                             "Etheostoma chlorosomum") %in% names(.))]),
+             `Fundulus stellifer` = ifelse(all(c("Fundulus stellifer",
+                                                 "Fundulus stellifera") %in% names(.)),
+                                           `Fundulus stellifer` + `Fundulus stellifera`,
+                                           c("Fundulus stellifer",
+                                             "Fundulus stellifera")[(c("Fundulus stellifer",
+                                                                       "Fundulus stellifera") %in% names(.))]),
+             `Lepomis gulosus` = ifelse(all(c("Lepomis gulosus",
+                                              "Chaenobryttus gulosus") %in% names(.)),
+                                        `Lepomis gulosus` + `Chaenobryttus gulosus`,
+                                        c("Lepomis gulosus",
+                                          "Chaenobryttus gulosus")[(c("Lepomis gulosus",
+                                                                      "Chaenobryttus gulosus") %in% names(.))]),
+             `Notropis dorsalis` = ifelse(all(c("Notropis dorsalis",
+                                                "Hybopsis dorsalis") %in% names(.)),
+                                          `Notropis dorsalis` + `Hybopsis dorsalis`,
+                                          c("Notropis dorsalis",
+                                            "Hybopsis dorsalis")[(c("Notropis dorsalis",
+                                                                    "Hybopsis dorsalis") %in% names(.))]),
+             `Cyprinella zanema` = ifelse(all(c("Cyprinella zanema",
+                                                "Hybopsis zanema") %in% names(.)),
+                                          `Cyprinella zanema` + `Hybopsis zanema`,
+                                          c("Cyprinella zanema",
+                                            "Hybopsis zanema")[(c("Cyprinella zanema",
+                                                                  "Hybopsis zanema") %in% names(.))])) %>%
+      rowwise() %>%
+      mutate(`Oncorhynchus clarkii` = sum(c_across(contains("Oncorhynchus clarki"))),
+             `Esox americanus` = sum(c_across(contains("Esox americanus"))),
+             `Oncorhynchus mykiss` = sum(c_across(contains("Oncorhynchus mykiss")))
+      ) %>%
+      ungroup() %>%
+      relocate(`Oncorhynchus clarkii`, .before = `Oncorhynchus nerka`) %>%
+      relocate(`Esox americanus`, .before = `Esox masquinongy`) %>%
+      dplyr::select(-c(tidyselect::contains("Esox americanus ")),
+                    -c(tidyselect::contains(" sp.")),
+                    -c(tidyselect::contains("Oncorhynchus clarkii ")),
+                    -tidyselect::any_of(c("Cottus bairdi",
+                                          "Macrhybopsis cf. aestivalis",
+                                          "Notropis cf. spectrunculus",
+                                          "Catostomus cf. latipinnis",
+                                          "Cyprinella cf. zanema",
+                                          "Noturus sp. c.f. leptacanthus",
+                                          "Moxostoma cf. poecilurum",
+                                          "Moxostoma cf. lachneri",
+                                          "Moxostoma sp cf erythrurum",
+                                          #remove clinch sculpin (undescribed spp)
+                                          "Cottus cf. broadband sculpin",
+                                          "Oncorhynchus clarki virginalis",
+                                          "Oncorhynchus mykiss gairdneri",
+                                          "Moxostoma duquesnii",
+                                          "Etheostoma chlorosomum",
+                                          "Fundulus stellifera",
+                                          "Hybopsis zanema",
+                                          "Hybopsis dorsalis",
+                                          "Chaenobryttus gulosus"
+                    )))
+
+  } else {}
+
+  full_fish <- full_fish %>%
     mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "SM_WADEABLE",
                                   "Small Wadeable",
                                   ifelse(FISH_PROTOCOL == "BOATABLE",
                                          "Boatable",
                                          "Large Wadeable")))
-
-
 
   if(!isTRUE(hybrids)) {
     full_fish <- full_fish %>%
