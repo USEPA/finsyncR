@@ -7,6 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+This needs a complete rehaul. 
+
 Column names are in the order of how they appear in each output dataset.
     
 ## Information shared across datasets
@@ -82,12 +84,8 @@ Description: Longitude of the site location, in decimal degrees
 #### CoordinateDatum
 Description: Datum of site location coordinates
 
-#### HUCCode
-Description: Hydrologic unit code (HUC) in which the site is located. Hydrologic units are geographic areas representing part or all of a surface drainage basin or distinct hydrologic feature and are delineated on the State Hydrologic Unit Maps. Each hydrologic unit is identified by a unique number (HUC), and a name. Additional information is available from the USGS Hydrologic Unit web site <http://water.usgs.gov/GIS/huc.html>
-
 #### DrainageArea_mi2
 Description: Area enclosed by a topographic divide from which direct surface runoff drains to the site, in square miles.
-
 
 ## Dataset specific information
 
@@ -159,13 +157,3 @@ Note: This column will only have non-zero values for electroshocking samples.
 Description: The value by which the number of individuals of each species is divided to obtain an abundance value that is standardized by unit effort. Specifically, this number is `ReachLengthFished_m` multiplied by the effort (values in one of `NumberSeineHauls`, `NumberStationarySetsKicks`, `NumberSnorkelingTransects`, or `MinutesShockTime`). 
 
 Note: This column will only be present when `standardize` is not set to `"none"` in the `getFishData()` function.
-
-
-```{r example, warning = FALSE, message = FALSE}
-# library(StreamData)
-# 
-# Invertdata = getInvertData(taxonLevel = "Genus",
-#                            rarefy = FALSE)
-# colnames(Invertdata)[1:32]
-
-```

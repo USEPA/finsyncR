@@ -3,6 +3,9 @@
 #double check function documentation
 #continue work on Vignettes
 #Come up with list of covariates that need to be included; drop ALL others
+#Fix
+# column names
+# Why does "Methods" appear under getFishData()?
 
 ##Maybe wait
 ##Fish stuff

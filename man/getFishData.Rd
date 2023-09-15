@@ -23,11 +23,11 @@ getFishData(
 included in the output dataset. See \code{Details} below for more information.}
 
 \item{standardize}{Standardization method to use for calculating fish abundance matrices.
-Default is \code{standardize = "none"}, which returns raw fish abundance values. Other options include
+Default is \code{standardize = "none"}, which returns raw fish count values. Other options include
 \code{standardize = "CPUE"}, which returns standardized abundances in Catch per Unit Effort.
 An alternative standardization method is \code{standardize = "MGMS"}, which calculates
 Multigear Mean Standardization (MGMS) values to account for catchability differences between
-fish sampling methods (see 'details' or Gibson-Reinemer et al. (2014) for more info on MGMS).}
+fish sampling methods (see 'details' and Gibson-Reinemer et al. (2014) for more info on MGMS).}
 
 \item{hybrids}{logical. Should hybrid individuals be included in the output dataset?
 \code{TRUE} or \code{FALSE}.}
@@ -45,27 +45,33 @@ A taxa by sample data frame with site, stream reach, and
 Access harmonized USGS and EPA Fish datasets
 }
 \details{
-Note: To standardize fish abundance data, abundances were divided by
-  the minutes shocked, number of seine hauls, etc. Then were divided by the
+To standardize fish abundance data, abundances are divided by minutes
+  shocked, number of seine hauls, etc. These values are then divided by the
   stream length sampled. ~35% of the data have been removed,
-  as these samples lacked the required standardization information.
-  Therefore, if you are interested in occurrence (pres/abs) data only, then
-  set \code{dataType = "occur"}. Thus, be aware that setting \code{dataType = "occur"}
-  will result in a larger dataset with additional samples/sites than when \code{dataType = "abun"}.
+  as these samples lacked information on either stream length sampled or sampling
+  effort. Therefore, if you are interested in occurrence (pres/abs) data
+  only, then set \code{dataType = "occur" and standardize = "none"}. Thus,
+  be aware that setting \code{dataType = "occur"} will result in a larger
+  dataset with additional samples/sites than when \code{dataType = "abun"}.
 
   To account for differences in efficacy between shocking, seine netting, and
-  snorkeling, we included multigear mean standardization (\code{standardize = "MGMS"}) as a
-  standardization method as an alternative to catch per unit effort (\code{standardize = "CPUE"}).
-  To calculate MGMS, we first calculated the mean total CPUE (summation of CPUEs for all
-  taxa at each site for each collection date) for each sampling method. Then we divided
-  each CPUE value by the mean total CPUE for their respective sampling methods. See
-  the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS computation.
+  snorkeling, we included multigear mean standardization
+  (\code{standardize = "MGMS"}) as a standardization method as an alternative
+  to catch per unit effort (\code{standardize = "CPUE"}). To calculate MGMS,
+  CPUE is calculated for each taxa within a sample. Then, mean total CPUE
+  (summation of CPUEs for all taxa at each site for each collection date) is
+  calculated for for each sampling method. Finally, each CPUE value is then
+  divided by the mean total CPUE for their respective sampling methods.
+  See the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS
+  computation.
 
-  Keep in mind that when setting \code{standardize = "CPUE"} will result in a larger dataset
-  (more rows) than \code{standardize = "MGMS"} because CPUE data will have a row for each sampling
-  method used at each time-location, whereas MGMS will have only one row for each time-location
-  because the function is standardizing by sampling method in addition to standardizing by
-  time and area sampled.
+  Keep in mind that when setting \code{standardize = "CPUE"} will result in a
+  larger dataset (more rows) than \code{standardize = "MGMS"} because CPUE data
+  will have a row for each sampling method used at each time-location, whereas
+  MGMS will have only one row for each time-location because the function is
+  standardizing by sampling method in addition to standardizing by time and
+  area sampled, such that MGMS values for each taxa will be summed for
+  instances in which a site had different methods used to collect fish.
 
   \code{agency} refers to the federal agency that collected the fish samples. If
   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
@@ -73,10 +79,11 @@ Note: To standardize fish abundance data, abundances were divided by
   within the larger USGS database. For the "EPA"  dataset, samples from the
   National Stream and River Assessment programs (2018-2019, 2013-2014,
   2008-2009) will be included. Note that by default, only moving waters
-  classified as "wadeable" are included and only samples that are "reach-wide"
-  are included. Some information included in the USGS dataset are not included
-  in the EPA datasets, and vice-versa, and thus will appear as "NA". NOTE:
-  As of now, taxonLevel must be set to "Species".
+  classified as "wadeable" are included, but setting \code{boatableStreams = TRUE}
+  will include non-wadeable streams. Some information included in the USGS
+  dataset are not included in the EPA datasets, and vice-versa, and thus
+  will appear as "NA" values. \code{agency} can also be set to either
+  "EPA" or "USGS" individually.
 }
 \examples{
 \dontrun{

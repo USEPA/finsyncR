@@ -4,8 +4,9 @@
 #' @param taxonLevel Level of taxonomic resolution, must be one of:
 #'   \code{"Phylum"}, \code{"Class"}, \code{"Order"},
 #'   \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
-#' @param taxonFix How to deal with changes in taxonomy across time, must
-#'   be one of: \code{"none"}, \code{"lump"}, \code{"remove"}.
+#' @param taxonFix How to handle changes in taxonomy across time, must
+#'   be one of: \code{"none"}, \code{"lump"}, \code{"remove"}. See \code{Details}
+#'   below for more information.
 #' @param agency The agency name(s) (e.g., "USGS" and "EPA") that should be
 #'   included in the output dataset. See \code{Details} below for more information.
 #' @param lifestage logical. Should the output dataset should include lifestage information for
@@ -14,7 +15,7 @@
 #'   identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 #'   below for more information.
 #' @param seed numeric. Set seed for \code{rarefy} to get consistent results with every
-#'   iteration of the function.
+#'   iteration of the function. Value gets passed to \code{set.seed} internally.
 #' @param sharedTaxa logical. Should Genera be limited to those that appear in
 #'   both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
 #'   \code{FALSE} when only one agency is specified.
@@ -26,12 +27,7 @@
 #' @return A species by sample data frame with site, stream reach, and
 #'   sample information.
 #'
-#' @details Note: There are 81 sampling events (sampling location - collection
-#'   date) with replicate samples (not duplicates). We have left these replicate
-#'   samples in the dataset, because some replicates are different in the
-#'   stream habitat sampled, which may be of interest for certain ecological
-#'   questions.
-#'
+#' @details
 #'   The function adjusts taxa abundances from samples for lab subsampling
 #'   ratio. As a result, duplicate taxa were combined (abundances summed)
 #'   following adjustments for lab subsampling.
@@ -57,36 +53,41 @@
 #'   such that ALL slash genera are dropped; this will result in much less data
 #'   being included in the final dataset. Finally, \code{taxonFix = "none"}, still
 #'   generate "slash" genera, but, it does not link these genera to larger linked
-#'   genera.
+#'   genera. See \code{vignette("GettingStarted")} for more information.
 #'
 #'   \code{agency} refers to agency that collected the invertebrate samples. If
-#'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
-#'   For the "USGS" dataset, this includes all programs with SampleMethodCodes
-#'   of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP". If \code{agency}
-#'   includes "EPA", samples from the EPA National Stream and River
-#'   Assessment programs (2018-2019, 2013-2014, 2008-2009) and EPA Wadeable Stream Assessment and WEMAP
-#'   (2000-2004) will be included. Note that from these samples, only moving
-#'   waters classified as "wadeable" are included and only samples that are
-#'   "reach-wide" are included. Some information included in the USGS dataset
-#'   are not included in the EPA datasets (and vice versa) and thus will appear as "NA".
-#'   Similar to the USGS data, there were inherent taxonomic issues with the
-#'   EPA data. As such, we have taken the same steps as described above under
-#'   \code{taxonFix} to address these concerns. \code{agency} can be set to either
+#'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")},
+#'   which is the default. For the "USGS" dataset, this includes all programs
+#'   with SampleMethodCodes of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and
+#'   "PNAMP". If \code{agency} includes "EPA", samples from the EPA National
+#'   Stream and River Assessment (NRSA) programs (2018-2019, 2013-2014, 2008-2009)
+#'   and EPA Wadeable Stream Assessment and WEMAP (2000-2004) will be included.
+#'   Note that by default, only moving waters classified as "wadeable" are
+#'   included, but setting \code{boatableStreams = TRUE} will include non-wadeable
+#'   streams. Some information included in the USGS dataset are not included in the EPA datasets, and vice-versa, and thus
+#'   will appear as "NA" values. \code{agency} can also be set to either
 #'   "EPA" or "USGS" individually.
 #'
-#'   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (RawCount)
+#'   If \code{rarefy = TRUE}, only samples with 300+ individuals identified (raw count)
 #'   will be retained. Thus, ~17 \% of samples will be removed, as they have <300
-#'   individuals sampled. We set the rarefaction threshold at 300, because 1) with
-#'   every 50 individuals identified, ~1 genera are added to the sample and 2) 82.8 \%
-#'   of samples have at least 300 individuals identified. Thus, lowering the threshold
-#'   to 200 individuals removed ~2 genera per sample, but only added an additional
-#'   7.3 \% of samples included (90.1 \% from 82.8 \%). Similarly, increasing the
-#'   threshold to 400 individuals added ~2 genera per sample, but reduced samples to
-#'   30.3 \% of all samples. Use \code{seed = ...} to get consistent output of
-#'   community data. NOTE: \code{rarefy = TRUE} can be used when wanting
-#'   occurrence data (presence/absence) OR proportional data (each taxon represents
-#'   a certain percent of a sample). Use \code{rarefy = FALSE} when densities are
-#'   the measure that you are interested in using.
+#'   individuals sampled. We hard coded the rarefaction threshold at 300, because
+#'   1) with every 50 individuals identified, ~1 genera are added to the sample
+#'   and 2) 82.8 \% of samples have at least 300 individuals identified. Thus,
+#'   lowering the threshold to 200 individuals removed ~2 genera per sample, but
+#'   only added an additional 7.3 \% of samples included (90.1 \% from 82.8 \%).
+#'   Similarly, increasing the threshold to 400 individuals added ~2 genera per
+#'   sample, but reduced samples to 30.3 \% of all samples. Use \code{seed = ...}
+#'   to get consistent output of community data. See \code{vignette("GettingStarted")}
+#'   for more information regarding rarefaction. NOTE: \code{rarefy = TRUE} can
+#'   be used when wanting occurrence data (presence/absence) OR proportional
+#'   data (each taxon represents a certain percent of a sample). Use
+#'   \code{rarefy = FALSE} when densities are the measure of interest.
+#'
+#'   Note: There are 81 sampling events (sampling location - collection
+#'   date) with replicate samples (not duplicates). We have left these replicate
+#'   samples in the dataset, because some replicates are different in the
+#'   stream habitat sampled, which may be of interest for certain ecological
+#'   questions.
 #'
 #' @author Michael Mahon, Devin Jones, Samantha Rumschlag
 #'
