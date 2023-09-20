@@ -320,9 +320,11 @@ NRSA_siteIDs$MASTER_SITEID <- ifelse(NRSA_siteIDs$SITE_ID %in% NRSA_0809_sites$S
 #                                                 "COUNTY_FIPS_CODE" = "character"))  %>%
 #   mutate(compound = stringr::str_to_lower(COMPOUND))
 
+# .specIDgen <- read.csv("SpecimenIdToGenusAllSites.csv")
+
 
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames, ".pest.dat"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames, ".specIDgen"), file = "R/sysdata.rda",
      compress = "xz")
 
 # usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
