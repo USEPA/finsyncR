@@ -1458,7 +1458,7 @@ getInvertData <- function(dataType = "occur",
       dplyr::mutate(across(tidyselect::all_of(taxonLevel.nrsa), ~ stringr::str_to_sentence(.)))
     }
 
-    if(isTRUE(sharedTaxa) | all(grepl("EPA", agency))){
+    if(isTRUE(sharedTaxa) & any(grepl("EPA", agency)) & any(grepl("USGS", agency))){
       ##List of NAWQA taxa
       NAWQAtaxa <- c(unique(TotalRows[,taxonLevel]))[[taxonLevel]]
 

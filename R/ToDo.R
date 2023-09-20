@@ -6,6 +6,7 @@
 #Fix
 # column names
 # Why does "Methods" appear under getFishData()?
+# add genpropID to Invert
 
 ##Maybe wait
 ##Fish stuff
