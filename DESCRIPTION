@@ -57,7 +57,8 @@ Imports:
     tidyselect (>= 1.1.0),
     httr,
     data.table,
-    lubridate
+    lubridate,
+    bit64
 Depends:
     R (>= 3.6.0)
 Suggests: 
