@@ -481,17 +481,19 @@ getFishData <- function(dataType = "occur",
     #READ IN STUFF
     ##Read in datasets directly from EPA website - may want a more stable source
     ##in the future (github repo?)
-    NRSA_1819_fishcnt = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-count-data.csv",
+    NRSA_1819_fishcnt = (data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-03/nrsa-1819-fish-count-data.csv",
                                                                                  httr::add_headers(`User-Agent` = UA)),
                                                                        encoding = "UTF-8", as = "text"),
                                                          colClasses = c("UID" = "character"),
-                                                         stringsAsFactors = FALSE))
+                                                         stringsAsFactors = FALSE,
+                                                     data.table = F))
 
-    NRSA_1819_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
+    NRSA_1819_sites = (data.table::fread(httr::content(httr::GET("https://www.epa.gov/system/files/other-files/2022-01/nrsa-1819-site-information-data-updated.csv",
                                                                            httr::add_headers(`User-Agent` = UA)),
                                                                  encoding = "UTF-8", as = "text"),
                                                    colClasses = c("UID" = "character"),
-                                                   stringsAsFactors = FALSE))
+                                                   stringsAsFactors = FALSE,
+                                                   data.table = F))
 
     ##FIX 1819 COUNT UIDs
     NRSA_1819_fishcnt$UID <- NRSA_1819_sites$UID[match(paste(NRSA_1819_fishcnt$SITE_ID,
@@ -500,39 +502,52 @@ getFishData <- function(dataType = "occur",
                                                              NRSA_1819_sites$DATE_COL, sep = "_"))]
 
 
-    NRSA_1314_fishcnt = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_fishcts_04232019.csv",
+    NRSA_1314_fishcnt = (data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_fishcts_04232019.csv",
                                                                              httr::add_headers(`User-Agent` = UA)),
                                                                    encoding = "UTF-8", as = "text"),
                                                      colClasses = c("UID" = "character"),
-                                                     stringsAsFactors = FALSE))
+                                                     stringsAsFactors = FALSE,
+                                                     data.table = F))
 
-    NRSA_1314_sites = suppressMessages(data.frame(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
-                                                                          httr::add_headers(`User-Agent` = UA)),
-                                                                encoding = "UTF-8",
-                                                                show_col_types = FALSE)) %>%
-                                         dplyr::mutate(UID = as.character(UID)))
+    tmp <- tempfile(fileext = '.csv')
+    writeBin(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2019-04/nrsa1314_siteinformation_wide_04292019.csv",
+                                     httr::add_headers(`User-Agent` = UA)),
+                           encoding = "UTF-8", as = "raw"),
+             tmp)
+    NRSA_1314_sites <- data.table::fread(tmp,
+                                         colClasses = c("UID" = "character"),
+                                         stringsAsFactors = FALSE,
+                                         data.table = F)
+    if(file.exists(tmp)){
+      unlink(tmp)
+    }
 
-    NRSA_0809_fishcnts = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2015-09/fishcts.csv",
+
+    NRSA_0809_fishcnts = (data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2015-09/fishcts.csv",
                                                                               httr::add_headers(`User-Agent` = UA)),
                                                                     encoding = "UTF-8", as = "text"),
                                                       colClasses = c("UID" = "character"),
-                                                      stringsAsFactors = FALSE))
+                                                      stringsAsFactors = FALSE,
+                                            data.table = F))
 
-    NRSA_0809_sites = data.frame(data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
+    NRSA_0809_sites = (data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/production/files/2015-09/siteinfo_0.csv",
                                                                            httr::add_headers(`User-Agent` = UA)),
                                                                  encoding = "UTF-8", as = "text"),
                                                    colClasses = c("UID" = "character"),
-                                                   stringsAsFactors = FALSE))
+                                                   stringsAsFactors = FALSE,
+                                                   data.table = F))
 
     NRSA_1314_fishtax <- data.table::fread(system.file("extdata",
                                                      "updateNRSAfishtax.csv",
-                                                     package = "StreamData"))
+                                                     package = "StreamData"),
+                                           data.table = F)
 
     NRSA_fish_sampleinfo <- data.table::fread(system.file("extdata",
                                                         "NRSA_Fish_SamplingInfo.csv",
                                                         package = "StreamData"),
                                             colClasses = c("UID" = "character"),
-                                            stringsAsFactors = FALSE)
+                                            stringsAsFactors = FALSE,
+                                            data.table = F)
 
     #############
     ##2008/2009
