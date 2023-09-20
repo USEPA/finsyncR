@@ -514,10 +514,9 @@ getFishData <- function(dataType = "occur",
                                      httr::add_headers(`User-Agent` = UA)),
                            encoding = "UTF-8", as = "raw"),
              tmp)
-    NRSA_1314_sites <- data.table::fread(tmp,
+    NRSA_1314_sites <- utils::read.csv(tmp,
                                          colClasses = c("UID" = "character"),
-                                         stringsAsFactors = FALSE,
-                                         data.table = F)
+                                         stringsAsFactors = FALSE)
     if(file.exists(tmp)){
       unlink(tmp)
     }
