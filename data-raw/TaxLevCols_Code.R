@@ -324,7 +324,7 @@ NRSA_siteIDs$MASTER_SITEID <- ifelse(NRSA_siteIDs$SITE_ID %in% NRSA_0809_sites$S
 
 
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames, ".specIDgen"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames[-14], ".specIDgen"), file = "R/sysdata.rda",
      compress = "xz")
 
 # usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
