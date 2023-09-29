@@ -1,16 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# StreamData -this is where the hexsticker will go
+# finsyncR -this is where the hexsticker will go
 
 <!-- badges: start -->
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![R-CMD-check](https://github.com/StreamData/StreamData/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/StreamData/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of StreamData is to provide easy access and automated data
+The goal of finsyncR is to provide easy access and automated data
 management to USGS and EPA stream BioData, pesticide county use
 estimates, and measured water quality data.
 
@@ -22,12 +22,12 @@ GitHub, you will need to use the `auth_token` argument within
 <https://github.com/settings/tokens> and supply the provided code to
 this argument.
 
-You can install the released version of `StreamData` from
-[GitHub](https://github.com/StreamData/StreamData) with:
+You can install the released version of `finsyncR` from
+[GitHub](https://github.com/StreamData/finsyncR) with:
 
     library(devtools)
 
-    devtools::install_github("StreamData/StreamData",
+    devtools::install_github("StreamData/finsyncR",
                              auth_token = "tokenstring",
                              build_vignette = FALSE
                              )
@@ -38,7 +38,7 @@ This is a basic example which shows you how to use one of the
 *getBioData* set of functions to access the fish dataset.
 
 ``` r
-library(StreamData)
+library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species")
 
