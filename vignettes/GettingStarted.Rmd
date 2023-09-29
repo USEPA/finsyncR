@@ -198,74 +198,7 @@ Users should avoid this column when calculating diversity metrics or when conduc
 The resulting fish data will include information on both reach length fished (`ReachLengthFished_m`), the sampling method employed (e.g., electrochocking, seining, snorkelling; `MethodBasic`), standardizeand effort values (e.g., minutes of shocking, number of seine hauls, minutes snorkeling; `StandardMethod`), and specific protocol employed (e.g., NRSA small stream, NRSA large stream, etc.; `FISH_PROTOCOL`).
 Users should note that conductivity can influence efficiency of electroshocking (e.g., [Lyon et al. 2014](https://cdnsciencepub.com/doi/10.1139/cjfas-2013-0287)), so, conductivity may be an important covariate to account for when using the electroshocking data, as conductivity likely has large ranges among sites within these datasets.
 
-# Abiotic Datasets
-
-### Pesticide Data
-
-Another function in the `finsyncR` package is `getCountyPest()`, which provides access to county-level pesticide use estimates for user-specified sites and years.
-This function returns a site by year dataframe of county-level pesticides use estimates in kilograms.
-
-The parameters in `getCountyPest()` are `data`, `ePest`, `lagTime`, `lagType`, `pestLevel`, and `pestLevelName`.
-`data` is a user-provided dataset that needs to have two columns: `SiteNumber` and `CollectionYear`.
-The site numbers need to be those found in the USGS/NWIS data and must have a `"USGS-"` prefix.
-Be aware that there are leading zeros in the USGS/NWIS site numbers, these must be present.
-`ePest` refers to the pesticide use estimate: `"low"` or `"high"`.
-`lagTime` refers to the number of years over which the pesticide use estimates should be summarized.
-`0` returns pesticide use estimates in the given year(s) only.
-`lagType` specifies whether to take a `"sum"` or a `"mean"` over years.
-Can only be used if `lagTime` is greater than 0.
-`pestLevel` specifies whether to summarize pesticide use estimates according to `"type"`, `"class"`, or `"compound"`.
-`pestLevelName` specifies the names of the pesticide types, classes, or individual compounds.
-A list of types, classes, and individual compounds can be found in an internal dataset: `finsyncR:::.pest.info`.
-
-Note: Not every county has an estimate for each of the 483 pesticides in every year.
-We have set `na.rm = TRUE` when means and sums are calculated, so we inherently assume use is 0 when not provided.
-Seed coats including many neonicotinoids are not included in pesticide use estimates.
-Pesticide use estimates are based on agriculture alone.
-
-```{r Pesticide Estimate}
-
-## from site number "05276005" from 1997-1999 (2 year lag) for "insecticide",
-## "herbicide", and "synthetic_fungicide".
-
-dat1 <- data.frame(SiteNumber = "USGS-05276005",
-                 CollectionYear = 1999)
-
-getCountyPest(data=dat1,
-              ePest = "high",
-              lagType = "sum",
-              lagTime = 2,
-              pestLevel = "type",
-              pestLevelName = c("insecticide",
-                                "herbicide",
-                                "synthetic_fungicide"))
-
-
-## from site number "05276005" for 1999 and 2010 for "insecticide",
-## "herbicide", and "synthetic_fungicide".
-
-dat2 <- data.frame(SiteNumber = c("USGS-05276005",
-                                  "USGS-05276005"), 
-                 CollectionYear = c(1999,
-                                    2010))
-
-getCountyPest(data=dat2,
-              ePest = "low",
-              lagType = "sum",
-              lagTime = 0,
-              pestLevel = "type",
-              pestLevelName = c("insecticide",
-                                "herbicide",
-                                "synthetic_fungicide"))
-  
-
-## See what compounds, classes, and types of pesticides are available.
-pestinfo <- finsyncR:::.pest.info
-head(pestinfo)
-
-```
-
-### NLCD Land use/Land cover Data
+# NLCD Land use/Land cover Data
 
 Another function in the `finsyncR` package is `getNLCDData()`, which provides access to catchment-and watershed-level NLCD land use/land cover datasets.
 Land-use/land-cover data is extracted from the USGS National Land Cover Database (NLCD) and was generated from StreamCat ([Hill et al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/1752-1688.12372)).
