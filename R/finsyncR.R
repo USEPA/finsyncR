@@ -1,6 +1,6 @@
-#' StreamData: An R Package to Access Cleaned and Compiled USGS and EPA Stream Data
+#' finsyncR: An R Package to Access Cleaned and Compiled USGS and EPA Stream Data
 #'
-#' The \code{StreamData} package provides the data and functions to generate
+#' The \code{finsyncR} package provides the data and functions to generate
 #'   site by taxa datasets for macroinvertebrates, fish, and algal samples.
 #'   Additionally, the package can provide county-level pesticide use estimates.
 #'
@@ -15,5 +15,5 @@
 #' @importFrom utils read.table
 #'
 #' @docType package
-#' @name StreamData
+#' @name finsyncR
 NULL

@@ -152,7 +152,7 @@ getInvertData <- function(dataType = "occur",
   if(any(grepl("USGS", agency))){
     Inverts <- utils::read.csv(base::unz(base::system.file("extdata",
                                                            "20201217.0749.InvertResults.zip",
-                                                           package = "StreamData"),
+                                                           package = "finsyncR"),
                                          "20201217.0749.InvertResults.csv"),
                                colClasses = c("SiteNumber" = "character"),
                                stringsAsFactors = FALSE)
@@ -163,15 +163,15 @@ getInvertData <- function(dataType = "occur",
 
     if(file.exists(system.file("extdata",
                                "20201217.0749.InvertResults.csv",
-                               package = "StreamData"))){
+                               package = "finsyncR"))){
       unlink(system.file("extdata",
                          "20201217.0749.InvertResults.csv",
-                         package = "StreamData"))
+                         package = "finsyncR"))
     }
 
     Project <- data.table::fread(base::system.file("extdata",
                                                    "20201217.0749.Project.csv",
-                                                   package = "StreamData"),
+                                                   package = "finsyncR"),
                                  stringsAsFactors = FALSE,
                                  showProgress = F,
                                  data.table = F)
@@ -220,7 +220,7 @@ getInvertData <- function(dataType = "occur",
     ## Need to get the SamplingMethodReference data from invertsamp
     invertSampleRef = data.table::fread(system.file("extdata",
                                                   "20201217.0749.InvertSamp.csv",
-                                                  package = "StreamData"),
+                                                  package = "finsyncR"),
                                       colClasses = c("SiteNumber" = "character"),
                                       stringsAsFactors = FALSE,
                                       data.table = F) %>%
@@ -664,7 +664,7 @@ getInvertData <- function(dataType = "occur",
     ##Gather sample information
     invertsamp = data.table::fread(system.file("extdata",
                                              "20201217.0749.InvertSamp.csv",
-                                             package = "StreamData"),
+                                             package = "finsyncR"),
                                  colClasses = c("SiteNumber" = "character"),
                                  stringsAsFactors = FALSE,
                                  data.table = F) %>%
@@ -679,7 +679,7 @@ getInvertData <- function(dataType = "occur",
     ##Gather Sample inventory information (specifically, just replicate type)
     invertsampinv = data.table::fread(system.file("extdata",
                                                 "20201217.0749.SampleInv.csv",
-                                                package = "StreamData"),
+                                                package = "finsyncR"),
                                     colClasses = c("SiteNumber" = "character"),
                                     stringsAsFactors = FALSE,
                                     data.table = F) %>%
@@ -690,7 +690,7 @@ getInvertData <- function(dataType = "occur",
     ##Gather site level information
     invertsite = data.table::fread(system.file("extdata",
                                              "20201217.0749.SiteInfo.csv",
-                                             package = "StreamData"),
+                                             package = "finsyncR"),
                                  colClasses = c("SiteNumber" = "character"),
                                  stringsAsFactors = FALSE,
                                  data.table = F) %>%
@@ -1310,7 +1310,7 @@ getInvertData <- function(dataType = "occur",
     ##Read in the density conversion dataset from the EPA
     NRSADenconv <- data.table::fread(base::system.file("extdata",
                                                      "EPA_DensityConv.csv",
-                                                     package = "StreamData"),
+                                                     package = "finsyncR"),
                                    colClasses = c("SITE_ID" = "character"),
                                    stringsAsFactors = FALSE,
                                    data.table = F) %>%

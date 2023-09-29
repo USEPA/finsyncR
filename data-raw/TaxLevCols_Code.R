@@ -319,11 +319,11 @@ NRSA_siteIDs$MASTER_SITEID <- ifelse(NRSA_siteIDs$SITE_ID %in% NRSA_0809_sites$S
 #                                  colClasses = c("STATE_FIPS_CODE" = "character",
 #                                                 "COUNTY_FIPS_CODE" = "character"))  %>%
 #   mutate(compound = stringr::str_to_lower(COMPOUND))
-
-# .specIDgen <- read.csv("SpecimenIdToGenusAllSites.csv")
-
-
 sysdata_filenames <- load("R/sysdata.rda")
+.specIDgen <- read.csv("SpecimenIdToGenusAllSites.csv")
+.specIDgen <- FULLDAT
+
+
 save(list = c(sysdata_filenames[-14], ".specIDgen"), file = "R/sysdata.rda",
      compress = "xz")
 

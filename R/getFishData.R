@@ -110,7 +110,7 @@ getFishData <- function(dataType = "occur",
   if(any(grepl("USGS", agency))){
     fish <- utils::read.csv(base::unz(base::system.file("extdata",
                                                         "20201217.0745.FishResults.zip",
-                                                        package = "StreamData"),
+                                                        package = "finsyncR"),
                                       "20201217.0745.FishResults.csv"),
                               colClasses = c("SiteNumber" = "character"),
                               stringsAsFactors = FALSE)
@@ -121,14 +121,14 @@ getFishData <- function(dataType = "occur",
     ##Remove the unzipped file from the system
     if(file.exists(system.file("extdata",
                                "20201217.0745.FishResults.csv",
-                               package = "StreamData"))){
+                               package = "finsyncR"))){
       unlink(system.file("extdata",
                          "20201217.0745.FishResults.csv",
-                         package = "StreamData"))
+                         package = "finsyncR"))
     }
     Project <- data.table::fread(system.file("extdata",
                                            "20201217.0745.Project.csv",
-                                           package = "StreamData"),
+                                           package = "finsyncR"),
                                  data.table = F)
 
     database <- c("National Water Quality Assessment",
@@ -198,7 +198,7 @@ getFishData <- function(dataType = "occur",
     ##Need to get Lat, Long, HUC, Drainage Area
     site <- data.table::fread(system.file("extdata",
                                         "20201217.0745.SiteInfo.csv",
-                                        package = "StreamData"),
+                                        package = "finsyncR"),
                             colClasses = c("SiteNumber" = "character"),
                             data.table = F) %>%
       dplyr::select(SiteNumber, Latitude_dd, Longitude_dd,
@@ -211,7 +211,7 @@ getFishData <- function(dataType = "occur",
     ##
     sample <- data.table::fread(system.file("extdata",
                                           "20201217.0745.FishSamp.csv",
-                                          package = "StreamData"),
+                                          package = "finsyncR"),
                               colClasses = c("SiteNumber" = "character"),
                               data.table = F)
     if(colnames(sample)[1] != "SIDNO"){
@@ -223,7 +223,7 @@ getFishData <- function(dataType = "occur",
 
     samplemethod = data.table::fread(system.file("extdata",
                                                "20201217.0745.FishMethodAndSubreachInfo.csv",
-                                               package = "StreamData"),
+                                               package = "finsyncR"),
                                    colClasses = c("SiteNumber" = "character"),
                                    data.table = F)
 
@@ -538,12 +538,12 @@ getFishData <- function(dataType = "occur",
 
     NRSA_1314_fishtax <- data.table::fread(system.file("extdata",
                                                      "updateNRSAfishtax.csv",
-                                                     package = "StreamData"),
+                                                     package = "finsyncR"),
                                            data.table = F)
 
     NRSA_fish_sampleinfo <- data.table::fread(system.file("extdata",
                                                         "NRSA_Fish_SamplingInfo.csv",
-                                                        package = "StreamData"),
+                                                        package = "finsyncR"),
                                             colClasses = c("UID" = "character"),
                                             stringsAsFactors = FALSE,
                                             data.table = F)
