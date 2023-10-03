@@ -10,6 +10,7 @@ getFishData(
   agency = c("USGS", "EPA"),
   standardize = "none",
   hybrids = FALSE,
+  sharedTaxa = FALSE,
   boatableStreams = FALSE
 )
 }
@@ -31,6 +32,10 @@ fish sampling methods (see 'details' and Gibson-Reinemer et al. (2014) for more 
 
 \item{hybrids}{logical. Should hybrid individuals be included in the output dataset?
 \code{TRUE} or \code{FALSE}.}
+
+\item{sharedTaxa}{logical. Should Genera be limited to those that appear in
+both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
+\code{FALSE} when only one agency is specified.}
 
 \item{boatableStreams}{logical. Should EPA boatable streams be included in the
 output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;

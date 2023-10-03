@@ -12,7 +12,10 @@
 #'   Multigear Mean Standardization (MGMS) values to account for catchability differences between
 #'   fish sampling methods (see 'details' and Gibson-Reinemer et al. (2014) for more info on MGMS).
 #' @param hybrids logical. Should hybrid individuals be included in the output dataset?
-#' \code{TRUE} or \code{FALSE}.
+#'   \code{TRUE} or \code{FALSE}.
+#' @param sharedTaxa logical. Should Genera be limited to those that appear in
+#'   both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
+#'   \code{FALSE} when only one agency is specified.
 #' @param boatableStreams logical. Should EPA boatable streams be included in the
 #'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
 #'   so \code{boatableStreams} should only be set to \code{TRUE} when gathering
@@ -82,6 +85,7 @@ getFishData <- function(dataType = "occur",
                         agency = c("USGS","EPA"),
                         standardize = "none",
                         hybrids = FALSE,
+                        sharedTaxa = FALSE,
                         boatableStreams = FALSE) {
 
   if(!(dataType %in% c("abun", "occur"))) {
@@ -106,6 +110,9 @@ getFishData <- function(dataType = "occur",
     stop(paste('taxonLevel must be set to Family, Genus, or Species'))
   }
 
+  if(isTRUE(sharedTaxa) && (all(grepl("USGS", agency)) | all(grepl("EPA", agency))) ){
+    stop('sharedTaxa can only be set to TRUE when agency is set to c("USGS", "EPA")')
+  }
 
   if(any(grepl("USGS", agency))){
     fish <- utils::read.csv(base::unz(base::system.file("extdata",
@@ -1046,6 +1053,21 @@ getFishData <- function(dataType = "occur",
       dplyr::select(-c(tidyselect::contains(" x "), -c(tidyselect::contains(".x."))))
 
   }
+
+  ##shared Taxa code
+  if(isTRUE(sharedTaxa) & any(grepl("EPA", agency)) & any(grepl("USGS", agency))){
+    ##List of NAWQA taxa
+
+    notbothfish <- colnames(full_fish %>%
+                              dplyr::group_by(Agency) %>%
+                              dplyr::summarize(dplyr::across(tidyselect::where(~ is.numeric(.x)), ~sum(., na.rm = T))) %>%
+                              dplyr::select(-Agency) %>%
+                              dplyr::select(tidyselect::where(~ any(. ==  0, na.rm = T))))
+
+    full_fish <- full_fish %>%
+      dplyr::select(-tidyselect::any_of(notbothfish))
+
+  } else {}
 
 
   return(data.frame(full_fish))
