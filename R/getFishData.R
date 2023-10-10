@@ -904,14 +904,16 @@ getFishData <- function(dataType = "occur",
                                         "MinutesShockTime", "SecondsShockTime")))
 
   full_fish <- full_fish %>%
+    ungroup() %>%
     left_join(.allsitesCOMID, by = dplyr::join_by(SiteNumber)) %>%
     dplyr::rename("No fish collected" = "tax_No fish collected")
 
 
   ##remove 0 column sum fish (not sure why they're even included, but remove anyway)
   full_fish <- full_fish  %>%
+    ungroup() %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
-    dplyr::select(-any_of(c(names(which((colSums(full_fish %>% dplyr::select(tidyselect::contains("tax_")))) == 0)))))
+    dplyr::select(-any_of(c(names(which((colSums(full_fish %>% dplyr::select(tidyselect::contains("tax_")), na.rm = T)) == 0)))))
 
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
