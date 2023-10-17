@@ -3,10 +3,23 @@
 #double check function documentation
 #continue work on Vignettes
 #Come up with list of covariates that need to be included; drop ALL others
+##fix column names here as well
+
+
+
 #Fix
 # column names
 # Why does "Methods" appear under getFishData()?
-# add genpropID to Invert
+
+
+
+
+
+
+
+
+
+
 
 ##Maybe wait
 ##Fish stuff

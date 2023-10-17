@@ -49,8 +49,15 @@ library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species")
 
-head(Fish)[,1:35]
+head(Fish)[,c(1:5,36,90,400)]
 ```
+
+## Metadata
+Metadata can be found in the "Metadata" vignette: `vignette("Metadata", package = "finsyncR")`.
+
+## Using finsyncR
+A compendium on the correct use of the finsyncR package and its output datasets can be found in the "Getting Started" vignette: `vignette("GettingStarted", package = "finsyncR")`.
+
 
 ## Open-Source Code Policy
 

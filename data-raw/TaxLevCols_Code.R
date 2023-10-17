@@ -327,7 +327,54 @@ sysdata_filenames <- load("R/sysdata.rda")
 # save(list = c(sysdata_filenames[-14], ".specIDgen"), file = "R/sysdata.rda",
 #      compress = "xz")
 
-save(list = c(sysdata_filenames[-c(7,13)]), file = "R/sysdata.rda",
+# save(list = c(sysdata_filenames[-c(7,13)]), file = "R/sysdata.rda",
+#      compress = "xz")
+
+
+.taxlu <- dplyr::tribble(
+  ~Order, ~Family,
+  "Neotaenioglossa", "Hydrobiidae",
+  "Neotaenioglossa", "Pleuroceridae",
+  "Neotaenioglossa", "Pomatiopsidae",
+  "Neotaenioglossa", "Thiaridae",
+  "Architaenioglossa", "Pilidae",
+  "Architaenioglossa", "Ampullariidae",
+  "Architaenioglossa", "Viviparidae",
+  "Unionoida", "Unionidae",
+  "Unionoida", "Margaritiferidae",
+  "Tubificida", "Naididae",
+  "Tubificida", "Tubificidae",
+  "Opisthopora", "Lumbricidae",
+  "Heterostropha", "Valvatidae",
+  "Hirudinida", "Piscicolidae",
+  "Neoophora", "Planariidae",
+  "", "Aeolosomatidae",
+) %>%
+  dplyr::mutate(FAMILY = toupper(Family))
+
+##need to check old code to generate .slashgen_fin
+.fishtaxlu <- dplyr::tribble(
+  ~Old, ~New,
+  "Cottus bairdi", "Cottus bairdii",
+  "Macrhybopsis cf. aestivalis", "Macrhybopsis aestivalis",
+  "Notropis cf. spectrunculus", "Notropis spectrunculus",
+  "Catostomus cf. latipinnis", "Catostomus latipinnis",
+  "Cyprinella cf. zanema", "Cyprinella zanema",
+  "Hybopsis zanema", "Cyprinella zanema",
+  "Noturus sp. c.f. leptacanthus", "Noturus leptacanthus",
+  "Moxostoma sp cf erythrurum", "Moxostoma erythrurum",
+  "Moxostoma cf. lachneri", "Moxostoma lachneri",
+  "Moxostoma cf. poecilurum", "Moxostoma poecilurum",
+  "Moxostoma duquesnii", "Moxostoma duquesnei",
+  "Etheostoma chlorosomum", "Etheostoma chlorosoma",
+  "Fundulus stellifera", "Fundulus stellifer",
+  "Chaenobryttus gulosus", "Lepomis gulosus",
+  "Hybopsis dorsalis", "Notropis dorsalis",
+  "Oncorhynchus mykiss gairdneri", "Oncorhynchus mykiss"
+)
+
+sysdata_filenames <- load("R/sysdata.rda")
+save(list = c(sysdata_filenames[-15], ".fishtaxlu"), file = "R/sysdata.rda",
      compress = "xz")
 
 # usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,

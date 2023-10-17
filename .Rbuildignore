@@ -5,3 +5,5 @@
 ^README\.Rmd$
 ^LICENSE\.md$
 ^\.github$
+[.]pptx$
+^R/ToDo\.R$

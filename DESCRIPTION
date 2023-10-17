@@ -1,7 +1,7 @@
 Package: finsyncR
 Type: Package
-Title: an R package for synchronizing fish and invertebrate data across the United States
-Version: 0.1.0.0010
+Title: Synchronize fish and invertebrate data across the United States
+Version: 0.1.1.0000
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
