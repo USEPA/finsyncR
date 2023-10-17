@@ -462,6 +462,7 @@ getInvertData <- function(dataType = "occur",
                                               CollectionDayOfYear == CollectionDayOfYear))
 
   invert_comms1 <- invert_comms1  %>%
+    dplyr::select(any_of(.finalcovarorder), tidyselect::contains("tax_")) %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 
   if(dataType == "occur") {

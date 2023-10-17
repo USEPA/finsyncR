@@ -373,8 +373,39 @@ sysdata_filenames <- load("R/sysdata.rda")
   "Oncorhynchus mykiss gairdneri", "Oncorhynchus mykiss"
 )
 
+.finalcovarorder <-
+  c("Agency",
+    "ProjectLabel",
+    "SiteNumber",
+    "SiteReachName",
+    "CollectionDate",
+    "CollectionYear",
+    "CollectionMonth",
+    "CollectionDayOfYear",
+    "Latitude_dd",
+    "Longitude_dd",
+    "CoordinateDatum",
+    "COMID",
+    "StreamOrder",
+    "WettedWidth",
+    "SampleTypeCode",
+        ##inverts
+    "AreaSampTot_m2",
+    "FieldSplitRatio",
+    "LabSubsamplingRatio",
+    "PropID",
+    "Gen_ID_Prop",
+    ##fish
+    "FishCollection",
+    "ReachLengthFished_m",
+    "SampleMethod",
+    "MethodEffort"
+    )
+
+
+
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames[-15], ".fishtaxlu"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames, ".finalcovarorder"), file = "R/sysdata.rda",
      compress = "xz")
 
 # usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,

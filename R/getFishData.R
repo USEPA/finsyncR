@@ -125,6 +125,8 @@ getFishData <- function(dataType = "occur",
     mycols = .TaxLevCols_Fish[[which(names(.TaxLevCols_Fish) == taxonLevel)]]$mycols
     taxcols = .TaxLevCols_Fish[[which(names(.TaxLevCols_Fish) == taxonLevel)]]$taxcols
 
+
+
     fish_comm = fish_info %>%
       dplyr::filter(PublishedTaxonNameLevel %in% taxcols |
                       grepl(" x ", BioDataTaxonName)) %>%
@@ -245,12 +247,19 @@ getFishData <- function(dataType = "occur",
   full_fish <- full_fish %>%
     ungroup() %>%
     left_join(.allsitesCOMID, by = dplyr::join_by(SiteNumber)) %>%
-    dplyr::rename("No fish collected" = "tax_No fish collected")
+    mutate(`tax_No fish collected` = ifelse(`tax_No fish collected` == 0,
+                                            "Fish Collected",
+                                            "No Fish Collected")) %>%
+    dplyr::rename("FishCollection" = "tax_No fish collected")
 
 
   ##remove 0 column sum fish (not sure why they're even included, but remove anyway)
   full_fish <- full_fish  %>%
-    ungroup() %>%
+    ungroup()  %>%
+    dplyr::rename("SampleTypeCode" = "FISH_PROTOCOL") %>%
+    dplyr::rename("SampleMethod" = "MethodBasic") %>%
+    dplyr::rename("MethodEffort" = "StandardMethod") %>%
+    dplyr::select(any_of(.finalcovarorder), tidyselect::contains("tax_")) %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
     dplyr::select(-any_of(c(names(which((colSums(full_fish %>% dplyr::select(tidyselect::contains("tax_")), na.rm = T)) == 0)))))
 
@@ -259,20 +268,21 @@ getFishData <- function(dataType = "occur",
   if(!isTRUE(boatableStreams)){
     full_fish <- full_fish %>%
       ##remove boatable sites
-      filter(FISH_PROTOCOL != "BOATABLE")
+      filter(SampleTypeCode != "BOATABLE")
   } else {}
 
   full_fish <- full_fish %>%
-    mutate(FISH_PROTOCOL = ifelse(FISH_PROTOCOL == "SM_WADEABLE",
+    mutate(SampleTypeCode = ifelse(SampleTypeCode == "SM_WADEABLE",
                                   "Small Wadeable",
-                                  ifelse(FISH_PROTOCOL == "BOATABLE",
+                                  ifelse(SampleTypeCode == "BOATABLE",
                                          "Boatable",
                                          "Large Wadeable")))
 
   if(!isTRUE(hybrids)) {
     full_fish <- full_fish %>%
-      dplyr::select(-c(tidyselect::contains(" x "), -c(tidyselect::contains(".x."))))
-
+      dplyr::select(-c(tidyselect::contains(" x ")),
+                       -c(tidyselect::contains(".x.")),
+                          -c(tidyselect::contains(" x-")))
   }
 
   ##shared Taxa code
