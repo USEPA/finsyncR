@@ -29,7 +29,7 @@ You can install the released version of `finsyncR` from
 
     devtools::install_github("StreamData/finsyncR",
                              auth_token = "tokenstring",
-                             build_vignette = FALSE
+                             build_vignette = TRUE
                              )
 
 ## Example
@@ -41,22 +41,25 @@ This is a basic example which shows you how to use one of the
 library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species")
+#> Joining with `by = join_by(SITE_ID, YEAR, VISIT_NO)`
+#> Joining with `by = join_by(UID, SITE_ID, VISIT_NO)`
+#> Joining with `by = join_by(SITE_ID, DATE_COL, VISIT_NO)`
 
 head(Fish)[,c(1:5,36,90,400)]
-#>   ProjectLabel ProjectAssignedSampleLabel NAWQA.SMCOD NAWQAStudyUnitCode
-#> 1     MMSD Eco                                                          
-#> 2     MMSD Eco                                                          
-#> 3     MMSD Eco                                                          
-#> 4     MMSD Eco           WMIC0907FSH0004A                               
-#> 5     MMSD Eco                                                          
-#> 6     MMSD Eco                                                          
-#>   CollectionDate Campostoma.anomalum Lepomis.gulosus Etheostoma.denoncourti
-#> 1     2007-09-10                   0               0                      0
-#> 2     2007-09-05                   0               0                      0
-#> 3     2007-09-05                   0               0                      0
-#> 4     2007-09-04                   1               0                      0
-#> 5     2007-09-12                   0               0                      0
-#> 6     2007-09-07                   0               0                      0
+#>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate
+#> 1   USGS     MMSD Eco USGS-04086600 04086600-A-MMSD Eco     2007-09-10
+#> 2   USGS     MMSD Eco USGS-04087030 04087030-A-MMSD Eco     2007-09-05
+#> 3   USGS     MMSD Eco USGS-04087070 04087070-A-MMSD Eco     2007-09-05
+#> 4   USGS     MMSD Eco USGS-04087088 04087088-A-MMSD Eco     2007-09-04
+#> 5   USGS     MMSD Eco USGS-04087119 04087119-A-MMSD Eco     2007-09-12
+#> 6   USGS     MMSD Eco USGS-04087204 04087204-A-MMSD Eco     2007-09-07
+#>   Cyprinus.carpio Cyprinella.galactura Oreochromis.aureus
+#> 1               0                    0                  0
+#> 2               0                    0                  0
+#> 3               0                    0                  0
+#> 4               0                    0                  0
+#> 5               0                    0                  0
+#> 6               0                    0                  0
 ```
 
 ## Metadata

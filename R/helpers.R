@@ -1252,6 +1252,28 @@ acquireData <- function(taxa,
                                            colClasses = c("UID" = "character"),
                                            stringsAsFactors = FALSE,
                                            data.table = F))
+      ##add wetted width to datasets
+      hab0809 <- (data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2015-09/phabmed.csv",
+                                                            httr::add_headers(`User-Agent` = UA)),
+                                                  encoding = "UTF-8", as = "text"),
+                                    stringsAsFactors = FALSE,
+                                    data.table = F)) %>%
+        dplyr::select(SITE_ID, YEAR, VISIT_NO, XWIDTH)
+
+      hab1314 <- (data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2019-04/nrsa1314_phabmed_04232019.csv",
+                                                            httr::add_headers(`User-Agent` = UA)),
+                                                  encoding = "UTF-8", as = "text"),
+                                    stringsAsFactors = FALSE,
+                                    data.table = F)) %>%
+        dplyr::select(SITE_ID, UID, VISIT_NO, XWIDTH) %>%
+        dplyr::mutate(UID = as.character(UID))
+
+      hab1819 <- (data.table::fread(httr::content(httr::GET("https://www.epa.gov/sites/default/files/2021-04/nrsa_1819_physical_habitat_larger_set_of_metrics_-_data.csv",
+                                                            httr::add_headers(`User-Agent` = UA)),
+                                                  encoding = "UTF-8", as = "text"),
+                                    stringsAsFactors = FALSE,
+                                    data.table = F)) %>%
+        dplyr::select(SITE_ID, DATE_COL, VISIT_NO, XWIDTH)
 
       NRSA_1314_fishtax <- data.table::fread(system.file("extdata",
                                                          "updateNRSAfishtax.csv",
@@ -1352,15 +1374,18 @@ acquireData <- function(taxa,
       ##Need UID, SITE_ID, DATE_COL, VISIT_NO, STATE, LOC_NAME, LAT_DD, LON_DD, MASTER_SITEID
 
       NRSA_0809_s <- NRSA_0809_sites %>%
-        dplyr::select(UID, SITE_ID, MASTER_SITEID, DATE_COL, VISIT_NO, STATE, LOC_NAME, LAT_DD83, LON_DD83) %>%
+        dplyr::left_join(hab0809) %>%
+        dplyr::select(UID, SITE_ID, MASTER_SITEID, DATE_COL, VISIT_NO, STATE, LOC_NAME, LAT_DD83, LON_DD83, XWIDTH) %>%
         mutate(DATE_COL = as.Date(DATE_COL, "%d-%B-%y"))
 
       NRSA_1314_s <- NRSA_1314_sites %>%
-        dplyr::select(UID, SITE_ID, DATE_COL, VISIT_NO, BOAT_WADE, NARS_NAME, LAT_DD83, LON_DD83) %>%
+        dplyr::left_join(hab1314) %>%
+        dplyr::select(UID, SITE_ID, DATE_COL, VISIT_NO, BOAT_WADE, NARS_NAME, LAT_DD83, LON_DD83, XWIDTH) %>%
         mutate(DATE_COL = as.Date(DATE_COL, "%m/%d/%Y"))
 
       NRSA_1819_s <- NRSA_1819_sites %>%
-        dplyr::select(UID, SITE_ID, DATE_COL, VISIT_NO, UNIQUE_ID, NARS_NAME, LAT_DD83, LON_DD83) %>%
+        dplyr::left_join(hab1819) %>%
+        dplyr::select(UID, SITE_ID, DATE_COL, VISIT_NO, UNIQUE_ID, NARS_NAME, LAT_DD83, LON_DD83, XWIDTH) %>%
         mutate(VISIT_NO = as.numeric(ifelse(VISIT_NO == "R",
                                             2,
                                             VISIT_NO)))%>%
@@ -1454,8 +1479,9 @@ acquireData <- function(taxa,
                                              GENUS = "No fish",
                                              SPECIES = "No fish",
                                              SCIENTIFIC = "No fish collected") %>%
-                                      dplyr::select(-BOAT_WADE)
-      )
+                                      dplyr::select(-BOAT_WADE,-XWIDTH)
+      ) %>%
+        rename("WettedWidth" = "XWIDTH")
 
 
       return(data.frame(NRSA_FISH_wSite))

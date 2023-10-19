@@ -7,153 +7,209 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This needs a complete rehaul. 
-
 Column names are in the order of how they appear in each output dataset.
-    
+
 ## Information shared across datasets
 
-### Sample-level Information
+#### Agency
+
+Description: Agency that oversaw the collection of the sample.
+
+Categorical. Levels:
+
+-   "EPA" - United States Environmental Protection Agency
+-   "USGS" - United States Geological Survey
 
 #### ProjectLabel
-Description: Project short name assigned by the project owner
 
-#### ProjectAssignedSampleLabel
-Description: A unique label or code assigned to the Sample by the Project (unique within a Project)
+Description: Project short name assigned by the project owner; for USGS data this is explicitly defined by the USGS, for EPA this has been defined as the sampling round/type (e.g., NRSA0809).
 
-#### NAWQA.SMCOD
-Description: NAWQA sample identification code used to identify each container (and sample)
-
-#### NAWQAStudyUnit
-Description: 4-letter abbreviation for NAWQA study unit
-
-#### CollectionDate
-Description: Date sample was collected (YYYYMMDD)
-
-#### StartTime
-Description: Time sampling activities started in 24-hour format (HH:MM)
-
-#### TimeDatum
-Description: Code that indicates time zone and seasonal time standardization at time of sample collection, such as: CST (Central Standard Time) or CDT (Central Daylight Time)
-
-#### CollectionYear
-Description: Year in which sample was collected (YYYY)
-
-#### CollectionMonth
-Description: Month in which sample was collected (MM)
-
-#### CollectionDayOfYear
-Description: Day-of-year when sample was collected. The number of days since the beginning of the year.
-
-#### ProvisionalData
-Description: Provisional data are data that have not completed the review process. Subsequent review may result in significant revisions. Data users are cautioned to consider carefully the provisional nature of the information before using it.
-
-
-### Site-level Information
+Categorical.
 
 #### SiteNumber
-Description: USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected.
 
-Note: Be aware that there are leading zeros in these site numbers. Thus, when working with these data, it is advised that you should either add alphabetical characters in front of the site number (i.e., `paste("USGS-", Invertdata$SiteNumber, sep = "")`) or when reading in a saved dataset, use the `"colClasses = c("SiteNumber" = "character")"` option in `read.csv()`.
+Description: Unique site identifiers. For USGS data, USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected (preceeded by "USGS-"). For EPA data, for the study and year sampled. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place of SITE_ID. SITE_IDs from individual rounds of NRSA sampling (WSA/EMAP included) were linked to a site-level UNIQUE_ID, so that sites that were resampled through time could be linked. If sites could not be linked to a UNIQUE_ID, survey-specific SITE_ID is used instead.
 
-#### SiteName
-Description: USGS National Water Information System (NWIS) name for the place where sample was collected.
+Categorical. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999.
+
+Note: To link EPA unique site IDs to survey-specific site IDs (e.g., to be used to link them to other NARS collected data), users can link unified site IDs to the survey-specific ID using the following code:
+
+```{r, eval = F}
+dataset$SurveySpecificSiteID <-
+  ifelse(dataset$SiteNumber %in% finsyncR:::.NRSA_siteIDs$UNIQUE_ID,
+         finsyncR:::.NRSA_siteIDs$SITE_ID[
+           match(dataset$SiteNumber,
+                 finsyncR:::.NRSA_siteIDs$UNIQUE_ID)],
+         ifelse(dataset$SiteNumber %in% finsyncR:::.NRSA_siteIDs$MASTER_SITEID,
+                finsyncR:::.NRSA_siteIDs$SITE_ID[
+                  match(dataset$SiteNumber,
+                        finsyncR:::.NRSA_siteIDs$MASTER_SITEID)],
+                dataset$SiteNumber))
+```
 
 #### StudyReachName
+
 Description: Name given to identify the longitudinal section of a stream that was selected for sampling.
 
-#### SiteTypeName
-Description: Name of hydrologic setting of the site such as stream, canal, ditch, lake, wetland, etc.
+Categorical.
 
-### StateFIPSCode
-Description: Federal Information Processing Standards (FIPS) code (two digits) for the state in which the site is located.
+#### CollectionDate
 
-Note: Be aware that there are leading zeros in these site numbers. Thus, when working with these data, it is advised that you should either add alphabetical characters in front of the site number (i.e., `paste("S-", Invertdata$StateFIPSCode, sep = "")`) or when reading in a saved dataset, use the `colClasses = c("StateFIPSCode" = "character")` option in `read.csv()`.
+Description: Date sample was collected (THIS NEEDS TO BE UPDATED)
 
-#### CountyFIPSCode
-Description: Federal Information Processing Standards (FIPS) code (three digits) for the county in which the site is located. 
+Date.
 
-Note: Be aware that there are leading zeros in these site numbers. Thus, when working with these data, it is advised that you should either add alphabetical characters in front of the FIPS code (i.e., `paste("C-", Invertdata$CountyFIPSCode, sep = "")`) or when reading in a saved dataset, use the `colClasses = c("CountyFIPSCode" = "character")` option in `read.csv()`.
+#### CollectionYear
+
+Description: Year in which sample was collected (YYYY)
+
+Integer.
+
+#### CollectionMonth
+
+Description: Month in which sample was collected (MM)
+
+Integer.
+
+#### CollectionDayOfYear
+
+Description: Day-of-year when sample was collected. The number of days since the beginning of the year.
+
+Integer.
 
 #### Latitude_dd
+
 Description: Latitude of the site location, in decimal degrees
 
+Numeric.
+
 #### Longitude_dd
+
 Description: Longitude of the site location, in decimal degrees
 
+Numeric.
+
 #### CoordinateDatum
+
 Description: Datum of site location coordinates
 
-#### DrainageArea_mi2
-Description: Area enclosed by a topographic divide from which direct surface runoff drains to the site, in square miles.
+Categorical. Levels:
 
-## Dataset specific information
+-   NAD83 - North American Datum 1983, EPSG: 4269
+-   NAD27 - North American Datum 1927, EPSG: 4267
+-   OLDHI - Old Hawaiian, EPSG: 4135
 
-### Inverts
+#### COMID
+
+Description: Waterbody unique identifier from US National Hydrography Dataset Plus (NHDPlus).
+
+Integer.
+
+#### StreamOrder
+
+Description:
+
+Integer.
+
+#### WettedWidth
+
+Description: For EPA samples only. Distance from left to right bank of the stream channel filled with water.
+
+Numeric.
+
+#### PredictedWettedWidth
+
+Description: Predicted distance from left to right bank of the stream channel filled with water. Gathered from StreamCat and [Doyle et al. 2023](https://doi.org/10.1111/1752-1688.13116). Available for most sites.
+
+Numeric.
 
 #### SampleTypeCode
+
 Description: Code indicating the type of sample collected
-Levels:
 
-* IRTH - NAWQA Invertebrate Targeted Habitat
-* BERW - NRSA Invertebrate, wadable, reach-wide benthos
+Categorical. Levels:
 
-#### IdentificationEntity
-Description: Organization or entity that identified the specimens
+Inverts:
+
+-   "IRTH" - USGS NAWQA Invertebrate Targeted Habitat; <https://www.nemi.gov/methods/method_summary/12232/>
+-   "BERW" - NRSA Invertebrate, wadable, reach-wide benthos; <https://www.nemi.gov/methods/method_summary/12564/>
+-   "SWAMP" - SWAMP Reachwide Benthos (Multihabitat) Procedure; <https://www.nemi.gov/methods/method_summary/12835/>
+-   "EMAP" - Macroinvertebrate Field and Laboratory Methods for Evaluating the Biological Integrity of Surface Waters; <https://www.nemi.gov/methods/method_summary/12955/>
+-   "CDPHE RR" - Benthic Macroinvertebrate,Riffle or Run Habitat Method; <https://www.nemi.gov/methods/method_summary/12896/>
+-   "PNAMP" - Pacific Northwest, wadeable streams; <https://www.nemi.gov/methods/method_summary/12579/>
+-   "BERWW" - NRSA Invertebrate, wadable, reach-wide benthos; <https://www.nemi.gov/methods/method_summary/12564/>
+-   "REACHWIDE" - NRSA Invertebrate, wadable, reach-wide benthos; <https://www.nemi.gov/methods/method_summary/12564/>
+-   "BELGB" - NRSA Invertebrate, non-wadeable, reach-wide benthos; <https://www.nemi.gov/methods/method_summary/12563/>
+-   "BETB" - NRSA Invertebrate, non-wadeable, reach-wide benthos; <https://www.nemi.gov/methods/method_summary/12563/>
+-   "BOATABLE" - NRSA Invertebrate, non-wadeable, reach-wide benthos; <https://www.nemi.gov/methods/method_summary/12563/>
+
+Fish:
+
+-   "BOATABLE" - Sample protocol for non-wadable rivers; <https://www.nemi.gov/methods/method_summary/12492/>
+-   "SM_WADEABLE" - Sample protocol for small wadeable streams; <https://www.nemi.gov/methods/method_summary/12237/>, <https://www.nemi.gov/methods/method_summary/12493/>
+-   "LG_WADEABLE" - Sample protocol for large wadeable streams; <https://www.nemi.gov/methods/method_summary/12237/>, <https://www.nemi.gov/methods/method_summary/12493/>
+
+### Data included in invertebrate data only
 
 #### AreaSampTot_m2
-Description: Total area sampled, in square meters.
 
-#### GeomorphicChannelUnit
-Description: The types of geomorphic channel units where sample was collected.
+Description: Estimated total area sampled, in square meters.
 
-#### ChannelBoundaries
-Description: General areas within the channel where sample was collected.
+Numeric.
 
-#### ChannelFeatures
-Description: Channel feature(s) where sample was taken.
+#### FieldSplitRatio
 
-#### ReplicateType
-Description: Code to indicate whether sample is a field-collection replicate
-Levels:
+Description: For USGS samples only, proportion of the field collected sample that was sent to the lab for identification. See "Getting Started" vignette for more information.
 
-* N - Sample is not a replicate
-* Y - Sample is a replicate
+Numeric. 0-1
 
-Note: These replicates were maintained in the invert dataset, because they sampled different geomorphic channel units, which might influence the taxa that are present within the sample. For the limited number of samples that are true field replicates, data users will need to use either one of the samples, to take the average of the samples, or to account for the replicate by using a random term in their models, depending on the question being addressed with the data. For all other datasets, averages were taken of replicate samples.
+#### LabSubsamplingRatio
 
-### Fish
+Description: Proportion of the lab sample that was actually identified (proportion of grids that were used to reach target identification count). See "Getting Started" vignette for more information.
 
-#### MethodCode
-Description: Code that identifies method used to collect the specimen(s). Electrofishing MethodCodes indicate gear type used and pass number or subreach (e.g. Backpack-P1).
+Numeric. 0-1
 
-#### MethodBasic
-Description: Simplified version of `MethodCode`. All electrofishing (boats, backpack, etc.) has been reclassified as "Shocking". All netting has been reclassified as "Seine". Snorkel samples have been classified as "Snorkel".
+#### PropID
+
+Description: Proportion of the sample that was identified. For USGS samples, FieldSplitRatio \* LabSubsamplingRatio. For EPA samples, LabSubsampling ratio. See "Getting Started" vignette for more information.
+
+Numeric. 0-1
+
+#### Gen_ID_Prop
+
+Description: Proportion of the individuals identified in the lab that were successfully identified to at least the Genus taxonomic level.
+
+Numeric. 0-1
+
+### Data included in fish data only
+
+#### FishCollection
+
+Description: Whether fish sampling was conducted, but no fish were collected. This column provides instances of true zero richness and abundance/density.
+
+Categorical. Levels:
+
+-   Fish Collected
+-   No Fish Collected
 
 #### ReachLengthFished_m
+
 Description: Length of stream covered by fishing activities conducted for this sample. Typically this will be equal to the curvilinear reach length of the assigned study reach.
 
-#### NumberSeineHauls
-Description: Number of times a seine was set and retrieved from the water.
+Numeric.
 
-Note: This column will only have non-zero values for seine samples.
+#### SampleMethod
 
-#### NumberStationarySetsKicks
-Description: Number of times a stationary kick-seine method was used.
+Description: All electrofishing (boats, backpack, etc.) is classified as "Shocking". All netting has been classified as "Seine". Snorkel samples have been classified as "Snorkel".
 
-Note: This column will only have non-zero values for kick-seine samples.
+Categorical. Levels:
 
-#### NumberSnorkelingTransects
-Description: Number of transects snorkeled within a reach.
+-   Shocking
+-   Seine
+-   Snorkel
 
-Note: This column will only have non-zero values for snorkel samples.
+#### MethodEffort
 
-#### MinutesShockTime
-Description: Actual time (in minutes) that shocking unit is on; the time electricity is being transmitted to the water.
+Description: The sampling effort given for each sample (these are summed across rounds if multiple rounds of a single sampling method occurred for a given sampling event). Units are minutes for electroshocking, number of hauls for seine netting, and minutes for snorkel samples.
 
-Note: This column will only have non-zero values for electroshocking samples.
-
-#### StandardMethod
-Description: The value by which the number of individuals of each species is divided to obtain an abundance value that is standardized by unit effort. Specifically, this number is `ReachLengthFished_m` multiplied by the effort (values in one of `NumberSeineHauls`, `NumberStationarySetsKicks`, `NumberSnorkelingTransects`, or `MinutesShockTime`). 
-
-Note: This column will only be present when `standardize` is not set to `"none"` in the `getFishData()` function.
+Numeric.

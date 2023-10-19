@@ -213,6 +213,7 @@ getFishData <- function(dataType = "occur",
     full_fish = fish_comm2 %>%
       mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
              # StandardMethod = as.character(StandardMethod),
+             WettedWidth = NA,
              Agency = "USGS")%>%
       relocate(Agency, .after = SiteNumber) %>%
       dplyr::select(-StateFIPSCode, -CountyFIPSCode)  %>%
@@ -223,8 +224,8 @@ getFishData <- function(dataType = "occur",
     full_fish <- bind_rows(fish_comm2 %>%
                              mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
                                     # StandardMethod = as.character(StandardMethod),
+                                    WettedWidth = NA,
                                     Agency = "USGS") %>%
-                             relocate(Agency, .after = SiteNumber) %>%
                              dplyr::select(-StateFIPSCode, -CountyFIPSCode, -MethodCode),
                            NRSA_FISH_comm2 %>% mutate(Agency = "EPA")) %>%
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
@@ -246,7 +247,7 @@ getFishData <- function(dataType = "occur",
 
   full_fish <- full_fish %>%
     ungroup() %>%
-    left_join(.allsitesCOMID, by = dplyr::join_by(SiteNumber)) %>%
+    left_join(.allsitesCOMID %>% filter(SiteNumber %in% full_fish$SiteNumber), by = dplyr::join_by(SiteNumber)) %>%
     mutate(`tax_No fish collected` = ifelse(`tax_No fish collected` == 0,
                                             "Fish Collected",
                                             "No Fish Collected")) %>%
@@ -262,8 +263,6 @@ getFishData <- function(dataType = "occur",
     dplyr::select(any_of(.finalcovarorder), tidyselect::contains("tax_")) %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
     dplyr::select(-any_of(c(names(which((colSums(full_fish %>% dplyr::select(tidyselect::contains("tax_")), na.rm = T)) == 0)))))
-
-  colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
   if(!isTRUE(boatableStreams)){
     full_fish <- full_fish %>%
@@ -291,7 +290,7 @@ getFishData <- function(dataType = "occur",
 
     notbothfish <- colnames(full_fish %>%
                               dplyr::group_by(Agency) %>%
-                              dplyr::summarize(dplyr::across(tidyselect::where(~ is.numeric(.x)), ~sum(., na.rm = T))) %>%
+                              dplyr::summarize(dplyr::across(tidyselect::contains("tax_"), ~sum(., na.rm = T))) %>%
                               dplyr::select(-Agency) %>%
                               dplyr::select(tidyselect::where(~ any(. ==  0, na.rm = T))))
 
@@ -299,6 +298,8 @@ getFishData <- function(dataType = "occur",
       dplyr::select(-tidyselect::any_of(notbothfish))
 
   } else {}
+
+  colnames(full_fish) = sub("tax_", "", colnames(full_fish))
 
   return(data.frame(full_fish))
 

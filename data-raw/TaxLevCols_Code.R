@@ -377,7 +377,7 @@ sysdata_filenames <- load("R/sysdata.rda")
   c("Agency",
     "ProjectLabel",
     "SiteNumber",
-    "SiteReachName",
+    "StudyReachName",
     "CollectionDate",
     "CollectionYear",
     "CollectionMonth",
@@ -388,6 +388,7 @@ sysdata_filenames <- load("R/sysdata.rda")
     "COMID",
     "StreamOrder",
     "WettedWidth",
+    "PredictedWettedWidth_m",
     "SampleTypeCode",
         ##inverts
     "AreaSampTot_m2",
@@ -402,11 +403,15 @@ sysdata_filenames <- load("R/sysdata.rda")
     "MethodEffort"
     )
 
+# .allsitesCOMID = read.csv("C:/Users/mmahon/OneDrive - Environmental Protection Agency (EPA)/Profile/Documents/Research/USGS Stream Macros/allsitesCOMID.csv")
+
+
 
 
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames, ".finalcovarorder"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames[-16], ".finalcovarorder"), file = "R/sysdata.rda",
      compress = "xz")
+
 
 # usethis::use_data(.TaxLevCols_Algae, .TaxLevCols_Inverts,
 #                   .TaxLevCols_Fish, .SamplingRatio_SamplerType,

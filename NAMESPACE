@@ -3,7 +3,6 @@
 export("%>%")
 export(getFishData)
 export(getInvertData)
-export(getInvertTraitData)
 export(getNLCDData)
 import(data.table, except = c(last, first, between, month, hour, quarter, week, year, wday, second, minute, mday, yday, isoweek))
 import(dplyr)

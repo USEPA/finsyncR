@@ -454,7 +454,7 @@ getInvertData <- function(dataType = "occur",
                                         .x)))
 
   invert_comms1 <- invert_comms1 %>%
-    left_join(.allsitesCOMID, by = dplyr::join_by(SiteNumber))
+    left_join(.allsitesCOMID %>% filter(SiteNumber %in% invert_comms1$SiteNumber), by = dplyr::join_by(SiteNumber))
 
   invert_comms1 <- invert_comms1 %>%
     left_join(.specIDgen %>% group_by(SiteNumber, CollectionYear, CollectionDayOfYear) %>% slice(1) %>% ungroup() %>% filter(SiteNumber %in% invert_comms1$SiteNumber) %>% dplyr::select(SiteNumber, CollectionYear, CollectionDayOfYear, Gen_ID_Prop), by = dplyr::join_by(SiteNumber == SiteNumber,

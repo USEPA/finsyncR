@@ -35,7 +35,7 @@ library(devtools)
 
 devtools::install_github("StreamData/finsyncR",
                          auth_token = "tokenstring",
-                         build_vignette = FALSE
+                         build_vignette = TRUE
                          )
 ```
 
