@@ -311,9 +311,9 @@ getInvertData <- function(dataType = "occur",
 
     ##First step after data has been gathered:
     ##Filter SAMPLE_TYPE to "BERW", "BERWW", or "REACHWIDE" in NRSA_inverts if not boatable
-    if(isTRUE(boatableStreams)) {
-      sampletype = c("BERW", "BERWW", "REACHWIDE", "BELGB", "BETB", "BOATABLE")
-    } else {
+    sampletype = c("BERW", "BERWW", "REACHWIDE", "BELGB", "BETB", "BOATABLE")
+
+    if(!isTRUE(boatableStreams)){
       sampletype = c("BERW", "BERWW", "REACHWIDE")
     }
 

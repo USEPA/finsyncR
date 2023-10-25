@@ -706,7 +706,6 @@ acquireData <- function(taxa,
 
         ##2003/2004
         NRSA_0304_inverts = NRSA_0304_inverts %>%
-          dplyr::filter(INDEX_SAMPTYPE %in% sampletype) %>%
           dplyr::select(-DISTINCT, -HABIT, -PTV, -FLAG_PTV, -FFG)
 
         ##Replace NAs with "", which is consistent with the other NRSA datasets
@@ -758,7 +757,6 @@ acquireData <- function(taxa,
         ##2008/2009
         ##Filter to BERW; remove columns that are not needed
         NRSA_0809_inverts = NRSA_0809_inverts %>%
-          dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
           dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -BENT_COM, -DATE_BENT,
                         -SAMPLE_CAT, -PUBLICATION_DATE) %>%
           dplyr::mutate(YEAR = paste("20", stringr::str_sub(DATE_COL, -2,-1), sep = ""),
@@ -786,7 +784,6 @@ acquireData <- function(taxa,
         ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
         ##not available in all datasets, so remove those that are not found across data)
         NRSA_1314_inverts = NRSA_1314_inverts %>%
-          dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
           dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -TOTAL300_OE,
                         -PUBLICATION_DATE, -TRIBE, -SUBFAMILY, -TAXA_ID)
 
@@ -801,7 +798,6 @@ acquireData <- function(taxa,
         ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
         ##not available in all datasets, so remove those that are not found across data)
         NRSA_1819_inverts <- NRSA_1819_inverts %>%
-          dplyr::filter(SAMPLE_TYPE %in% sampletype) %>%
           dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -EPA_REG,
                         -PUBLICATION_DATE, -TRIBE, -SUBFAMILY, -TAXA_ID,
                         -FFG, -HABIT, -PTV, -AG_ECO9, -NON_TARGET, -SITESAMP,
@@ -1512,7 +1508,7 @@ invertTaxFix <- function(dataset,
   gns = c()
   slashedgen <- slashedgen[order(slashedgen)]
   for(i in slashedgen){
-    hldr <- grep(i, slashgen_fin, fixed = T)
+    hldr <- grep(i, .slashgen_fin, fixed = T)
     cnt <- c(cnt, hldr)
     gns = c(gns, rep(i, times = length(hldr)))
   }
