@@ -150,6 +150,7 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("USGS", agency))){
+    cat(" Gathering and cleaning USGS raw data                    ")
     TotalRows = acquireData(taxa = "inverts",
                            agency = "USGS",
                            waterbody = "streams")
@@ -164,6 +165,7 @@ getInvertData <- function(dataType = "occur",
     ##then rarify based on the RAWCOUNT (individuals actually identified)
     if(dataType == "occur"){
       if(isTRUE(rarefy)) {
+        cat('\r',"Rarefying USGS data                                      ")
         set.seed(seed)
         TotalRows = TotalRows %>%
           dplyr::group_by(SIDNO) %>%
@@ -184,6 +186,7 @@ getInvertData <- function(dataType = "occur",
       } else {}
     }   else {}
 
+    cat('\r',"Applying taxonomy fixes to USGS data                    ")
     TotalRows = invertTaxFix(TotalRows,
                              taxonFix,
                              agency = "USGS",
@@ -304,7 +307,7 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(any(grepl("EPA", agency))){
-
+    cat('\r',"Gathering, joining, and cleaning EPA raw data                    ")
     NRSA_inverts = acquireData(taxa = "inverts",
                               agency = "EPA",
                               waterbody = "streams")
@@ -323,6 +326,7 @@ getInvertData <- function(dataType = "occur",
     ##Second step:
     ##Rarefy samples to 300 in the same manner as the NAQWA data for consistency
     if(isTRUE(rarefy)) {
+      cat('\r',"Rarefying EPA data                              ")
       set.seed(seed)
       NRSA_inverts <- NRSA_inverts %>%
         ##Create unique grouping based on UID, SITE_ID, YEAR, and VISIT_NO
@@ -364,6 +368,7 @@ getInvertData <- function(dataType = "occur",
 
     ##Third step:
     ##FIX ALL TAXONOMIC ISSUES
+    cat('\r',"Applying taxonomic fixes to EPA data                    ")
       NRSA_inverts = invertTaxFix(NRSA_inverts,
                                   TaxonFix = taxonFix,
                                   agency = "EPA",
@@ -373,6 +378,7 @@ getInvertData <- function(dataType = "occur",
 
 
     if(isTRUE(sharedTaxa) & any(grepl("EPA", agency)) & any(grepl("USGS", agency))){
+      cat('\r',"Removing taxa not in both USGS and EPA datasets                 ")
       ##List of NAWQA taxa
       USGStaxa <- c(unique(TotalRows[,taxonLevel]))[[taxonLevel]]
 
@@ -442,11 +448,11 @@ getInvertData <- function(dataType = "occur",
     invert_comms1 <- nrsa_comms1
 
   } else if(any(grepl("EPA", agency)) & any(grepl("USGS", agency))) {
-
+    cat("\r","Syncying USGS and EPA data                                     ")
     invert_comms1 <- dplyr::bind_rows(invert_comms1, nrsa_comms1)
 
   } else {}
-
+  cat("\r","Finalizing data for output                          ")
   invert_comms1 = invert_comms1 %>%
     dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
                                 ~ifelse(is.na(.x),
@@ -478,6 +484,7 @@ getInvertData <- function(dataType = "occur",
 
   ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
+  cat("\r","finsyncR data syncronization complete                          \n")
 
   return(data.frame(invert_comms1))
 
