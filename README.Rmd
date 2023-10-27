@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # finsyncR -this is where the hexsticker will go
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -35,8 +35,7 @@ library(devtools)
 
 devtools::install_github("StreamData/finsyncR",
                          auth_token = "tokenstring",
-                         build_vignette = TRUE
-                         )
+                         build_vignette = TRUE)
 ```
 
 ## Example

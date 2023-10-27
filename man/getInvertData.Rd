@@ -51,72 +51,74 @@ EPA data only.}
 }
 \value{
 A species by sample data frame with site, stream reach, and
-  sample information.
+sample information.
 }
 \description{
 Access harmonized USGS and EPA Macroinvertebrate datasets
 }
 \details{
 The function adjusts taxa abundances from samples for lab subsampling
-  ratio. As a result, duplicate taxa were combined (abundances summed)
-  following adjustments for lab subsampling.
+ratio. As a result, duplicate taxa were combined (abundances summed)
+following adjustments for lab subsampling.
 
-  \code{taxonFix} provides ways to handle changes in taxonomy across time,
-  especially in instances in which species have been reorganized into new
-  genera. \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
-  makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
-  by giving a unified genera name to all species and genera that have been linked
-  through changes in taxonomy (e.g. genera1/genera2/genera3). Note: of 98
-  problematic genera that exist throughout both datasets, \code{taxonFix = "lump"}
-  results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
-  One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
-  \code{taxonFix = "remove"} prioritizes accurate identification by dropping
-  observations from problematic genera that do not have species identification.
-  Without a species-level identification from the bench, there is no way to
-  assure correct membership in a updated genera. NOTE: "slash" genera that NRSA
-  and NAWQA roll up into family/subfamily are now being included as genera. As
-  a result, there are fewer individual genera, but this results in more data
-  being included at the genus level. When \code{taxonFix = "lump"}, these "slash"
-  genera are rolled into the larger linked genera, as above. \code{taxonFix = "remove"}
-  still prioritizes accurate identifications by dropping all obscure identifications,
-  such that ALL slash genera are dropped; this will result in much less data
-  being included in the final dataset. Finally, \code{taxonFix = "none"}, still
-  generate "slash" genera, but, it does not link these genera to larger linked
-  genera. See \code{vignette("GettingStarted")} for more information.
+\code{taxonFix} provides ways to handle changes in taxonomy across time,
+especially in instances in which species have been reorganized into new
+genera. \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
+makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
+by giving a unified genera name to all species and genera that have been linked
+through changes in taxonomy (e.g. genera1/genera2/genera3). Note: of 98
+problematic genera that exist throughout both datasets, \code{taxonFix = "lump"}
+results in 13 "lumped" genera. Most new "lumped" genera are <5 "old" genera joined.
+One "lumped" genera (within Ephemeroptera) includes 70 "old" genera.
+\code{taxonFix = "remove"} prioritizes accurate identification by dropping
+observations from problematic genera that do not have species identification.
+Without a species-level identification from the bench, there is no way to
+assure correct membership in a updated genera. NOTE: "slash" genera that NRSA
+and NAWQA roll up into family/subfamily are now being included as genera. As
+a result, there are fewer individual genera, but this results in more data
+being included at the genus level. When \code{taxonFix = "lump"}, these "slash"
+genera are rolled into the larger linked genera, as above. \code{taxonFix = "remove"}
+still prioritizes accurate identifications by dropping all obscure identifications,
+such that ALL slash genera are dropped; this will result in much less data
+being included in the final dataset. Finally, \code{taxonFix = "none"}, still
+generate "slash" genera, but, it does not link these genera to larger linked
+genera. See \code{vignette("GettingStarted")} for more information.
 
-  \code{agency} refers to agency that collected the invertebrate samples. If
-  you want to use data from both agencies, set \code{agency = c("USGS", "EPA")},
-  which is the default. For the "USGS" dataset, this includes all programs
-  with SampleMethodCodes of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and
-  "PNAMP". If \code{agency} includes "EPA", samples from the EPA National
-  Stream and River Assessment (NRSA) programs (2018-2019, 2013-2014, 2008-2009)
-  and EPA Wadeable Stream Assessment and WEMAP (2000-2004) will be included.
-  Note that by default, only moving waters classified as "wadeable" are
-  included, but setting \code{boatableStreams = TRUE} will include non-wadeable
-  streams. Some information included in the USGS dataset are not included in the EPA datasets, and vice-versa, and thus
-  will appear as "NA" values. \code{agency} can also be set to either
-  "EPA" or "USGS" individually.
+\code{agency} refers to agency that collected the invertebrate samples. If
+you want to use data from both agencies, set \code{agency = c("USGS", "EPA")},
+which is the default. For the "USGS" dataset, this includes all programs
+with SampleMethodCodes of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and
+"PNAMP". If \code{agency} includes "EPA", samples from the EPA National
+Stream and River Assessment (NRSA) programs (2018-2019, 2013-2014, 2008-2009)
+and EPA Wadeable Stream Assessment and WEMAP (2000-2004) will be included.
+Note that by default, only moving waters classified as "wadeable" are
+included, but setting \code{boatableStreams = TRUE} will include non-wadeable
+streams. Some information included in the USGS dataset are not included in the EPA datasets, and vice-versa, and thus
+will appear as "NA" values. \code{agency} can also be set to either
+"EPA" or "USGS" individually.
 
-  If \code{rarefy = TRUE}, only samples with 300+ individuals identified (raw count)
-  will be retained. Thus, ~17 \% of samples will be removed, as they have <300
-  individuals sampled. We hard coded the rarefaction threshold at 300, because
-  1) with every 50 individuals identified, ~1 genera are added to the sample
-  and 2) 82.8 \% of samples have at least 300 individuals identified. Thus,
-  lowering the threshold to 200 individuals removed ~2 genera per sample, but
-  only added an additional 7.3 \% of samples included (90.1 \% from 82.8 \%).
-  Similarly, increasing the threshold to 400 individuals added ~2 genera per
-  sample, but reduced samples to 30.3 \% of all samples. Use \code{seed = ...}
-  to get consistent output of community data. See \code{vignette("GettingStarted")}
-  for more information regarding rarefaction. NOTE: \code{rarefy = TRUE} can
-  be used when wanting occurrence data (presence/absence) OR proportional
-  data (each taxon represents a certain percent of a sample). Use
-  \code{rarefy = FALSE} when densities are the measure of interest.
+If \code{rarefy = TRUE}, only samples with 300+ individuals identified (raw count)
+will be retained. Thus, ~17 \\% of samples will be removed, as they have <300
+individuals sampled. We hard coded the rarefaction threshold at 300, because
+\enumerate{
+\item with every 50 individuals identified, ~1 genera are added to the sample
+and 2) 82.8 \\% of samples have at least 300 individuals identified. Thus,
+lowering the threshold to 200 individuals removed ~2 genera per sample, but
+only added an additional 7.3 \\% of samples included (90.1 \\% from 82.8 \\%).
+Similarly, increasing the threshold to 400 individuals added ~2 genera per
+sample, but reduced samples to 30.3 \\% of all samples. Use \code{seed = ...}
+to get consistent output of community data. See \code{vignette("GettingStarted")}
+for more information regarding rarefaction. NOTE: \code{rarefy = TRUE} can
+be used when wanting occurrence data (presence/absence) OR proportional
+data (each taxon represents a certain percent of a sample). Use
+\code{rarefy = FALSE} when densities are the measure of interest.
+}
 
-  Note: There are 81 sampling events (sampling location - collection
-  date) with replicate samples (not duplicates). We have left these replicate
-  samples in the dataset, because some replicates are different in the
-  stream habitat sampled, which may be of interest for certain ecological
-  questions.
+Note: There are 81 sampling events (sampling location - collection
+date) with replicate samples (not duplicates). We have left these replicate
+samples in the dataset, because some replicates are different in the
+stream habitat sampled, which may be of interest for certain ecological
+questions.
 }
 \examples{
 \dontrun{

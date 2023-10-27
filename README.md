@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+experimental](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -29,8 +29,7 @@ You can install the released version of `finsyncR` from
 
     devtools::install_github("StreamData/finsyncR",
                              auth_token = "tokenstring",
-                             build_vignette = TRUE
-                             )
+                             build_vignette = TRUE)
 
 ## Example
 
@@ -41,9 +40,11 @@ This is a basic example which shows you how to use one of the
 library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species")
+#>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data
 #> Joining with `by = join_by(SITE_ID, YEAR, VISIT_NO)`
 #> Joining with `by = join_by(UID, SITE_ID, VISIT_NO)`
 #> Joining with `by = join_by(SITE_ID, DATE_COL, VISIT_NO)`
+#>  Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Syncying USGS and EPA data                                      Finalizing data for output                           finsyncR data syncronization complete
 
 head(Fish)[,c(1:5,36,90,400)]
 #>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate

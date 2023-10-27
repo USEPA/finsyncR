@@ -5,8 +5,12 @@ Version: 0.1.2.0001
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
-           role = c("aut"),
+           role = c("aut", "cre"),
            email = "mahon.michael@epa.gov"),
+      person(given = "Samantha",
+           family = "Rumschlag",
+           role = c("aut"),
+           email = "rumschlag.samantha@epa.gov"),
       person(given = "Devin",
            family = "Jones",
            role = c("aut"),
@@ -17,7 +21,7 @@ Authors@R:
            email = "ebrown23@nd.edu"),
       person(given = "Terry",
            family = "Brown",
-           role = c("aut"),
+           role = c("aut", "rev"),
            email = "brown.terryn@epa.gov"),
       person(given = "Ryan",
            family = "Hill",
@@ -26,11 +30,7 @@ Authors@R:
       person(given = "Stefan",
            family = "Kunz",
            role = c("aut"),
-           email = "stkunz@uni-landau.de"),     
-      person(given = "Samantha",
-           family = "Rumschlag",
-           role = c("aut", "cre"),
-           email = "rumschlag.samantha@epa.gov")
+           email = "stkunz@uni-landau.de")
            )
 Maintainer: Michael Mahon <mahon.michael@epa.gov>
 Description:
@@ -48,6 +48,7 @@ Copyright: This software is in the public domain because it contains materials
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Roxygen: list(markdown = TRUE)
 Imports: 
     magrittr,
     dplyr (>= 1.1.0),

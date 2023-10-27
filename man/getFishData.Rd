@@ -44,51 +44,51 @@ EPA data only.}
 }
 \value{
 A taxa by sample data frame with site, stream reach, and
-  sample information.
+sample information.
 }
 \description{
 Access harmonized USGS and EPA Fish datasets
 }
 \details{
 To standardize fish abundance data, abundances are divided by minutes
-  shocked, number of seine hauls, etc. These values are then divided by the
-  stream length sampled. ~35% of the data have been removed,
-  as these samples lacked information on either stream length sampled or sampling
-  effort. Therefore, if you are interested in occurrence (pres/abs) data
-  only, then set \code{dataType = "occur" and standardize = "none"}. Thus,
-  be aware that setting \code{dataType = "occur"} will result in a larger
-  dataset with additional samples/sites than when \code{dataType = "abun"}.
+shocked, number of seine hauls, etc. These values are then divided by the
+stream length sampled. ~35\% of the data have been removed,
+as these samples lacked information on either stream length sampled or sampling
+effort. Therefore, if you are interested in occurrence (pres/abs) data
+only, then set \code{dataType = "occur" and standardize = "none"}. Thus,
+be aware that setting \code{dataType = "occur"} will result in a larger
+dataset with additional samples/sites than when \code{dataType = "abun"}.
 
-  To account for differences in efficacy between shocking, seine netting, and
-  snorkeling, we included multigear mean standardization
-  (\code{standardize = "MGMS"}) as a standardization method as an alternative
-  to catch per unit effort (\code{standardize = "CPUE"}). To calculate MGMS,
-  CPUE is calculated for each taxa within a sample. Then, mean total CPUE
-  (summation of CPUEs for all taxa at each site for each collection date) is
-  calculated for for each sampling method. Finally, each CPUE value is then
-  divided by the mean total CPUE for their respective sampling methods.
-  See the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS
-  computation.
+To account for differences in efficacy between shocking, seine netting, and
+snorkeling, we included multigear mean standardization
+(\code{standardize = "MGMS"}) as a standardization method as an alternative
+to catch per unit effort (\code{standardize = "CPUE"}). To calculate MGMS,
+CPUE is calculated for each taxa within a sample. Then, mean total CPUE
+(summation of CPUEs for all taxa at each site for each collection date) is
+calculated for for each sampling method. Finally, each CPUE value is then
+divided by the mean total CPUE for their respective sampling methods.
+See the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS
+computation.
 
-  Keep in mind that when setting \code{standardize = "CPUE"} will result in a
-  larger dataset (more rows) than \code{standardize = "MGMS"} because CPUE data
-  will have a row for each sampling method used at each time-location, whereas
-  MGMS will have only one row for each time-location because the function is
-  standardizing by sampling method in addition to standardizing by time and
-  area sampled, such that MGMS values for each taxa will be summed for
-  instances in which a site had different methods used to collect fish.
+Keep in mind that when setting \code{standardize = "CPUE"} will result in a
+larger dataset (more rows) than \code{standardize = "MGMS"} because CPUE data
+will have a row for each sampling method used at each time-location, whereas
+MGMS will have only one row for each time-location because the function is
+standardizing by sampling method in addition to standardizing by time and
+area sampled, such that MGMS values for each taxa will be summed for
+instances in which a site had different methods used to collect fish.
 
-  \code{agency} refers to the federal agency that collected the fish samples. If
-  you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
-  For the "USGS" dataset, this includes all programs that collected fish data
-  within the larger USGS database. For the "EPA"  dataset, samples from the
-  National Stream and River Assessment programs (2018-2019, 2013-2014,
-  2008-2009) will be included. Note that by default, only moving waters
-  classified as "wadeable" are included, but setting \code{boatableStreams = TRUE}
-  will include non-wadeable streams. Some information included in the USGS
-  dataset are not included in the EPA datasets, and vice-versa, and thus
-  will appear as "NA" values. \code{agency} can also be set to either
-  "EPA" or "USGS" individually.
+\code{agency} refers to the federal agency that collected the fish samples. If
+you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
+For the "USGS" dataset, this includes all programs that collected fish data
+within the larger USGS database. For the "EPA"  dataset, samples from the
+National Stream and River Assessment programs (2018-2019, 2013-2014,
+2008-2009) will be included. Note that by default, only moving waters
+classified as "wadeable" are included, but setting \code{boatableStreams = TRUE}
+will include non-wadeable streams. Some information included in the USGS
+dataset are not included in the EPA datasets, and vice-versa, and thus
+will appear as "NA" values. \code{agency} can also be set to either
+"EPA" or "USGS" individually.
 }
 \examples{
 \dontrun{
