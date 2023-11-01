@@ -2,52 +2,54 @@
 % Please edit documentation in R/getNLCDData.R
 \name{getNLCDData}
 \alias{getNLCDData}
-\title{Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site}
+\title{Match data from the National Land Cover Database to each fish and macroinvertebrate sampling site}
 \usage{
 getNLCDData(data, scale = "Cat", group = FALSE)
 }
 \arguments{
-\item{data}{Input dataset which needs to include columns for
+\item{data}{Input dataset must include columns for
 \code{"SiteNumber"} and \code{"CollectionYear"}.}
 
-\item{scale}{Scale for LULC data to be generated. Must be \code{"Cat"} for
+\item{scale}{Scale for NLCD data to be generated. Must be \code{"Cat"} for
 catchment or \code{"Ws"} for watershed. See \code{Details} below for more
 information.}
 
-\item{group}{logical. Should the land-use/land-cover data be grouped into broad
-categories? \code{TRUE} or \code{FALSE}. See \code{Details} below for more
+\item{group}{logical. Should the NLCD data be grouped into broad categories?
+\code{TRUE} or \code{FALSE}. See \code{Details} below for more
 information.}
 }
 \value{
-Function returns a site by year dataframe of NLCD land-use/land-cover
-data for either the catchment or watershed scale.
+Function returns a site by year dataframe of NLCD data for either the
+catchment or watershed scale.
 }
 \description{
-Generate NLCD Land-use/Land-cover data for each NAWQA and EPA site
+This function to match National Land Cover Database (NLCD) data to each fish
+and macroinvertebrate sampling site in both space and time by calling StreamCat.
 }
 \details{
 Land-use/land-cover data is extracted from the USGS National Land Cover
 Database (NLCD). These LULC data are available in the following years:
-2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For instances of years in the
-input data that are not exact year matches from this list, years are
-temporally matched to the closest year with LULC data (e.g. a site sampled
-in 1995 will have LULC data from 2001). Note that for samples that fall at
-the midpoint of two NLCD years (e.g. 2005), the function defaults to the
-earlier year (e.g. a site sampled in 2005 will have LULC data from 2004).
+2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For  years in the input
+data that are not exact year matches from this list, years are matched to
+the closest year with NLCD data (e.g. a site sampled in 1995 will have NLCD
+data from 2001). Note that for samples that fall at the midpoint of two NLCD
+years (e.g. 2005), the function defaults to the earlier year (e.g. a site
+sampled in 2005 will have NLCD data from 2004).
 
 Data can be extracted at the catchment (\code{"Cat"}) or watershed (\code{"Ws"})
-scales. Watershed is larger than catchment, and includes land that drains
+scales. Watershed is larger than catchment and includes land that drains
 downstream of the sampling location. Catchment only includes land that is
-upstream of the sampling location (watershed).
+upstream of the sampling location.
 
-LULC data can be grouped (\code{group = TRUE}) into five broad categories.
-These categories include "water" (grouping of all wetland and open water
-land covers), "urban" (grouping of all urban land covers), "forest" (grouping
-of deciduous, coniferous, and mixed forests), "open" (grouping of shrub,
-barren land, grassland, and hay/pasture), and "crop" (no grouping, just the
-crop landuse).
+NLCD data can be grouped (\code{group = TRUE}) into five broad categories.
+These categories include "water" (grouping of all wetland and open water land
+covers), "urban" (grouping of all urban land covers), "forest" (grouping of
+deciduous, coniferous, and mixed forests), "open" (grouping of shrub, barren
+land, grassland, and hay/pasture), and "crop" (no grouping, just the crop
+land use).
 
-Function pings StreamCat API.
+The function gathers catchment/watershed NLCD data from the StreamCat API
+(Hill et al. 2016).
 }
 \examples{
 \dontrun{
@@ -62,6 +64,12 @@ Function pings StreamCat API.
   group = FALSE)
   }
 
+}
+\references{
+Hill, Ryan A., Marc H. Weber, Scott G. Leibowitz, Anthony R. Olsen,
+and Darren J. Thornbrugh, 2016. The Stream-Catchment (StreamCat) Dataset:
+A Database of Watershed Metrics for the Conterminous United States. Journal of
+the American Water Resources Association (JAWRA) 52:120-128. DOI: 10.1111/1752-1688.12372.
 }
 \author{
 Michael Mahon, Ryan Hill, Samantha Rumschlag

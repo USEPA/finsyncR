@@ -4,11 +4,35 @@
 \name{finsyncR-package}
 \alias{finsyncR}
 \alias{finsyncR-package}
-\title{finsyncR: An R Package to Access Cleaned and Compiled USGS and EPA Stream Data}
+\title{finsyncR: An R Package to synchronize fish and invertebrate datasets from federal sources in the United States}
 \description{
-The \code{finsyncR} package provides the data and functions to generate
-site by taxa datasets for macroinvertebrates and fish samples from the EPA
-Nation Rivers and Streams Assessment and USGS Biodata repository.
+\code{finsyncR} (\strong{f}ish and \strong{in}vertebrate \strong{sync}hronizer in \strong{R}) provides
+access to, manipulates, and harmonizes national-level aquatic biomonitoring
+datasets in the United States, with a focus on fish
+and macroinvertebrates sampled in rivers and streams. The package streamlines
+the process of retrieving and working with these data, making the process of
+utilizing these data  easier for researchers. The data resources used in this
+package are from United States Environmental Protection Agency’s National
+Aquatic Resources Surveys, namely the National River and Streams Assessment,
+and United States Geological Survey’s BioData.
+
+The package provides abundance (density) and occurrence data for fish and
+macroinvertebrates at a variety of levels of taxonomic resolution. Alongside
+community matrices, important data describing sampling methods are provided,
+which are intended to be used as covariates in analyses. The package provides
+flexibility for common data management issues for temporal biologic datasets.
+Data management options include harmonization of macroinvertebrate taxonomy
+across the two federal datasets and through time and the ability to drop
+hybrid organisms altogether for fish. Samples, which often vary in the number
+of individuals within a sample, can be rarefied to a specific count.
+Additionally, fish samples can be standardized to catch per-unit effort and
+to account for catchability differences between fish sampling methods. The
+package can also match  sampling sites for fish and macroinvertebrates to
+data from the National Land Cover Database.
+
+Data from USGS BioData were obtained from Pete Ruhl (pmruhl@usgs.gov), and
+data from the National Aquatic Resource Surveys are directly downloaded by
+the package from the website: \link{https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys}.
 
 Users should cite the aforementioned datasets as follows:
 \itemize{
@@ -40,10 +64,10 @@ A compendium on the correct use of the finsyncR package and its output
 datasets can be found in the "Getting Started"
 vignette: \link{vignette("GettingStarted", package = "finsyncR")}.
 
-\strong{Of note}: The approach to data management used in this package is not the
-same as the approach used in the EPA NARS national reports. For more
-information on the data management approach used in the national
-assessments please see:
+\strong{Of note}: The approach provided in this package concerning the way the
+USEPA National Rivers and Streams Assessment data are treated is not
+necessarily the same as the approach used in the National Rivers and
+Streams Assessment national reports.
 
 \strong{Disclaimer}: The United States Environmental Protection Agency (EPA) GitHub
 project code is provided on an "as is" basis and the user assumes

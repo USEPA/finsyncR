@@ -1,7 +1,7 @@
 Package: finsyncR
 Type: Package
-Title: Synchronize fish and invertebrate data across the United States
-Version: 0.1.2.0001
+Title: An R Package to synchronize fish and invertebrate datasets from federal sources in the United States
+Version: 0.1.3.0000
 Authors@R:
     c(person(given = "Michael",
            family = "Mahon",
@@ -34,14 +34,14 @@ Authors@R:
            )
 Maintainer: Michael Mahon <mahon.michael@epa.gov>
 Description:
-    The package includes functions to access, extract, manipulate, and harmonize
-    United States federal aquatic biomonitoring data, with a focus on
-    macroinvertebrates and fish. This R package also provides functions to
-    generate site-level information that may be of use in understanding the abiotic,
-    contaminant, and land use drivers of dynamics of these biomonitoring data.
-    The package streamlines the process of retrieving and working with these
-    biomonitoring data, making it easier for researchers to utilize these
-    unparalleled resources.
+    The package includes functions that provide access to, manipulate, and harmonize
+    national-level aquatic biomonitoring datasets in the United States, with a
+    focus on fish and macroinvertebrates sampled in rivers and streams. The
+    package streamlines the process of retrieving and working with these data,
+    making the process of utilizing these data  easier for researchers. The data
+    resources used in this package are from United States Environmental Protection
+    Agency’s National Aquatic Resources Surveys, namely the National River and
+    Streams Assessment, and United States Geological Survey’s BioData. 
 License: CC0
 Copyright: This software is in the public domain because it contains materials
     that originally came from the U.S. Environmental Protection Agency.

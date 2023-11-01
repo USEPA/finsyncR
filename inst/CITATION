@@ -1,8 +1,8 @@
-citHeader("To cite StreamData in publications use:")
+citHeader("To cite finsyncR in publications use:")
 
 citEntry(
   entry = "Unpublished",
-  title = "{StreamData}: R Package to Access Harmonized USGS and EPA Aquatic Biomonitoring Datasets",
+  title = "{finsyncR}: R Package to synchronize fish and invertebrate datasets from federal sources in the United States",
   author = personList(as.person("Michael Mahon"),
                                    as.person("Devin Jones"),
                                    as.person("Ethan Brown"),
@@ -11,10 +11,10 @@ citEntry(
                                    as.person("Stefan Kunz"),
                                    as.person("Samantha Rumschlag")),
   year = "2023",
-  note        = "R package version 0.0.0.9421",
+  note        = "R package version 0.1.3",
  textVersion  =
            paste("Michael Mahon, Devin Jones, Ethan Brown, Terry Brown, Ryan Hill,",
-                 "Stefan Kunz, Samantha Rumschlag (2023). {StreamData}: R Package",
-                 "to Access Harmonized USGS and EPA Aquatic Biomonitoring Datasets.",
-                 "R package version 0.0.0.9421")
+                 "Stefan Kunz, Samantha Rumschlag (2023). {finsyncR}: R Package",
+                 "to synchronize fish and invertebrate datasets from federal",
+                 "sources in the United States. R package version 0.1.3")
 )

@@ -1,52 +1,57 @@
-#' Access harmonized USGS and EPA Fish datasets
+#' Access and harmonize fish data
 #'
-#' @param dataType Output data type, either \code{"abun"} or \code{"occur"}.
-#' @param taxonLevel Level of taxonomic resolution, must be one of:
-#'   \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
-#' @param agency The agency name(s) (e.g., "USGS" and "EPA") that should be
-#'   included in the output dataset. See \code{Details} below for more information.
-#' @param standardize Standardization method to use for calculating fish abundance matrices.
+#' @description
+#' This function generates an occurrence or abundance community matrix for
+#' fish sampled in rivers and streams.
+#'
+#' @param dataType Output data type for the community matrix, either
+#'   \code{"abun"} (abundance) or \code{"occur"} (occurrence).
+#' @param taxonLevel Level of taxonomic resolution for the community matrix.
+#'   Input must be one of: \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
+#' @param agency The agency name or names (e.g., "USGS" and "EPA") that are the
+#'   source of data for the output community matrix. See \code{Details} below for more information.
+#' @param standardize Standardization method to be used for calculating fish abundance matrices.
 #'   Default is \code{standardize = "none"}, which returns raw fish count values. Other options include
 #'   \code{standardize = "CPUE"}, which returns standardized abundances in Catch per Unit Effort.
-#'   An alternative standardization method is \code{standardize = "MGMS"}, which calculates
+#'   An alternative standardization method is \code{standardize = "MGMS"}, which uses
 #'   Multigear Mean Standardization (MGMS) values to account for catchability differences between
-#'   fish sampling methods (see 'details' and Gibson-Reinemer et al. (2014) for more info on MGMS).
+#'   fish sampling methods. See 'Details' for more information on standardizations.
 #' @param hybrids logical. Should hybrid individuals be included in the output dataset?
 #'   \code{TRUE} or \code{FALSE}.
-#' @param sharedTaxa logical. Should Genera be limited to those that appear in
-#'   both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
+#' @param sharedTaxa logical. Should taxa be limited to those organisms that
+#'   appear in both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
 #'   \code{FALSE} when only one agency is specified.
 #' @param boatableStreams logical. Should EPA boatable streams be included in the
-#'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable;
-#'   so \code{boatableStreams} should only be set to \code{TRUE} when gathering
-#'   EPA data only.
+#'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable.
+#'   It is not advisable to include boatable streams when building a dataset
+#'   including both EPA and USGS data. Boatable EPA data and wadeable USGS data
+#'   are not considered comparable.
 #'
-#' @return A taxa by sample data frame with site, stream reach, and
-#'   sample information.
+#' @return A taxa by sample data frame with site, stream reach, and sample information.
 #'
 #' @details
-#'   To standardize fish abundance data, abundances are divided by minutes
-#'   shocked, number of seine hauls, etc. These values are then divided by the
-#'   stream length sampled. ~35% of the data have been removed,
-#'   as these samples lacked information on either stream length sampled or sampling
-#'   effort. Therefore, if you are interested in occurrence (pres/abs) data
-#'   only, then set \code{dataType = "occur" and standardize = "none"}. Thus,
-#'   be aware that setting \code{dataType = "occur"} will result in a larger
+#'   To standardize fish abundance data, abundances are divided by sampling effort
+#'   (minutes shocked, number of seine hauls, minutes snorkeling), which is then
+#'   divided by the stream length sampled. INSERT EQUATION HERE. Some of the samples
+#'   lacked information on either stream length sampled or sampling effort. Therefore,
+#'   if a user is interested in occurrence (pres/abs) data only, then set
+#'   \code{dataType = "occur" and standardize = "none"}, which will provide an
+#'   occurrence dataset the samples that are otherwise dropped with standardization.
+#'   Be aware that setting \code{dataType = "occur"} will result in a larger
 #'   dataset with additional samples/sites than when \code{dataType = "abun"}.
 #'
 #'   To account for differences in efficacy between shocking, seine netting, and
-#'   snorkeling, we included multigear mean standardization
-#'   (\code{standardize = "MGMS"}) as a standardization method as an alternative
-#'   to catch per unit effort (\code{standardize = "CPUE"}). To calculate MGMS,
-#'   CPUE is calculated for each taxa within a sample. Then, mean total CPUE
-#'   (summation of CPUEs for all taxa at each site for each collection date) is
-#'   calculated for for each sampling method. Finally, each CPUE value is then
-#'   divided by the mean total CPUE for their respective sampling methods.
-#'   See the supplement of Gibson-Reinemer et al. (2014) for an example of MGMS
-#'   computation.
+#'   snorkeling, multigear mean standardization (\code{standardize = "MGMS"}) is
+#'   another standardization method provided as an alternative to catch per unit
+#'   effort (\code{standardize = "CPUE"}). To calculate MGMS, CPUE is calculated
+#'   for each taxa within a sample. Then, mean total CPUE (summation of CPUEs for
+#'   all taxa at each site for each collection date) is calculated for each
+#'   sampling method. Finally, each CPUE value is then divided by the mean total
+#'   CPUE for their respective sampling methods. See the supplement of
+#'   Gibson-Reinemer et al. (2014) for an example of MGMS computation.
 #'
-#'   Keep in mind that when setting \code{standardize = "CPUE"} will result in a
-#'   larger dataset (more rows) than \code{standardize = "MGMS"} because CPUE data
+#'   Keep in mind that when setting \code{standardize = "CPUE"} will result in
+#'   more rows in a dataset than \code{standardize = "MGMS"} because CPUE data
 #'   will have a row for each sampling method used at each time-location, whereas
 #'   MGMS will have only one row for each time-location because the function is
 #'   standardizing by sampling method in addition to standardizing by time and
@@ -54,29 +59,22 @@
 #'   instances in which a site had different methods used to collect fish.
 #'
 #'   \code{agency} refers to the federal agency that collected the fish samples. If
-#'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")}.
-#'   For the "USGS" dataset, this includes all programs that collected fish data
-#'   within the larger USGS database. For the "EPA"  dataset, samples from the
-#'   National Stream and River Assessment programs (2018-2019, 2013-2014,
-#'   2008-2009) will be included. Note that by default, only moving waters
-#'   classified as "wadeable" are included, but setting \code{boatableStreams = TRUE}
-#'   will include non-wadeable streams. Some information included in the USGS
-#'   dataset are not included in the EPA datasets, and vice-versa, and thus
-#'   will appear as "NA" values. \code{agency} can also be set to either
-#'   "EPA" or "USGS" individually.
+#'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")},
+#'   which is the default. Note that by default, only moving waters classified as
+#'   "wadeable" are included, but setting \code{boatableStreams = TRUE} will
+#'   include non-wadeable streams. Some information included in the EPA dataset
+#'   are not included in the USGS datasets, specifically observed wetted width of the stream or river.
 #'
 #' @author Michael Mahon, Ethan Brown, Samantha Rumschlag
 #'
 #' @references Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
-#' catch per unit effort data from different fish sampling gears: multigear mean standardization (MGMS).
+#' catch per unit effort data from different fish sampling gears: Multigear mean standardization (MGMS).
 #' Can. J. Fish. Aquat. Sci. 74:8-14.
 #'
 #' @examples
 #' \dontrun{
 #' Fish <- getFishData(taxonLevel = "Species")
-#'
 #' }
-#'
 #'
 #' @export
 
