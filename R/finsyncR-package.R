@@ -27,7 +27,7 @@
 #'
 #' Data from USGS BioData were obtained from Pete Ruhl (pmruhl@usgs.gov), and
 #' data from the National Aquatic Resource Surveys are directly downloaded by
-#' the package from the website: [https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys].
+#' the package from the [NARS website](https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys).
 #'
 #' Users should cite the aforementioned datasets as follows:
 #'
@@ -56,11 +56,11 @@
 #'   https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys.
 #'
 #' Metadata can be found in the "Metadata"
-#' vignette: [vignette("Metadata", package = "finsyncR")].
+#' vignette: `vignette("Metadata", package = "finsyncR")`.
 #'
 #' A compendium on the correct use of the finsyncR package and its output
 #' datasets can be found in the "Getting Started"
-#' vignette: [vignette("GettingStarted", package = "finsyncR")].
+#' vignette: `vignette("GettingStarted", package = "finsyncR")`.
 #'
 #' **Of note**: The approach provided in this package concerning the way the
 #' USEPA National Rivers and Streams Assessment data are treated is not

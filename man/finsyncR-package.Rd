@@ -32,7 +32,7 @@ data from the National Land Cover Database.
 
 Data from USGS BioData were obtained from Pete Ruhl (pmruhl@usgs.gov), and
 data from the National Aquatic Resource Surveys are directly downloaded by
-the package from the website: \link{https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys}.
+the package from the \href{https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys}{NARS website}.
 
 Users should cite the aforementioned datasets as follows:
 \itemize{
@@ -58,11 +58,11 @@ https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-reso
 }
 
 Metadata can be found in the "Metadata"
-vignette: \link{vignette("Metadata", package = "finsyncR")}.
+vignette: \code{vignette("Metadata", package = "finsyncR")}.
 
 A compendium on the correct use of the finsyncR package and its output
 datasets can be found in the "Getting Started"
-vignette: \link{vignette("GettingStarted", package = "finsyncR")}.
+vignette: \code{vignette("GettingStarted", package = "finsyncR")}.
 
 \strong{Of note}: The approach provided in this package concerning the way the
 USEPA National Rivers and Streams Assessment data are treated is not
