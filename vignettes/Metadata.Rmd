@@ -22,15 +22,15 @@ Categorical. Levels:
 
 #### ProjectLabel
 
-Description: Project short name assigned by the project owner; for USGS data this is explicitly defined by the USGS, for EPA this has been defined as the sampling round/type (e.g., NRSA0809).
+Description: Project short name assigned by the project owner. For USGS data, ProjectLabel is explicitly provided by the USGS. For EPA, ProjectLabelis the sampling round/type (e.g., NRSA0809).
 
 Categorical.
 
 #### SiteNumber
 
-Description: Unique site identifiers. For USGS data, USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected (preceeded by "USGS-"). For EPA data, for the study and year sampled. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place of SITE_ID. SITE_IDs from individual rounds of NRSA sampling (WSA/EMAP included) were linked to a site-level UNIQUE_ID, so that sites that were resampled through time could be linked. If sites could not be linked to a UNIQUE_ID, survey-specific SITE_ID is used instead.
+Description: Unique site identifiers. For USGS data, SiteNumber is USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected (preceeded by “USGS-”). For EPA data, SiteNumber is the NARS “SITE_ID” variable, with the preferred form of  NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place of SITE_ID , to link sites temporally. SITE_IDs from individual rounds of NRSA sampling (WSA/EMAP included) were linked to a site-level UNIQUE_ID, so that sites that were resampled through time could be linked. If sites could not be linked to a UNIQUE_ID, survey-specific SITE_ID is used instead.
 
-Categorical. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999.
+Categorical. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. USGS form is USGS-xxxxxxxx, where xxxxxxxx is the 8 to 15-digit USGS NWIS identifier.
 
 Note: To link EPA unique site IDs to survey-specific site IDs (e.g., to be used to link them to other NARS collected data), users can link unified site IDs to the survey-specific ID using the following code:
 
@@ -55,7 +55,7 @@ Categorical.
 
 #### CollectionDate
 
-Description: Date sample was collected (THIS NEEDS TO BE UPDATED)
+Description: Date sample was collected (YYYY-MM-DD)
 
 Date.
 
@@ -107,25 +107,25 @@ Integer.
 
 #### StreamOrder
 
-Description:
+Description: Strahler stream order. Moving waters of the first order are the outermost tributaries. If two streams of the same order merge, the resulting stream is given a number that is one higher. If two rivers with different stream orders merge, the resulting stream is given the higher of the two numbers.
 
 Integer.
 
 #### WettedWidth
 
-Description: For EPA samples only. Distance from left to right bank of the stream channel filled with water.
+Description: Provided for EPA samples only. Measured distance from left to right bank of the stream channel filled with water. Meters.
 
 Numeric.
 
 #### PredictedWettedWidth
 
-Description: Predicted distance from left to right bank of the stream channel filled with water. Gathered from StreamCat and [Doyle et al. 2023](https://doi.org/10.1111/1752-1688.13116). Available for most sites.
+Description: Predicted distance from left to right bank of the stream channel filled with water. Gathered from StreamCat and Doyle, Jessie M., Hill, Ryan A., Leibowitz, Scott G. and Ebersole, Joseph L.. 2023. \"Random forest models to estimate bankfull and low flow channel widths and depths across the conterminous United States.\" *JAWRA Journal of the American Water Resources Association* 59(5): 1099--1114. <https://doi.org/10.1111/1752-1688.13116>. Provided for most sites. Meters.
 
 Numeric.
 
 #### SampleTypeCode
 
-Description: Code indicating the type of sample collected
+Description: Code indicating the method of sample collected
 
 Categorical. Levels:
 
@@ -159,13 +159,13 @@ Numeric.
 
 #### FieldSplitRatio
 
-Description: For USGS samples only, proportion of the field collected sample that was sent to the lab for identification. See "Getting Started" vignette for more information.
+Description: For USGS samples only, proportion of the field collected sample that was sent to the lab for identification. See “Getting Started” vignette for more information.
 
 Numeric. 0-1
 
 #### LabSubsamplingRatio
 
-Description: Proportion of the lab sample that was actually identified (proportion of grids that were used to reach target identification count). See "Getting Started" vignette for more information.
+Description: Proportion of the lab sample that was actually identified (proportion of grids that were used to reach target identification count). See “Getting Started” vignette for more information.
 
 Numeric. 0-1
 
@@ -185,7 +185,7 @@ Numeric. 0-1
 
 #### FishCollection
 
-Description: Whether fish sampling was conducted, but no fish were collected. This column provides instances of true zero richness and abundance/density.
+Description: Whether fish sampling was conducted at a site, but no fish were collected. This column provides instances of true zero richness and abundance/density.
 
 Categorical. Levels:
 
@@ -194,13 +194,13 @@ Categorical. Levels:
 
 #### ReachLengthFished_m
 
-Description: Length of stream covered by fishing activities conducted for this sample. Typically this will be equal to the curvilinear reach length of the assigned study reach.
+Description: Length of stream covered by fishing activities conducted for this sample. ReachLengthFished_m is equal to the curvilinear reach length of the assigned study reach.
 
 Numeric.
 
 #### SampleMethod
 
-Description: All electrofishing (boats, backpack, etc.) is classified as "Shocking". All netting has been classified as "Seine". Snorkel samples have been classified as "Snorkel".
+Description: Method of sample collection for fish. All electrofishing (boats, backpack, etc.) is classified as "Shocking". All netting has been classified as "Seine". Snorkel samples have been classified as "Snorkel".
 
 Categorical. Levels:
 
@@ -210,6 +210,12 @@ Categorical. Levels:
 
 #### MethodEffort
 
-Description: The sampling effort given for each sample (these are summed across rounds if multiple rounds of a single sampling method occurred for a given sampling event). Units are minutes for electroshocking, number of hauls for seine netting, and minutes for snorkel samples.
+Description: The sampling effort for each sample (values summed across rounds if multiple rounds of a single sampling method occurred for a given sampling event).
 
 Numeric.
+
+#### MethodEffort_units
+
+Description: The units for sampling effort for each sample. Units are minutes for electroshocking, number of hauls for seine netting, and number of transects for snorkel samples.
+
+Categorical.

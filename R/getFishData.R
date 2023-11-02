@@ -266,6 +266,12 @@ getFishData <- function(dataType = "occur",
     dplyr::rename("SampleMethod" = "MethodBasic") %>%
     dplyr::rename("MethodEffort" = "StandardMethod") %>%
     dplyr::select(any_of(.finalcovarorder), tidyselect::contains("tax_")) %>%
+    dplyr::mutate(MethodEffort_units = ifelse(SampleMethod == "Shocking",
+                                              "Minutes",
+                                              ifelse(SampleMethod == "Seine",
+                                                     "Number of Hauls",
+                                              "Number of transects"))) %>%
+    dplyr::relocate("MethodEffort_units", .after = "MethodEffort") %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col()) %>%
     dplyr::select(-any_of(c(names(which((colSums(full_fish %>% dplyr::select(tidyselect::contains("tax_")), na.rm = T)) == 0)))))
 
