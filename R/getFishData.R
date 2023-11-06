@@ -31,8 +31,10 @@
 #'
 #' @details
 #'   To standardize fish abundance data, abundances are divided by sampling effort
-#'   (minutes shocked, number of seine hauls, minutes snorkeling), which is then
-#'   divided by the stream length sampled. INSERT EQUATION HERE. Some of the samples
+#'   (minutes shocked, number of seine hauls, number of snorkeling transects), which is then
+#'   divided by the stream length sampled.
+#'    \deqn{CPUE = taxa~abundance / sampling~effort / stream~length~fished~(m)}
+#'   Some of the samples
 #'   lacked information on either stream length sampled or sampling effort. Therefore,
 #'   if a user is interested in occurrence (pres/abs) data only, then set
 #'   \code{dataType = "occur" and standardize = "none"}, which will provide an
