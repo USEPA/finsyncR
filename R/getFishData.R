@@ -30,10 +30,10 @@
 #' @return A taxa by sample data frame with site, stream reach, and sample information.
 #'
 #' @details
-#'   To standardize fish abundance data, abundances are divided by sampling effort
-#'   (minutes shocked, number of seine hauls, number of snorkeling transects), which is then
-#'   divided by the stream length sampled.
-#'    \deqn{CPUE = taxa~abundance / sampling~effort / stream~length~fished~(m)}
+#'   To standardize fish abundance data, abundances are divided by the product of
+#'    sampling effort (minutes shocked, number of seine hauls, number of
+#'    snorkeling transects) and stream length sampled.
+#'    \deqn{CPUE = \frac{taxa~abundance}{(sampling~effort~*~stream~length~fished~(m))}}
 #'   Some of the samples
 #'   lacked information on either stream length sampled or sampling effort. Therefore,
 #'   if a user is interested in occurrence (pres/abs) data only, then set
@@ -45,20 +45,24 @@
 #'   To account for differences in efficacy between shocking, seine netting, and
 #'   snorkeling, multigear mean standardization (\code{standardize = "MGMS"}) is
 #'   another standardization method provided as an alternative to catch per unit
-#'   effort (\code{standardize = "CPUE"}). To calculate MGMS, CPUE is calculated
-#'   for each taxa within a sample. Then, mean total CPUE (summation of CPUEs for
-#'   all taxa at each site for each collection date) is calculated for each
-#'   sampling method. Finally, each CPUE value is then divided by the mean total
-#'   CPUE for their respective sampling methods. See the supplement of
-#'   Gibson-Reinemer et al. (2014) for an example of MGMS computation.
-#'
-#'   Keep in mind that when setting \code{standardize = "CPUE"} will result in
-#'   more rows in a dataset than \code{standardize = "MGMS"} because CPUE data
-#'   will have a row for each sampling method used at each time-location, whereas
-#'   MGMS will have only one row for each time-location because the function is
-#'   standardizing by sampling method in addition to standardizing by time and
-#'   area sampled, such that MGMS values for each taxa will be summed for
-#'   instances in which a site had different methods used to collect fish.
+#'   effort (\code{standardize = "CPUE"}). When (\code{standardize = "MGMS"}), individual
+#'   taxa abundances are standardized as above in `CPUE`. Then, the total catch (TC)
+#'   of all *i* taxa in each sample *j* is standardized by the product of
+#'   sampling effort (minutes shocked, number of seine hauls, number of
+#'   snorkeling transects) and stream length sampled:
+#'   \eqn{TCPUE = \frac{TC_j}{(sampling~effort~*~stream~length~fished~(m))}}.
+#'   For each gear type (e.g., electroshock, seine net, snorkel), the mean TCPUE
+#'   is calculated, \eqn{\overline{TCPUE}}. Next, to standardize
+#'   each gear, CPUE for each taxa *i* is divided by \eqn{\overline{TCPUE}}.
+#'   \deqn{MSC_{ij} = \frac{CPUE_{ij}}{\overline{TCPUE}}} \eqn{MSC_{ij}} is the mean standardized
+#'   catch of species *i* in observation *j*. The units of sampling effort are
+#'   cancelled out in the calculation of \eqn{MSC_{ij}}, but patterns of relative abundance
+#'   of species within and across observations are preserved. The function then
+#'   sums the \eqn{MSC_{ij}} among gear types, resulting in a single row of data for
+#'   each sampling event, regardless of the number of gear types used, such that
+#'   setting \code{standardize = "CPUE"} will result in more rows within the output
+#'    dataset than \code{standardize = "MGMS"}. See Gibson-Reinemer et al. (2017)
+#'    for more information regarding the computation of MGMS.
 #'
 #'   \code{agency} refers to the federal agency that collected the fish samples. If
 #'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")},
@@ -227,7 +231,7 @@ getFishData <- function(dataType = "occur",
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
 
   } else if(any(grepl("EPA", agency)) & any(grepl("USGS", agency))) {
-    cat("\r","Syncying USGS and EPA data                                     ")
+    cat("\r","Harmonizing USGS and EPA data                                     ")
     full_fish <- bind_rows(fish_comm2 %>%
                              mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
                                     # StandardMethod = as.character(StandardMethod),
@@ -314,7 +318,7 @@ getFishData <- function(dataType = "occur",
   } else {}
 
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
-  cat("\r","finsyncR data syncronization complete                          \n")
+  cat("\r","finsyncR data synchronization complete                          \n")
   return(data.frame(full_fish))
 
 }

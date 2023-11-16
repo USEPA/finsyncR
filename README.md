@@ -10,17 +10,18 @@ experimental](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://
 [![R-CMD-check](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of finsyncR is to provide easy access and automated data
-management to USGS and EPA stream BioData, pesticide county use
-estimates, and measured water quality data.
+`finsyncR` (**f**ish and **in**vertebrate **sync**hronizer in **R**) is
+a data management package that integrates and processes national-level
+aquatic biomonitoring datasets in the U.S., with a focus on fish and
+macroinvertebrates sampled in rivers and streams. The package
+streamlines the process of retrieving and harmonizing these data,
+improving access to cleaned data and making the application these data
+straightforward for researchers. The sources of data for this package
+are the United States Environmental Protection Agency’s (USEPA) National
+Aquatic Resource Surveys (NARS), namely the National River and Streams
+Assessment (NRSA), and United States Geological Survey’s (USGS) BioData.
 
 ## Installation
-
-Note: because this package is held within a private repository on
-GitHub, you will need to use the `auth_token` argument within
-`install_github()`. Generate a personal access token (PAT) in
-<https://github.com/settings/tokens> and supply the provided code to
-this argument.
 
 You can install the released version of `finsyncR` from
 [GitHub](https://github.com/StreamData/finsyncR) with:
@@ -28,18 +29,18 @@ You can install the released version of `finsyncR` from
     library(devtools)
 
     devtools::install_github("StreamData/finsyncR",
-                             auth_token = "tokenstring",
                              build_vignette = TRUE)
 
-## Example
+## Example of function and output
 
-This is a basic example which shows you how to use one of the
-*getBioData* set of functions to access the fish dataset.
+This is a basic example which shows you how to use the `getFishData()`
+function to generate the fish dataset for both USGS and USEPA datasets.
 
 ``` r
 library(finsyncR)
 
-Fish <- getFishData(taxonLevel = "Species")
+Fish <- getFishData(taxonLevel = "Species",
+                    agency = c("USGS","EPA"))
 #>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data
 #> Joining with `by = join_by(SITE_ID, YEAR, VISIT_NO)`
 #> Joining with `by = join_by(UID, SITE_ID, VISIT_NO)`

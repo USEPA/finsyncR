@@ -1369,23 +1369,23 @@ acquireData <- function(taxa,
 
       ##Need UID, SITE_ID, DATE_COL, VISIT_NO, STATE, LOC_NAME, LAT_DD, LON_DD, MASTER_SITEID
 
-      NRSA_0809_s <- NRSA_0809_sites %>%
+      suppressMessages({NRSA_0809_s <- NRSA_0809_sites %>%
         dplyr::left_join(hab0809) %>%
         dplyr::select(UID, SITE_ID, MASTER_SITEID, DATE_COL, VISIT_NO, STATE, LOC_NAME, LAT_DD83, LON_DD83, XWIDTH) %>%
-        mutate(DATE_COL = as.Date(DATE_COL, "%d-%B-%y"))
+        mutate(DATE_COL = as.Date(DATE_COL, "%d-%B-%y"))})
 
-      NRSA_1314_s <- NRSA_1314_sites %>%
+      suppressMessages({NRSA_1314_s <- NRSA_1314_sites %>%
         dplyr::left_join(hab1314) %>%
         dplyr::select(UID, SITE_ID, DATE_COL, VISIT_NO, BOAT_WADE, NARS_NAME, LAT_DD83, LON_DD83, XWIDTH) %>%
-        mutate(DATE_COL = as.Date(DATE_COL, "%m/%d/%Y"))
+        mutate(DATE_COL = as.Date(DATE_COL, "%m/%d/%Y"))})
 
-      NRSA_1819_s <- NRSA_1819_sites %>%
+      suppressMessages({NRSA_1819_s <- NRSA_1819_sites %>%
         dplyr::left_join(hab1819) %>%
         dplyr::select(UID, SITE_ID, DATE_COL, VISIT_NO, UNIQUE_ID, NARS_NAME, LAT_DD83, LON_DD83, XWIDTH) %>%
         mutate(VISIT_NO = as.numeric(ifelse(VISIT_NO == "R",
                                             2,
                                             VISIT_NO)))%>%
-        mutate(DATE_COL = as.Date(DATE_COL, "%m/%d/%Y"))
+        mutate(DATE_COL = as.Date(DATE_COL, "%m/%d/%Y"))})
 
       NRSA_fish_sites <- bind_rows(NRSA_0809_s, NRSA_1314_s, NRSA_1819_s) %>%
         relocate(UNIQUE_ID, .after = SITE_ID) %>%

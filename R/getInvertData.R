@@ -463,7 +463,7 @@ getInvertData <- function(dataType = "occur",
     invert_comms1 <- nrsa_comms1
 
   } else if(any(grepl("EPA", agency)) & any(grepl("USGS", agency))) {
-    cat("\r","Syncying USGS and EPA data                                     ")
+    cat("\r","Harmonizing USGS and EPA data                                     ")
     invert_comms1 <- dplyr::bind_rows(invert_comms1, nrsa_comms1)
 
   } else {}
@@ -499,7 +499,7 @@ getInvertData <- function(dataType = "occur",
 
   ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
-  cat("\r","finsyncR data syncronization complete                          \n")
+  cat("\r","finsyncR data synchronization complete                          \n")
 
   return(data.frame(invert_comms1))
 
