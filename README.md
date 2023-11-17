@@ -41,11 +41,7 @@ library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species",
                     agency = c("USGS","EPA"))
-#>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data
-#> Joining with `by = join_by(SITE_ID, YEAR, VISIT_NO)`
-#> Joining with `by = join_by(UID, SITE_ID, VISIT_NO)`
-#> Joining with `by = join_by(SITE_ID, DATE_COL, VISIT_NO)`
-#>  Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Syncying USGS and EPA data                                      Finalizing data for output                           finsyncR data syncronization complete
+#>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Harmonizing USGS and EPA data                                      Finalizing data for output                           finsyncR data synchronization complete
 
 head(Fish)[,c(1:5,36,90,400)]
 #>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate
@@ -55,13 +51,13 @@ head(Fish)[,c(1:5,36,90,400)]
 #> 4   USGS     MMSD Eco USGS-04087088 04087088-A-MMSD Eco     2007-09-04
 #> 5   USGS     MMSD Eco USGS-04087119 04087119-A-MMSD Eco     2007-09-12
 #> 6   USGS     MMSD Eco USGS-04087204 04087204-A-MMSD Eco     2007-09-07
-#>   Cyprinus.carpio Cyprinella.galactura Oreochromis.aureus
-#> 1               0                    0                  0
-#> 2               0                    0                  0
-#> 3               0                    0                  0
-#> 4               0                    0                  0
-#> 5               0                    0                  0
-#> 6               0                    0                  0
+#>   Ameiurus.melas Clinostomus.funduloides Strongylura.marina
+#> 1              0                       0                  0
+#> 2              0                       0                  0
+#> 3              0                       0                  0
+#> 4              0                       0                  0
+#> 5              0                       0                  0
+#> 6              0                       0                  0
 ```
 
 ## Metadata
@@ -74,6 +70,12 @@ Metadata can be found in the “Metadata” vignette:
 A compendium on the correct use of the finsyncR package and its output
 datasets can be found in the “Getting Started” vignette:
 `vignette("GettingStarted", package = "finsyncR")`.
+
+## Contributing to finsyncR
+
+For information on how to contribute to the `finsyncR` package, please
+see the [contributing to finsyncR
+document](https://github.com/StreamData/finsyncR/blob/main/CONTRIBUTING.md).
 
 ## Open-Source Code Policy
 

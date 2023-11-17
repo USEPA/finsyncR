@@ -54,6 +54,8 @@ Metadata can be found in the "Metadata" vignette: `vignette("Metadata", package 
 ## Using finsyncR
 A compendium on the correct use of the finsyncR package and its output datasets can be found in the "Getting Started" vignette: `vignette("GettingStarted", package = "finsyncR")`.
 
+## Contributing to finsyncR
+For information on how to contribute to the `finsyncR` package, please see the [contributing to finsyncR document](https://github.com/StreamData/finsyncR/blob/main/CONTRIBUTING.md).
 
 ## Open-Source Code Policy
 
