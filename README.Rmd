@@ -17,20 +17,20 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/USEPA/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `finsyncR` (**f**ish and **in**vertebrate **sync**hronizer in **R**) is a data management package that integrates and processes national-level aquatic biomonitoring datasets in the U.S., with a focus on fish and macroinvertebrates sampled in rivers and streams. The package streamlines the process of retrieving and harmonizing these data, improving access to cleaned data and making the application these data straightforward for researchers. The sources of data for this package are the United States Environmental Protection Agency’s (USEPA) National Aquatic Resource Surveys (NARS), namely the National River and Streams Assessment (NRSA), and United States Geological Survey’s (USGS) BioData. 
 
 
 ## Installation
-You can install the released version of `finsyncR` from [GitHub](https://github.com/StreamData/finsyncR) with:
+You can install the released version of `finsyncR` from [GitHub](https://github.com/USEPA/finsyncR) with:
 
 
 ```
 library(devtools)
 
-devtools::install_github("StreamData/finsyncR",
+devtools::install_github("USEPA/finsyncR",
                          build_vignette = TRUE)
 ```
 
@@ -55,7 +55,7 @@ Metadata can be found in the "Metadata" vignette: `vignette("Metadata", package 
 A compendium on the correct use of the finsyncR package and its output datasets can be found in the "Getting Started" vignette: `vignette("GettingStarted", package = "finsyncR")`.
 
 ## Contributing to finsyncR
-For information on how to contribute to the `finsyncR` package, please see the [contributing to finsyncR document](https://github.com/StreamData/finsyncR/blob/main/CONTRIBUTING.md).
+For information on how to contribute to the `finsyncR` package, please see the [contributing to finsyncR document](https://github.com/USEPA/finsyncR/blob/main/CONTRIBUTING.md).
 
 ## Open-Source Code Policy
 

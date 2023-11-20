@@ -71,7 +71,7 @@
 #'   include non-wadeable streams. Some information included in the EPA dataset
 #'   are not included in the USGS datasets, specifically observed wetted width of the stream or river.
 #'
-#' @author Michael Mahon, Ethan Brown, Samantha Rumschlag
+#' @author Michael Mahon, Ethan Brown, Samantha Rumschlag, Terry Brown
 #'
 #' @references Gibson-Reinemer DK, Ickes BS, Chick JH, 2014. Development and assessment of a new method for combining
 #' catch per unit effort data from different fish sampling gears: Multigear mean standardization (MGMS).

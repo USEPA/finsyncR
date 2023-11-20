@@ -82,7 +82,7 @@
 #'   \code{rarefy = FALSE} when densities are the measure of interest.
 #'
 #'   When dataType = “abun”, the function calculates taxa densities from samples
-#'   using lab subsampling ratios and area sampled \deqn{Taxa~abundance = n * Subsampling~Ratio}
+#'   using lab subsampling ratios and area sampled \deqn{Taxa~abundance = n*\frqc{1}{Subsampling~Ratio}}
 #'   where *n* is the number of specimens identified and *Subsampling Ratio* is the
 #'   proportion of the sample that was identified at the lab bench. For
 #'   the USGS dataset, this incorporates both "field split ratio" (proportion of
@@ -90,7 +90,7 @@
 #'   the "lab subsampling ratio" (proportion of grids used to identify invertebrates
 #'   at the lab bench). For the EPA datasets, this is just the "lab subsampling ratio", the
 #'   proportion of grids used to identify invertebrates at the lab bench. Then,
-#'   \deqn{Taxa~density = Taxa~abundance / Area~sampled~(m^2)} where taxa abundance
+#'   \deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}} where taxa abundance
 #'   is simply divided by area sampled to estimate density. See
 #'   \code{vignette("GettingStarted")} for more details on the calculation of
 #'   taxa densities.
@@ -104,7 +104,7 @@
 #'   `data %>% group_by(Site_Number, CollectionDayOfYear) %>% slice(1)` to retain
 #'   only one replicate from each sampling event from the dataset.
 #'
-#' @author Michael Mahon, Devin Jones, Samantha Rumschlag
+#' @author Michael Mahon, Devin Jones, Samantha Rumschlag, Terry Brown
 #'
 #' @examples
 #' \dontrun{

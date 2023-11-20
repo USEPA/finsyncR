@@ -4,13 +4,13 @@
 
 First of all, thanks for considering contributing to finsyncR!
 
-finsyncR is an open source project, maintained by people who care. We are not directly funded to do so.
+finsyncR is an open source project, maintained by people who care.
 
-[repo]: https://github.com/our_org/finsyncR
-[issues]: https://github.com/our_org/finsyncR/issues
-[new_issue]: https://github.com/our_org/finsyncR/issues/new
+[repo]: https://github.com/USEPA/finsyncR
+[issues]: https://github.com/USEPA/finsyncR/issues
+[new_issue]: https://github.com/USEPA/finsyncR/issues/new
 [email]: mailto:mahon.michael@epa.gov
-[citation]: https://github.com/StreamData/finsyncR/blob/main/inst/CITATION
+[citation]: https://github.com/USEPA/finsyncR/blob/main/inst/CITATION
 ## How you can contribute
 
 There are several ways you can contribute to this project. If you want to know more about why and how to contribute to open source projects like this one, see this [Open Source Guide](https://opensource.guide/how-to-contribute/).

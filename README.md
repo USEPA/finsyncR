@@ -7,7 +7,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/USEPA/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `finsyncR` (**f**ish and **in**vertebrate **sync**hronizer in **R**) is
@@ -24,11 +24,11 @@ Assessment (NRSA), and United States Geological Survey’s (USGS) BioData.
 ## Installation
 
 You can install the released version of `finsyncR` from
-[GitHub](https://github.com/StreamData/finsyncR) with:
+[GitHub](https://github.com/USEPA/finsyncR) with:
 
     library(devtools)
 
-    devtools::install_github("StreamData/finsyncR",
+    devtools::install_github("USEPA/finsyncR",
                              build_vignette = TRUE)
 
 ## Example of function and output
@@ -75,7 +75,7 @@ datasets can be found in the “Getting Started” vignette:
 
 For information on how to contribute to the `finsyncR` package, please
 see the [contributing to finsyncR
-document](https://github.com/StreamData/finsyncR/blob/main/CONTRIBUTING.md).
+document](https://github.com/USEPA/finsyncR/blob/main/CONTRIBUTING.md).
 
 ## Open-Source Code Policy
 
