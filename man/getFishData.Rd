@@ -105,5 +105,5 @@ catch per unit effort data from different fish sampling gears: Multigear mean st
 Can. J. Fish. Aquat. Sci. 74:8-14.
 }
 \author{
-Michael Mahon, Ethan Brown, Samantha Rumschlag
+Michael Mahon, Ethan Brown, Samantha Rumschlag, Terry Brown
 }

@@ -108,7 +108,7 @@ data (each taxon represents a certain proportion of a sample). Use
 \code{rarefy = FALSE} when densities are the measure of interest.
 
 When dataType = “abun”, the function calculates taxa densities from samples
-using lab subsampling ratios and area sampled \deqn{Taxa~abundance = n * Subsampling~Ratio}
+using lab subsampling ratios and area sampled \deqn{Taxa~abundance = n*\frqc{1}{Subsampling~Ratio}}
 where \emph{n} is the number of specimens identified and \emph{Subsampling Ratio} is the
 proportion of the sample that was identified at the lab bench. For
 the USGS dataset, this incorporates both "field split ratio" (proportion of
@@ -116,7 +116,7 @@ the sample that was brought into the lab for specimen identification) and
 the "lab subsampling ratio" (proportion of grids used to identify invertebrates
 at the lab bench). For the EPA datasets, this is just the "lab subsampling ratio", the
 proportion of grids used to identify invertebrates at the lab bench. Then,
-\deqn{Taxa~density = Taxa~abundance / Area~sampled~(m^2)} where taxa abundance
+\deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}} where taxa abundance
 is simply divided by area sampled to estimate density. See
 \code{vignette("GettingStarted")} for more details on the calculation of
 taxa densities.
@@ -141,5 +141,5 @@ RarefyInverts <- getInvertData(taxonLevel = "Genus",
 
 }
 \author{
-Michael Mahon, Devin Jones, Samantha Rumschlag
+Michael Mahon, Devin Jones, Samantha Rumschlag, Terry Brown
 }

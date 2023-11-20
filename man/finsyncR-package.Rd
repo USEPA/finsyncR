@@ -80,6 +80,13 @@ or favoring by EPA. The EPA seal and logo shall not be used in any manner to
 imply endorsement of any commercial product or activity by EPA or the United
 States Government.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://didactic-carnival-mz54op5.pages.github.io/}
+}
+
+}
 \author{
 \strong{Maintainer}: Michael Mahon \email{mahon.michael@epa.gov}
 

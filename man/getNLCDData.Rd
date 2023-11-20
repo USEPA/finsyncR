@@ -29,7 +29,7 @@ and macroinvertebrate sampling site in both space and time by calling StreamCat.
 \details{
 Land-use/land-cover data is extracted from the USGS National Land Cover
 Database (NLCD). These LULC data are available in the following years:
-2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For  years in the input
+2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For years in the input
 data that are not exact year matches from this list, years are matched to
 the closest year with NLCD data (e.g. a site sampled in 1995 will have NLCD
 data from 2001). Note that for samples that fall at the midpoint of two NLCD
@@ -72,5 +72,5 @@ A Database of Watershed Metrics for the Conterminous United States. Journal of
 the American Water Resources Association (JAWRA) 52:120-128. DOI: 10.1111/1752-1688.12372.
 }
 \author{
-Michael Mahon, Ryan Hill, Samantha Rumschlag
+Michael Mahon, Ryan Hill, Samantha Rumschlag, Terry Brown
 }

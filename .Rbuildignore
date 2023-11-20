@@ -9,3 +9,6 @@
 ^R/ToDo\.R$
 ^data-raw$
 [.]docx$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
