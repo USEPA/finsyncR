@@ -7,7 +7,7 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://github.com/USEPA/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/StreamData/finsyncR/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/USEPA/finsyncR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/USEPA/finsyncR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `finsyncR` (**f**ish and **in**vertebrate **sync**hronizer in **R**) is
