@@ -216,7 +216,7 @@ getFishData <- function(dataType = "occur",
 
   if(all(grepl("EPA", agency))) {
 
-    full_fish <- NRSA_FISH_comm %>%
+    full_fish <- NRSA_FISH_comm2 %>%
       mutate(Agency = "EPA") %>%
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
 

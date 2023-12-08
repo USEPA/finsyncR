@@ -1177,13 +1177,19 @@ acquireData <- function(taxa,
                                                     by = "SIDNO"), samplemethod, by = "SIDNO_MethodCode")
 
       fish_info = fish_info %>%
-        mutate(FISH_PROTOCOL = ifelse(grepl("Boat", MethodCode),
+        group_by(SIDNO) %>%
+        mutate(clipper = paste(MethodCode, collapse = "_")) %>%
+        ungroup() %>%
+        mutate(FISH_PROTOCOL = ifelse(grepl("Boat|Beach|Snorkel|Additional|Gill",clipper) & !grepl("Tow|Back",clipper),
                                       "BOATABLE",
-                                      ifelse(ReachLengthFished_m / 20 < 12.5,
-                                             "SM_WADEABLE",
-                                             ifelse(ReachLengthFished_m / 20 < 25.1,
+                                      ifelse(clipper == "BeachSiene",
+                                             "BOATABLE",
+                                             ifelse(grepl("Tow",clipper),
                                                     "LG_WADEABLE",
-                                                    "BOATABLE"))))
+                                                    ifelse(grepl("Back|NRSA",clipper),
+                                                           "SM_WADEABLE",
+                                                           "SM_WADEABLE"))))) %>%
+        dplyr::select(-clipper)
 
     return(data.frame(fish_info))
 
@@ -1442,24 +1448,33 @@ acquireData <- function(taxa,
                     ungroup() %>%
                     dplyr::select(-DATE_COL, -VISIT_NO),
                   by = "UID") %>%
-        mutate(FISH_PROTOCOL = ifelse(MethodBasic == "Shocking" & FISH_PROTOCOL == "WADEABLE",
-                                      ifelse(is.na(ELECTROFISH) | ELECTROFISH == "",
-                                             ifelse(RCH_LENGTH > 499,
-                                                    "LG_WADEABLE",
-                                                    "SM_WADEABLE"),
-                                             ifelse(ELECTROFISH %in% c("BANK/TOW", "BOAT", "RAFT"),
-                                                    "LG_WADEABLE",
-                                                    "SM_WADEABLE")),
-                                      ifelse(MethodBasic == "Seine" & FISH_PROTOCOL == "WADEABLE",
-                                             ifelse(RCH_LENGTH > 499,
-                                                    "LG_WADEABLE",
-                                                    "SM_WADEABLE"),
-                                             FISH_PROTOCOL)),
+        mutate(FISH_PROTOCOL2 = ifelse(FISH_PROTOCOL %in% c("BOATABLE",
+                                                           "LG_NONWADEABLE",
+                                                           "SM_NONWADEABLE"),
+                                      "BOATABLE",
+                                      ifelse(FISH_PROTOCOL == "WADEABLE" & XWIDTH >= 25,
+                                             "LG_WADEABLE",
+                                             ifelse(FISH_PROTOCOL %in% "WADEABLE" & XWIDTH < 25,
+                                                    "SM_WADEABLE",
+                                                    ifelse(FISH_PROTOCOL %in% c("",NA) & XWIDTH < 12.5,
+                                                           "SM_WADEABLE",
+                                                           ifelse(FISH_PROTOCOL == "" & XWIDTH <= 25,
+                                                                  "LG_WADEABLE",
+                                                                  ifelse(FISH_PROTOCOL == "" & XWIDTH > 25,
+                                                                         "BOATABLE",
+                                                                         FISH_PROTOCOL)))))),
+               FISH_PROTOCOL2 = ifelse(is.na(FISH_PROTOCOL2),
+                                       FISH_PROTOCOL,
+                                       FISH_PROTOCOL2),
+               FISH_PROTOCOL2 = ifelse(FISH_PROTOCOL2 == "WADEABLE",
+                                       "SM_WADEABLE",
+                                       FISH_PROTOCOL2),
+               FISH_PROTOCOL = FISH_PROTOCOL2,
                StandardMethod = ifelse(MethodBasic == "Seine",
                                        NumberSeineHauls,
                                        MinutesShockTime)
         ) %>%
-        dplyr::select(-BOAT_WADE)
+        dplyr::select(-BOAT_WADE,-FISH_PROTOCOL2)
 
 
       ##Add no fish collected rows
