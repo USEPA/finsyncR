@@ -85,7 +85,7 @@ getNLCDData <- function(data, scale = "Cat", group = FALSE){
   nlcd_mets = paste(paste(rep(nlcd, each = length(years)), years, sep = ""), collapse = ",")
 
   ##attach COMIDs to site-numbers
-  data = suppressMessages(dplyr::left_join(data, (.allsitesCOMID[,-c(3,4)] %>% dplyr::filter(SiteNumber %in% data$SiteNumber))))
+  data = suppressMessages(dplyr::left_join(data, (.allsitesCOMID[,-c(3,4,5)] %>% dplyr::filter(SiteNumber %in% data$SiteNumber))))
 
   comid = paste(data$COMID, collapse = ",")
 
