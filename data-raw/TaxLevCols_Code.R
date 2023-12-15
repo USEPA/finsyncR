@@ -370,8 +370,19 @@ sysdata_filenames <- load("R/sysdata.rda")
   "Fundulus stellifera", "Fundulus stellifer",
   "Chaenobryttus gulosus", "Lepomis gulosus",
   "Hybopsis dorsalis", "Notropis dorsalis",
-  "Oncorhynchus mykiss gairdneri", "Oncorhynchus mykiss"
-)
+  "Oncorhynchus mykiss gairdneri", "Oncorhynchus mykiss",
+  "Aequidens portalegrensis", "Cichlasoma portalegrensis",
+  "Herichthys cyanoguttatum",	"Herichthys cyanoguttatus",
+  "Lethenteron japonicum",	"Lethenteron camtschaticum",
+  "Tilapia zillii",	"Coptodon zillii",
+  "Phoxinus cumberlandensis",	"Chrosomus cumberlandensis",
+  "Phoxinus eos",	"Chrosomus eos",
+  "Phoxinus erythrogaster",	"Chrosomus erythrogaster",
+  "Phoxinus neogaeus",	"Chrosomus neogaeus",
+  "Phoxinus oreas",	"Chrosomus oreas",
+  "Phoxinus tennesseensis",	"Chrosomus tennesseensis"  )
+
+.fishtaxlu$NewGenus <- gsub(" .*$","",.fishtaxlu$New)
 
 .finalcovarorder <-
   c("Agency",
@@ -389,6 +400,7 @@ sysdata_filenames <- load("R/sysdata.rda")
     "StreamOrder",
     "WettedWidth",
     "PredictedWettedWidth_m",
+    "NARS_Ecoregion",
     "SampleTypeCode",
         ##inverts
     "AreaSampTot_m2",
@@ -405,8 +417,7 @@ sysdata_filenames <- load("R/sysdata.rda")
 
 # .allsitesCOMID = read.csv("C:/Users/mmahon/OneDrive - Environmental Protection Agency (EPA)/Profile/Documents/Research/USGS Stream Macros/allsitesCOMID.csv")
 
-
-
+.slashgen_fin <- c(.slashgen_fin, "Arctopelopia/Conchapelopia/Hayesomyia/Helopelopia/Meropelopia/Rheopelopia/Telopelopia/Thienemannimyia")
 
 sysdata_filenames <- load("R/sysdata.rda")
 save(list = c(sysdata_filenames[-16], ".finalcovarorder"), file = "R/sysdata.rda",

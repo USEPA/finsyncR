@@ -1514,9 +1514,7 @@ invertTaxFix <- function(dataset,
   #create variable TaxonFix = none, lump, remove
   #none = no change, lump = lump genera through time, remove = remove observation only if spp. level ID does not exist
   ##Generate a list of those individual genera that make up the slash genera
-  slashedgen <- unique(c(sub("\\/.*", "", .slashgen_fin),
-                         sub(".*\\/", "", .slashgen_fin),
-                         "Neocloeon"))
+  slashedgen <- unique(unlist(strsplit(.slashgen_fin,"/")))
 
   cnt = c()
   hldr = c()
@@ -1531,20 +1529,29 @@ invertTaxFix <- function(dataset,
   dat1 = data.frame(Genus = gns,
                     Slash = .slashgen_fin[cnt])
 
+
   ##Fix a naming issue. Needs to include "Glyptotendipes"
   dat1$Slash[grep("Chironomus/Einfeldia", dat1$Slash)] <- "Chironomus/Einfeldia/Glyptotendipes"
+
+  dat1F <- dat1 %>%
+    group_by(Genus) %>%
+    slice(1) %>%
+    ungroup()
+  ##dat1 should NOT be combined with the cluster labels like this; instead it should be a separate step
+  dat1L <- dat1
+
 
   ##From the genus to slash dataset from above, remove all of those that do not
   ## appear in the clust_labels dataset
   ##First, match the group information based on the genera present in both the dat1
   ## and clust_labels dataset
-  dat1$group <- .clust_labels[match(dat1$Genus,
+  dat1L$group <- .clust_labels[match(dat1L$Genus,
                                     .clust_labels$genus),]$group
 
   #There are some problems here, since there are multiple "slash" genera per
   #individual genus, so need to lump these
   #Select those genera that appear in >1 "slash" genera
-  probslash <- dat1 %>%
+  probslash <- dat1L %>%
     group_by(Genus) %>%
     mutate(count = n()) %>%
     filter(count >1) %>%
@@ -1556,12 +1563,7 @@ invertTaxFix <- function(dataset,
   ##Take the unique genera in the "slash" genera and join them into a larger
   ##lump "slash" genus
   for(i in 1:length(probslashl)){
-    probslashl[[i]]$Fix <- paste(sort(unique(c(sub("\\/.*",
-                                                   "",
-                                                   probslashl[[i]]$Slash),
-                                               sub(".*\\/",
-                                                   "",
-                                                   probslashl[[i]]$Slash)))),
+    probslashl[[i]]$Fix <- paste(sort(unique(unlist(strsplit(probslashl[[i]]$Slash,"/")))),
                                  collapse = "/")
   }
 
@@ -1574,7 +1576,7 @@ invertTaxFix <- function(dataset,
   ## clust_labels); then take 1 observation for each slash genus and generate
   ## information (this does not matter) to better join this dataset with the
   ## clust_labels dataset
-  dat1L <- dat1 %>%
+  dat1L <- dat1L %>%
     dplyr::filter(!is.na(group)) %>%
     dplyr::group_by(Slash) %>%
     dplyr::slice(1) %>%
@@ -1617,6 +1619,9 @@ invertTaxFix <- function(dataset,
                                              .taxlu$Family)],
                            dataset$Order)
 
+    # NEED TO FIX SLASHIES HERE
+
+
     dataset = dataset %>%
       mutate(Class = ifelse(Family == "Aeolosomatidae",
                             "",
@@ -1637,15 +1642,12 @@ invertTaxFix <- function(dataset,
                             Order))
 
     if(taxonLevel == "Genus"){
-      if(TaxonFix == "none"){
-
-      } else if(TaxonFix == "lump"){
 
         #If genera that are one of genera in dat1, rename the Genus with the slash
         #label from dat1, else, keep the original Genus label
-        dataset$Genus <- ifelse(dataset$Genus %in% dat1$Genus,
-                                dat1$Slash[match(dataset$Genus,
-                                                 dat1$Genus)],
+        dataset$Genus <- ifelse(dataset$Genus %in% dat1F$Genus,
+                                dat1F$Slash[match(dataset$Genus,
+                                                 dat1F$Genus)],
                                 dataset$Genus)
 
         #If genera that are one of problem slash genera, rename the Genus with the lumped
@@ -1655,26 +1657,38 @@ invertTaxFix <- function(dataset,
                                                     fix_slash$Slash)],
                                 dataset$Genus)
 
+      if(TaxonFix == "none"){
+
+      } else if(TaxonFix == "lump"){
+        #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
+        #else, keep the original Genus label
+        #create bench genus in dataset
+        dataset <- dataset %>%
+          dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
+
+        dataset$Genus <- ifelse(dataset$BenchGenus %in% .clust_labels$genus,
+                                .clust_labels$lump[match(dataset$BenchGenus,
+                                                         .clust_labels$genus)],
+                                dataset$Genus)
+
+        dataset <- dataset %>%
+          dplyr::select(-BenchGenus)
+
+
+
+        dataset$Genus <- ifelse(dataset$Genus %in% .clust_labels$genus,
+                                .clust_labels$lump[match(dataset$Genus,
+                                                         .clust_labels$genus)],
+                                dataset$Genus)
+
+
         ##Do the same for those in slashlump
         dataset$Genus <- ifelse(dataset$Genus %in% slashlump$genus,
                                 slashlump$lump[match(dataset$Genus,
                                                      slashlump$genus)],
                                 dataset$Genus)
 
-        #create bench genus in dataset
-        dataset <- dataset %>%
-          dplyr::mutate(BenchGenus = as.character(gsub( " .*$", "", BenchTaxonName)))
 
-
-        #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
-        #else, keep the original Genus label
-        dataset$Genus <- ifelse(dataset$BenchGenus %in% slashlump$genus,
-                                slashlump$lump[match(dataset$BenchGenus,
-                                                     slashlump$genus)],
-                                dataset$Genus)
-
-        dataset <- dataset %>%
-          dplyr::select(-BenchGenus)
 
       } else if(TaxonFix == "remove"){
 
@@ -1715,15 +1729,11 @@ invertTaxFix <- function(dataset,
                                                       .switch1to1$BenchGenus)],
                               dataset$GENUS)
 
-    ##This is the same code as the NAWQA taxonomy fix
-    if(TaxonFix == "none"){
-
-    } else if(TaxonFix == "lump"){
       #If genera that are one of genera in dat1, rename the Genus with the slash
       #label from dat1, else, keep the original Genus label
-      dataset$GENUS <- ifelse(dataset$GENUS %in% dat1$Genus,
-                              dat1$Slash[match(dataset$GENUS,
-                                               dat1$Genus)],
+      dataset$GENUS <- ifelse(dataset$GENUS %in% dat1F$Genus,
+                              dat1F$Slash[match(dataset$GENUS,
+                                               dat1F$Genus)],
                               dataset$GENUS)
 
       #If genera that are one of problem slash genera, rename the Genus with the lumped
@@ -1733,12 +1743,26 @@ invertTaxFix <- function(dataset,
                                                   fix_slash$Slash)],
                               dataset$GENUS)
 
+    ##This is the same code as the NAWQA taxonomy fix
+    if(TaxonFix == "none"){
+
+    } else if(TaxonFix == "lump"){
+
+
       #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
       #else, keep the original Genus label
       dataset$GENUS <- ifelse(dataset$GENUS %in% slashlump$genus,
                               slashlump$lump[match(dataset$GENUS,
                                                    slashlump$genus)],
                               dataset$GENUS)
+
+      #If bench genera that are one of bench genera in clust_labels, rename the Genus with the lump label from clust_labels
+      #else, keep the original Genus label
+      dataset$GENUS <- ifelse(dataset$GENUS %in% .clust_labels$genus,
+                              .clust_labels$lump[match(dataset$GENUS,
+                                                       .clust_labels$genus)],
+                              dataset$GENUS)
+
 
     }else if(TaxonFix == "remove"){
 
@@ -1773,9 +1797,14 @@ fishTaxFix <- function(dataset,
                                                   .fishtaxlu$New)],
                              dataset$Genus)
 
+
     return(dataset)
   }
   if(agency == "EPA"){
+    dataset$SPECIES = ifelse(grepl("Pomoxis sp", dataset$SCIENTIFIC),
+                             "",
+                             dataset$SPECIES)
+
     dataset$SCIENTIFIC = ifelse(dataset$SCIENTIFIC %in% .fishtaxlu$Old,
                                 .fishtaxlu$New[match(dataset$SCIENTIFIC,
                                                      .fishtaxlu$Old)],
@@ -1787,7 +1816,9 @@ fishTaxFix <- function(dataset,
                                                      "",
                                                      ifelse(grepl(" or ", dataset$SCIENTIFIC),
                                                             stringr::str_replace(dataset$SCIENTIFIC, " or ", " x "),
-                                                            dataset$SCIENTIFIC)))))
+                                                            ifelse(grepl("Pomoxis sp", dataset$SCIENTIFIC),
+                                                                   "Pomoxis ",
+                                                            dataset$SCIENTIFIC))))))
 
     dataset$GENUS = ifelse(dataset$SCIENTIFIC %in% .fishtaxlu$New,
                            .fishtaxlu$NewGenus[match(dataset$SCIENTIFIC,

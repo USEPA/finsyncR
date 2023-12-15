@@ -11,6 +11,7 @@ getInvertData(
   agency = c("USGS", "EPA"),
   lifestage = FALSE,
   rarefy = TRUE,
+  rarefyCount = 300,
   sharedTaxa = FALSE,
   seed = 0,
   boatableStreams = FALSE
@@ -37,6 +38,10 @@ lifestage information for each individual?  \code{TRUE} or \code{FALSE}.}
 \item{rarefy}{logical. Should samples be standardized by the number of individuals
 identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 below for more information.}
+
+\item{rarefyCount}{integer. If \code{rarefy = TRUE}, the individual count to be used
+as the cutoff for rarefaction (standardizing samples by the number of individuals
+identified). Default is 300.}
 
 \item{sharedTaxa}{logical. Should Genera be limited to those that appear in
 both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
@@ -92,20 +97,21 @@ non-wadeable streams. Some information included in the EPA dataset are not
 included in the USGS datasets, specifically observed wetted width of the
 stream/river.
 
-If \code{rarefy = TRUE}, only samples with 300+ individuals identified (raw
-count) are retained. Thus, ~17 \\% of samples are removed, as they have <300
-individuals sampled. The rarefaction threshold is 300 organisms for each
-sampling event, because 1) with every 50 individuals identified, ~1 genera
-are added to the sample and 2) 82.8 \\% of samples have at least 300 individuals
-identified. Thus, lowering the threshold to 200 individuals removed ~2 genera
-per sample, but only an additional 8.8 \\% of samples are included (90.1 \\% from 82.8 \\%).
-Similarly, increasing the threshold to 400 individuals added ~2 genera per
-sample, but reduced samples to 30.3 \\% of all samples. Use \code{seed = ...}
-to get consistent output of community data. See \code{vignette("GettingStarted")}
-for more information regarding rarefaction. NOTE: \code{rarefy = TRUE} can
-be used when a user wants occurrence data (presence/absence) OR proportional
-data (each taxon represents a certain proportion of a sample). Use
-\code{rarefy = FALSE} when densities are the measure of interest.
+If \code{rarefy = TRUE},  samples with \code{rarefyCount}+ individuals
+identified (raw count) are retained. Thus, a percentage of samples will be
+removed, as they have <\code{rarefyCount} individuals sampled. The rarefaction
+threshold is default is 300 organisms, because 1) with every 50 individuals
+identified, ~1 genera are added to the sample and 2) 91.3 \\% of samples have
+at least 300 individuals identified. Thus, lowering the threshold to 200
+individuals removed ~2 genera per sample, but only an additional 3.2 \\% of
+samples are included (94.5 \\% from 91.3 \\%). Similarly, increasing the threshold
+to 400 individuals added ~2 genera per sample, but reduced samples to 40.6 \\% of
+all samples. Use \code{seed = ...}  to get consistent output of community data.
+See \code{vignette("GettingStarted")} for more information regarding
+rarefaction. NOTE: \code{rarefy = TRUE} can be used when a user wants
+occurrence data (presence/absence) OR proportional data (each taxon represents
+a certain proportion of a sample). Use \code{rarefy = FALSE} when densities
+are the measure of interest.
 
 When dataType = “abun”, the function calculates taxa densities from samples
 using lab subsampling ratios and area sampled \deqn{Taxa~abundance = n*\frqc{1}{Subsampling~Ratio}}
