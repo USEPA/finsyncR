@@ -74,8 +74,11 @@
 <p>Column names are in the order of how they appear in each output
 dataset.</p>
 <div class="section level2">
-<h2 id="information-shared-across-datasets">Information shared across datasets<a class="anchor" aria-label="anchor" href="#information-shared-across-datasets"></a>
+<h2 id="macroinvertebrates-and-fish">Macroinvertebrates and Fish<a class="anchor" aria-label="anchor" href="#macroinvertebrates-and-fish"></a>
 </h2>
+<div class="section level3">
+<h3 id="information-shared-across-datasets">Information shared across datasets<a class="anchor" aria-label="anchor" href="#information-shared-across-datasets"></a>
+</h3>
 <div class="section level4">
 <h4 id="agency">Agency<a class="anchor" aria-label="anchor" href="#agency"></a>
 </h4>
@@ -91,7 +94,7 @@ dataset.</p>
 </h4>
 <p>Description: Project short name assigned by the project owner. For
 USGS data, ProjectLabel is explicitly provided by the USGS. For EPA,
-ProjectLabelis the sampling round/type (e.g., NRSA0809).</p>
+ProjectLabel is the sampling round/type (e.g., NRSA0809).</p>
 <p>Categorical.</p>
 </div>
 <div class="section level4">
@@ -219,6 +222,26 @@ most sites. Meters.</p>
 <p>Numeric.</p>
 </div>
 <div class="section level4">
+<h4 id="nars_ecoregion">NARS_Ecoregion<a class="anchor" aria-label="anchor" href="#nars_ecoregion"></a>
+</h4>
+<p>Description: Ecoregions are regions that contain similar
+environmental characteristics, including climate, vegetation, and
+geology. The nine NARS ecoregions are aggregations of Omernik Level III
+ecoregions.</p>
+<p>Categorical. Levels:</p>
+<ul>
+<li>CPL: Coastal Plains</li>
+<li>NAP: Northern Appalachians</li>
+<li>NPL: Northern Plains</li>
+<li>SAP: Southern Appalachians</li>
+<li>SPL: Southern Plains</li>
+<li>TPL: Temperate Plains</li>
+<li>UMW: Upper Midwest</li>
+<li>WMT: Western Mountains</li>
+<li>XER: Xeric</li>
+</ul>
+</div>
+<div class="section level4">
 <h4 id="sampletypecode">SampleTypeCode<a class="anchor" aria-label="anchor" href="#sampletypecode"></a>
 </h4>
 <p>Description: Code indicating the method of sample collected</p>
@@ -259,6 +282,7 @@ Evaluating the Biological Integrity of Surface Waters; <a href="https://www.nemi
 <li>“LG_WADEABLE” - Sample protocol for large wadeable streams; <a href="https://www.nemi.gov/methods/method_summary/12237/" class="external-link uri">https://www.nemi.gov/methods/method_summary/12237/</a>, <a href="https://www.nemi.gov/methods/method_summary/12493/" class="external-link uri">https://www.nemi.gov/methods/method_summary/12493/</a>
 </li>
 </ul>
+</div>
 </div>
 <div class="section level3">
 <h3 id="data-included-in-invertebrate-data-only">Data included in invertebrate data only<a class="anchor" aria-label="anchor" href="#data-included-in-invertebrate-data-only"></a>
@@ -356,6 +380,232 @@ minutes for electroshocking, number of hauls for seine netting, and
 number of transects for snorkel samples.</p>
 <p>Categorical.</p>
 </div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="nlcd-data">NLCD Data<a class="anchor" aria-label="anchor" href="#nlcd-data"></a>
+</h2>
+<div class="section level4">
+<h4 id="sitenumber-1">SiteNumber<a class="anchor" aria-label="anchor" href="#sitenumber-1"></a>
+</h4>
+<p>Description: Unique site identifiers. For USGS data, SiteNumber is
+USGS National Water Information System (NWIS) 8 to 15-digit identifier
+for the place for where sample was collected (preceeded by “USGS-”). For
+EPA data, SiteNumber is the NARS “SITE_ID” variable, with the preferred
+form of NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is
+between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place
+of SITE_ID , to link sites temporally. SITE_IDs from individual rounds
+of NRSA sampling (WSA/EMAP included) were linked to a site-level
+UNIQUE_ID, so that sites that were resampled through time could be
+linked. If sites could not be linked to a UNIQUE_ID, survey-specific
+SITE_ID is used instead.</p>
+<p>Categorical. EPA preferred form is NRS_MM-xxxxx, where MM is two
+letter state code, and xxxxx is between 10001 and 99999. USGS form is
+USGS-xxxxxxxx, where xxxxxxxx is the 8 to 15-digit USGS NWIS
+identifier.</p>
+</div>
+<div class="section level4">
+<h4 id="collectionyear-1">CollectionYear<a class="anchor" aria-label="anchor" href="#collectionyear-1"></a>
+</h4>
+<p>Description: Year in which sample was collected (YYYY)</p>
+<p>Integer.</p>
+</div>
+<div class="section level3">
+<h3 id="ungrouped-nlcd-columns-group-false">Ungrouped NLCD columns (<code>group = FALSE</code>)<a class="anchor" aria-label="anchor" href="#ungrouped-nlcd-columns-group-false"></a>
+</h3>
+<div class="section level4">
+<h4 id="pcturbmd_aoi">PCTURBMD[_AOI]<a class="anchor" aria-label="anchor" href="#pcturbmd_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+developed, medium-intensity land use (NLCD class 23).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest).</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctmxfst_aoi">PCTMXFST[_AOI]<a class="anchor" aria-label="anchor" href="#pctmxfst_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as mixed
+deciduous/evergreen forest land cover (NLCD class 43).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pcthay_aoi">PCTHAY[_AOI]<a class="anchor" aria-label="anchor" href="#pcthay_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as hay land
+use (NLCD class 81).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pcturblo_aoi">PCTURBLO[_AOI]<a class="anchor" aria-label="anchor" href="#pcturblo_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+developed, low-intensity land use (NLCD class 22).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctshrb_aoi">PCTSHRB[_AOI]<a class="anchor" aria-label="anchor" href="#pctshrb_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+shrub/scrub land cover (NLCD class 52).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pcturbhi_aoi">PCTURBHI[_AOI]<a class="anchor" aria-label="anchor" href="#pcturbhi_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+developed, high-intensity land use (NLCD class 24).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pcthbwet_aoi">PCTHBWET[_AOI]<a class="anchor" aria-label="anchor" href="#pcthbwet_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+herbaceous wetland land cover (NLCD class 95).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctcrop_aoi">PCTCROP[_AOI]<a class="anchor" aria-label="anchor" href="#pctcrop_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as crop
+land use (NLCD class 82).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctgrs_aoi">PCTGRS[_AOI]<a class="anchor" aria-label="anchor" href="#pctgrs_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+grassland/herbaceous land cover (NLCD class 71).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctow_aoi">PCTOW[_AOI]<a class="anchor" aria-label="anchor" href="#pctow_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as open
+water land cover (NLCD class 11).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctbl_aoi">PCTBL[_AOI]<a class="anchor" aria-label="anchor" href="#pctbl_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as barren
+land cover (NLCD class 31).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctconif_aoi">PCTCONIF[_AOI]<a class="anchor" aria-label="anchor" href="#pctconif_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+evergreen forest land cover (NLCD class 42).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctdecid_aoi">PCTDECID[_AOI]<a class="anchor" aria-label="anchor" href="#pctdecid_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+deciduous forest land cover (NLCD class 41).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pcturbop_aoi">PCTURBOP[_AOI]<a class="anchor" aria-label="anchor" href="#pcturbop_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+developed, open space land use (NLCD class 21).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctwdwet_aoi">PCTWDWET[_AOI]<a class="anchor" aria-label="anchor" href="#pctwdwet_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as woody
+wetland land cover (NLCD class 90).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="grouped-nlcd-columns-group-true">Grouped NLCD Columns (<code>group = TRUE</code>)<a class="anchor" aria-label="anchor" href="#grouped-nlcd-columns-group-true"></a>
+</h2>
+<div class="section level4">
+<h4 id="pctcrop_aoi-1">PctCrop[_AOI]<a class="anchor" aria-label="anchor" href="#pctcrop_aoi-1"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as crop
+land use (NLCD class 82).</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctfst_aoi">PctFst[_AOI]<a class="anchor" aria-label="anchor" href="#pctfst_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+deciduous forest, evergreen forest, or mixed deciduous/evergreen forest
+land covers (NLCD class 41, 42, 43). Values are summed percentages
+across these land cover classes.</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctopn_aoi">PctOpn[_AOI]<a class="anchor" aria-label="anchor" href="#pctopn_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+shrub/scrub, barren, grassland/herbaceous, or hay land covers/uses (NLCD
+class 31, 52, 71, 81). Values are summed percentages across these land
+cover/use classes.</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pcturb_aoi">PctUrb[_AOI]<a class="anchor" aria-label="anchor" href="#pcturb_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as
+developed, low-intensity; developed, medium-intensity; developed,
+high-intensity; or developed, open space land uses (NLCD classes 21, 22,
+23, 24). Values are summed percentages across these land use
+classes.</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
+</div>
+<div class="section level4">
+<h4 id="pctwater_aoi">PctWater[_AOI]<a class="anchor" aria-label="anchor" href="#pctwater_aoi"></a>
+</h4>
+<p>Description: Percent of area of interest (AOI) classified as open
+water, woody wetland, or herbaceous wetland land covers (NLCD classes
+11, 90, 95). Values are summed percentages across these land cover
+classes.</p>
+<p>Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column
+specifying user input area of interest)</p>
+<p>Continuous. Percent.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
