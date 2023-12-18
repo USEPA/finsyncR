@@ -77,7 +77,7 @@
 #'   at least 300 individuals identified. Thus, lowering the threshold to 200
 #'   individuals removed ~2 genera per sample, but only an additional 3.2 \% of
 #'   samples are included (94.5 \% from 91.3 \%). Similarly, increasing the threshold
-#'   to 400 individuals added ~2 genera per sample, but reduced samples to 40.6 \% of
+#'   to 400 individuals added ~2 genera per sample, but reduced samples to 70.6 \% of
 #'   all samples. Use \code{seed = ...}  to get consistent output of community data.
 #'   See \code{vignette("GettingStarted")} for more information regarding
 #'   rarefaction. NOTE: \code{rarefy = TRUE} can be used when a user wants

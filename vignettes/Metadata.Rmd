@@ -9,7 +9,9 @@ vignette: >
 
 Column names are in the order of how they appear in each output dataset.
 
-## Information shared across datasets
+## Macroinvertebrates and Fish
+
+### Information shared across datasets
 
 #### Agency
 
@@ -22,13 +24,13 @@ Categorical. Levels:
 
 #### ProjectLabel
 
-Description: Project short name assigned by the project owner. For USGS data, ProjectLabel is explicitly provided by the USGS. For EPA, ProjectLabelis the sampling round/type (e.g., NRSA0809).
+Description: Project short name assigned by the project owner. For USGS data, ProjectLabel is explicitly provided by the USGS. For EPA, ProjectLabel is the sampling round/type (e.g., NRSA0809).
 
 Categorical.
 
 #### SiteNumber
 
-Description: Unique site identifiers. For USGS data, SiteNumber is USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected (preceeded by “USGS-”). For EPA data, SiteNumber is the NARS “SITE_ID” variable, with the preferred form of  NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place of SITE_ID , to link sites temporally. SITE_IDs from individual rounds of NRSA sampling (WSA/EMAP included) were linked to a site-level UNIQUE_ID, so that sites that were resampled through time could be linked. If sites could not be linked to a UNIQUE_ID, survey-specific SITE_ID is used instead.
+Description: Unique site identifiers. For USGS data, SiteNumber is USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected (preceeded by “USGS-”). For EPA data, SiteNumber is the NARS “SITE_ID” variable, with the preferred form of NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place of SITE_ID , to link sites temporally. SITE_IDs from individual rounds of NRSA sampling (WSA/EMAP included) were linked to a site-level UNIQUE_ID, so that sites that were resampled through time could be linked. If sites could not be linked to a UNIQUE_ID, survey-specific SITE_ID is used instead.
 
 Categorical. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. USGS form is USGS-xxxxxxxx, where xxxxxxxx is the 8 to 15-digit USGS NWIS identifier.
 
@@ -122,6 +124,22 @@ Numeric.
 Description: Predicted distance from left to right bank of the stream channel filled with water. Gathered from StreamCat and Doyle, Jessie M., Hill, Ryan A., Leibowitz, Scott G. and Ebersole, Joseph L.. 2023. \"Random forest models to estimate bankfull and low flow channel widths and depths across the conterminous United States.\" *JAWRA Journal of the American Water Resources Association* 59(5): 1099--1114. <https://doi.org/10.1111/1752-1688.13116>. Provided for most sites. Meters.
 
 Numeric.
+
+#### NARS_Ecoregion
+
+Description: Ecoregions are regions that contain similar environmental characteristics, including climate, vegetation, and geology. The nine NARS ecoregions are aggregations of Omernik Level III ecoregions. 
+
+Categorical. Levels:
+
+-   CPL: Coastal Plains
+-   NAP: Northern Appalachians
+-   NPL: Northern Plains
+-   SAP: Southern Appalachians
+-   SPL: Southern Plains
+-   TPL: Temperate Plains
+-   UMW: Upper Midwest
+-   WMT: Western Mountains
+-   XER: Xeric
 
 #### SampleTypeCode
 
@@ -219,3 +237,184 @@ Numeric.
 Description: The units for sampling effort for each sample. Units are minutes for electroshocking, number of hauls for seine netting, and number of transects for snorkel samples.
 
 Categorical.
+
+
+
+
+## NLCD Data
+
+#### SiteNumber
+
+Description: Unique site identifiers. For USGS data, SiteNumber is USGS National Water Information System (NWIS) 8 to 15-digit identifier for the place for where sample was collected (preceeded by “USGS-”). For EPA data, SiteNumber is the NARS “SITE_ID” variable, with the preferred form of NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. EPA unique site ID (UNIQUE_ID) is used in place of SITE_ID , to link sites temporally. SITE_IDs from individual rounds of NRSA sampling (WSA/EMAP included) were linked to a site-level UNIQUE_ID, so that sites that were resampled through time could be linked. If sites could not be linked to a UNIQUE_ID, survey-specific SITE_ID is used instead.
+
+Categorical. EPA preferred form is NRS_MM-xxxxx, where MM is two letter state code, and xxxxx is between 10001 and 99999. USGS form is USGS-xxxxxxxx, where xxxxxxxx is the 8 to 15-digit USGS NWIS identifier.
+
+#### CollectionYear
+
+Description: Year in which sample was collected (YYYY)
+
+Integer.
+
+### Ungrouped NLCD columns (`group = FALSE`)
+
+#### PCTURBMD[_AOI]
+
+Description: Percent of area of interest (AOI) classified as developed, medium-intensity land use (NLCD class 23).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest).
+
+Continuous. Percent.
+
+#### PCTMXFST[_AOI]
+
+Description: Percent of area of interest (AOI) classified as mixed deciduous/evergreen forest land cover (NLCD class 43).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTHAY[_AOI]
+
+Description: Percent of area of interest (AOI) classified as hay land use (NLCD class 81).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTURBLO[_AOI]
+
+Description: Percent of area of interest (AOI) classified as developed, low-intensity land use (NLCD class 22).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTSHRB[_AOI]
+
+Description: Percent of area of interest (AOI) classified as shrub/scrub land cover (NLCD class 52).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTURBHI[_AOI]
+
+Description: Percent of area of interest (AOI) classified as developed, high-intensity land use (NLCD class 24).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTHBWET[_AOI]
+
+Description: Percent of area of interest (AOI) classified as herbaceous wetland land cover (NLCD class 95).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTCROP[_AOI]
+
+Description: Percent of area of interest (AOI) classified as crop land use (NLCD class 82).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTGRS[_AOI]
+
+Description: Percent of area of interest (AOI) classified as grassland/herbaceous land cover (NLCD class 71).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTOW[_AOI]
+
+Description: Percent of area of interest (AOI) classified as open water land cover (NLCD class 11).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTBL[_AOI]
+
+Description: Percent of area of interest (AOI) classified as barren land cover (NLCD class 31).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTCONIF[_AOI]
+
+Description: Percent of area of interest (AOI) classified as evergreen forest land cover (NLCD class 42).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTDECID[_AOI]
+
+Description: Percent of area of interest (AOI) classified as deciduous forest land cover (NLCD class 41).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTURBOP[_AOI]
+
+Description: Percent of area of interest (AOI) classified as developed, open space land use (NLCD class 21).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PCTWDWET[_AOI]
+
+Description: Percent of area of interest (AOI) classified as woody wetland land cover (NLCD class 90).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+## Grouped NLCD Columns (`group = TRUE`)
+
+#### PctCrop[_AOI]
+
+Description: Percent of area of interest (AOI) classified as crop land use (NLCD class 82).
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PctFst[_AOI]
+
+Description: Percent of area of interest (AOI) classified as deciduous forest, evergreen forest, or mixed deciduous/evergreen forest land covers (NLCD class 41, 42, 43). Values are summed percentages across these land cover classes.
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PctOpn[_AOI]
+
+Description: Percent of area of interest (AOI) classified as shrub/scrub, barren, grassland/herbaceous, or hay land covers/uses (NLCD class 31, 52, 71, 81). Values are summed percentages across these land cover/use classes.
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PctUrb[_AOI]
+
+Description: Percent of area of interest (AOI) classified as developed, low-intensity; developed, medium-intensity; developed, high-intensity; or developed, open space land uses (NLCD classes 21, 22, 23, 24). Values are summed percentages across these land use classes.
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
+
+#### PctWater[_AOI]
+
+Description: Percent of area of interest (AOI) classified as open water, woody wetland, or herbaceous wetland land covers (NLCD classes 11, 90, 95). Values are summed percentages across these land cover classes.
+
+Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying user input area of interest)
+
+Continuous. Percent.
