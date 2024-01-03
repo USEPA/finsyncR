@@ -2,19 +2,19 @@ citHeader("To cite finsyncR in publications use:")
 
 citEntry(
   entry = "Unpublished",
-  title = "{finsyncR}: R Package to synchronize fish and invertebrate datasets from federal sources in the United States",
+  title = "finsyncR: R Package to synchronize fish and invertebrate datasets from federal sources in the United States",
   author = personList(as.person("Michael Mahon"),
                                    as.person("Devin Jones"),
-                                   as.person("Ethan Brown"),
-                                   as.person("Terry Brown"),
                                    as.person("Ryan Hill"),
+                                   as.person("Terry Brown"),
+                                   as.person("Ethan Brown"),
                                    as.person("Stefan Kunz"),
                                    as.person("Samantha Rumschlag")),
-  year = "2023",
-  note        = "R package version 0.1.3",
+  year = "2024",
+  note        = "R package version 1.0.0",
  textVersion  =
-           paste("Michael Mahon, Devin Jones, Ethan Brown, Terry Brown, Ryan Hill,",
-                 "Stefan Kunz, Samantha Rumschlag (2023). {finsyncR}: R Package",
+           paste("Michael Mahon, Devin Jones, Ryan Hill, Terry Brown, Ethan Brown,",
+                 "Stefan Kunz, Samantha Rumschlag (2024). finsyncR: R Package",
                  "to synchronize fish and invertebrate datasets from federal",
-                 "sources in the United States. R package version 0.1.3")
+                 "sources in the United States. R package version 1.0.0")
 )

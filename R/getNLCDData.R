@@ -1,8 +1,9 @@
 #' Match data from the National Land Cover Database to each fish and macroinvertebrate sampling site
 #'
 #' @description
-#' This function to match National Land Cover Database (NLCD) data to each fish
-#' and macroinvertebrate sampling site in both space and time by calling StreamCat.
+#' This function to match watershed-level National Land Cover Database (NLCD) data
+#' to each fish and macroinvertebrate sampling site in both space and time
+#' by calling StreamCat.
 #'
 #' @param data Input dataset must include columns for
 #'  \code{"SiteNumber"} and \code{"CollectionYear"}.
@@ -18,7 +19,8 @@
 #' @return Function returns a site by year dataframe of NLCD data for either the
 #' catchment or watershed scale.
 #'
-#' @details Land-use/land-cover data is extracted from the USGS National Land Cover
+#' @details Land-use/land-cover data is extracted from the Multi-Resolution Land
+#'   Characteristics (MRLC) Consortium National Land Cover
 #'   Database (NLCD). These LULC data are available in the following years:
 #'   2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019. For years in the input
 #'   data that are not exact year matches from this list, years are matched to
@@ -28,9 +30,10 @@
 #'   sampled in 2005 will have NLCD data from 2004).
 #'
 #'   Data can be extracted at the catchment (\code{"Cat"}) or watershed (\code{"Ws"})
-#'   scales. Watershed is larger than catchment and includes land that drains
-#'   downstream of the sampling location. Catchment only includes land that is
-#'   upstream of the sampling location.
+#'   scales. The catchment includes land area that drains directly to the sampled
+#'   stream segment of the medium-resolution National Hydrography Dataset version
+#'   2.(NHDPlusV2), but excludes data from upstream segments. The watershed scale
+#'   includes data from the local catchment and from all upstream contributing catchments.
 #'
 #'   NLCD data can be grouped (\code{group = TRUE}) into five broad categories.
 #'   These categories include "water" (grouping of all wetland and open water land
@@ -39,8 +42,8 @@
 #'   land, grassland, and hay/pasture), and "crop" (no grouping, just the crop
 #'   land use).
 #'
-#'   The function gathers catchment/watershed NLCD data from the StreamCat API
-#'   (Hill et al. 2016).
+#'   The function gathers catchment/watershed NLCD data from the StreamCat database
+#'   (Hill et al. 2016) via the StreamCat API (https://www.epa.gov/national-aquatic-resource-surveys/streamcat-metrics-rest-api).
 #'
 #' @author Michael Mahon, Ryan Hill, Samantha Rumschlag, Terry Brown
 #'
@@ -52,14 +55,29 @@
 #' @examples
 #' \dontrun{
 #' ## Code to generate the percent land-use/land-cover in the catchment for
-#' ## site number "USGS-05276005" from 2007.
+#' ## site numbers "USGS-05276005" and "USGS-01390450" from 2007 2008, respectively.
 #'
-#'   dat = data.frame(SiteNumber = "USGS-05276005",
-#'                    CollectionYear = 2007)
+#'   dat = data.frame(SiteNumber = c("USGS-05276005","USGS-01390450"),
+#'                    CollectionYear = c(2007,2008))
 #'
 #'   getNLCDData(data=dat,
 #'   scale = "Cat",
 #'   group = FALSE)
+#'
+#' ## Code to generate the percent land-use/land-cover in the catchment for
+#' ## all samples in the base macroinvertebrate dataset, and grouping those
+#' ## LULC data into broad categories.
+#'
+#'   invertDat1 <- getInvertData()
+#'   invertDat1_forNLCD <- invertDat1 %>%
+#'     dplyr::select(SiteNumber, CollectionYear)
+#'
+#'
+#'   dat1 = data.frame(invertDat1_forNLCD)
+#'
+#'   getNLCDData(data=dat1,
+#'   scale = "Cat",
+#'   group = TRUE)
 #'   }
 #'
 #' @export

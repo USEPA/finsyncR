@@ -1,29 +1,31 @@
 #' finsyncR: An R Package to synchronize fish and invertebrate datasets from federal sources in the United States
 #'
 #'@description
-#' `finsyncR` (**f**ish and **in**vertebrate **sync**hronizer in **R**) provides
-#' access to, manipulates, and harmonizes national-level aquatic biomonitoring
-#' datasets in the United States, with a focus on fish
-#' and macroinvertebrates sampled in rivers and streams. The package streamlines
+#' `finsyncR` (**f**ish and **in**vertebrate **sync**hronizer in **R**) flexibly
+#' acquires, processes, and integrates national-level aquatic biomonitoring
+#' datasets in the US, with a focus on fish and macroinvertebrates sampled in
+#' rivers and streams. The package streamlines
 #' the process of retrieving and working with these data, making the process of
 #' utilizing these data  easier for researchers. The data resources used in this
 #' package are from United States Environmental Protection Agency’s National
 #' Aquatic Resources Surveys, namely the National River and Streams Assessment,
 #' and United States Geological Survey’s BioData.
 #'
-#' The package provides abundance (density) and occurrence data for fish and
-#' macroinvertebrates at a variety of levels of taxonomic resolution. Alongside
-#' community matrices, important data describing sampling methods are provided,
-#' which are intended to be used as covariates in analyses. The package provides
-#' flexibility for common data management issues for temporal biologic datasets.
-#' Data management options include harmonization of macroinvertebrate taxonomy
-#' across the two federal datasets and through time and the ability to drop
-#' hybrid organisms altogether for fish. Samples, which often vary in the number
-#' of individuals within a sample, can be rarefied to a specific count.
-#' Additionally, fish samples can be standardized to catch per-unit effort and
-#' to account for catchability differences between fish sampling methods. The
-#' package can also match  sampling sites for fish and macroinvertebrates to
-#' data from the National Land Cover Database.
+#` The package provides abundance and occurrence data for fish and macroinvertebrates
+#` at a variety of levels of taxonomic resolution. The package provides flexibility
+#` for common data management issues for temporal biologic datasets. Data management
+#` options include harmonization of macroinvertebrate taxonomy across the two federal
+#` datasets and through time and the ability to drop hybrid organisms altogether for
+#` fish. Samples, which often vary in the number of individuals within a sample,
+#` can be rarefied to a specific count. Additionally, fish samples can be standardized
+#` to catch per-unit effort and to account for catchability differences between
+#` fish sampling methods. The package also matches sampling sites for fish and
+#` macroinvertebrates to data from the National Land Cover Database. Please see
+#` the Getting Started Vignette, for more information on how to use the package
+#` and on certain nuances of the data that could influence analyses in some
+#` instances including spatial sampling designs, the timing and frequency of
+#` monitoring efforts, variation in sampling efforts, and improvements in taxonomic
+#` identifications through time in some orders of macroinvertebrates.
 #'
 #' Data from USGS BioData were obtained from Pete Ruhl (pmruhl@usgs.gov), and
 #' data from the National Aquatic Resource Surveys are directly downloaded by

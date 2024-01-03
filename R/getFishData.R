@@ -2,7 +2,8 @@
 #'
 #' @description
 #' This function generates an occurrence or abundance community matrix for
-#' fish sampled in rivers and streams.
+#' fish sampled in rivers and streams from the US EPA National Rivers and Streams
+#' Assessment and USGS BioData.
 #'
 #' @param dataType Output data type for the community matrix, either
 #'   \code{"abun"} (abundance) or \code{"occur"} (occurrence).
@@ -22,54 +23,66 @@
 #'   appear in both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
 #'   \code{FALSE} when only one agency is specified.
 #' @param boatableStreams logical. Should EPA boatable streams be included in the
-#'   output dataset? \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable.
-#'   It is not advisable to include boatable streams when building a dataset
+#'   output dataset? \code{TRUE} or \code{FALSE}. Note: most USGS fish samples are
+#'   from wadable streams. It is not advisable to include boatable streams when building a dataset
 #'   including both EPA and USGS data. Boatable EPA data and wadeable USGS data
-#'   are not considered comparable.
+#'   are not necessarily comparable.
 #'
 #' @return A taxa by sample data frame with site, stream reach, and sample information.
 #'
 #' @details
-#'   To standardize fish abundance data, abundances are divided by the product of
-#'    sampling effort (minutes shocked, number of seine hauls, number of
-#'    snorkeling transects) and stream length sampled.
-#'    \deqn{CPUE = \frac{taxa~abundance}{(sampling~effort~*~stream~length~fished~(m))}}
-#'   Some of the samples
-#'   lacked information on either stream length sampled or sampling effort. Therefore,
-#'   if a user is interested in occurrence (pres/abs) data only, then set
-#'   \code{dataType = "occur" and standardize = "none"}, which will provide an
-#'   occurrence dataset the samples that are otherwise dropped with standardization.
-#'   Be aware that setting \code{dataType = "occur"} will result in a larger
-#'   dataset with additional samples/sites than when \code{dataType = "abun"}.
-#'
-#'   To account for differences in efficacy between shocking, seine netting, and
-#'   snorkeling, multigear mean standardization (\code{standardize = "MGMS"}) is
-#'   another standardization method provided as an alternative to catch per unit
-#'   effort (\code{standardize = "CPUE"}). When (\code{standardize = "MGMS"}), individual
-#'   taxa abundances are standardized as above in `CPUE`. Then, the total catch (TC)
-#'   of all *i* taxa in each sample *j* is standardized by the product of
-#'   sampling effort (minutes shocked, number of seine hauls, number of
-#'   snorkeling transects) and stream length sampled:
-#'   \eqn{TCPUE = \frac{TC_j}{(sampling~effort~*~stream~length~fished~(m))}}.
-#'   For each gear type (e.g., electroshock, seine net, snorkel), the mean TCPUE
-#'   is calculated, \eqn{\overline{TCPUE}}. Next, to standardize
-#'   each gear, CPUE for each taxa *i* is divided by \eqn{\overline{TCPUE}}.
-#'   \deqn{MSC_{ij} = \frac{CPUE_{ij}}{\overline{TCPUE}}} \eqn{MSC_{ij}} is the mean standardized
-#'   catch of species *i* in observation *j*. The units of sampling effort are
-#'   cancelled out in the calculation of \eqn{MSC_{ij}}, but patterns of relative abundance
-#'   of species within and across observations are preserved. The function then
-#'   sums the \eqn{MSC_{ij}} among gear types, resulting in a single row of data for
-#'   each sampling event, regardless of the number of gear types used, such that
-#'   setting \code{standardize = "CPUE"} will result in more rows within the output
-#'    dataset than \code{standardize = "MGMS"}. See Gibson-Reinemer et al. (2017)
-#'    for more information regarding the computation of MGMS.
-#'
 #'   \code{agency} refers to the federal agency that collected the fish samples. If
 #'   you want to use data from both agencies, set \code{agency = c("USGS", "EPA")},
 #'   which is the default. Note that by default, only moving waters classified as
 #'   "wadeable" are included, but setting \code{boatableStreams = TRUE} will
 #'   include non-wadeable streams. Some information included in the EPA dataset
 #'   are not included in the USGS datasets, specifically observed wetted width of the stream or river.
+#'
+#'   To standardize fish abundance data (\code{standardize = "CPUE"}), abundances
+#'   are divided by the product of
+#'   sampling effort (minutes shocked, number of seine hauls, number of
+#'   snorkeling transects) and stream length sampled.
+#'   \deqn{CPUE = \frac{taxa~abundance}{(sampling~effort~*~stream~length~fished~(m))}}
+#'
+#'   When (\code{standardize = "CPUE"}) or (\code{standardize = "none"}), sampling
+#'   events that used multiple gear types will have rows of data for each unique
+#'   gear type (i.e. sampling event in which
+#'   both electroshocking and senining were used will have separate rows of data for
+#'   each gear type). To account for differences in efficacy between shocking, seining, and
+#'   snorkeling, multigear mean standardization (\code{standardize = "MGMS"}) is
+#'   another standardization method provided as an alternative to catch per unit
+#'   effort (\code{standardize = "CPUE"}). When (\code{standardize = "MGMS"}), individual
+#'   taxa abundances are standardized for each gear type (i.e. electroshock, seine net,
+#'   snorkel), as above in `CPUE`. Then, for each gear type, the CPUE
+#'   of all *i* taxa in each sample *j* is summed to get Total Catch Per Unit Effort
+#'   for sample *j* (TCPUE~*j*~):
+#'
+#'   \eqn{TCPUE_j = \sum_{} CPUE_{ij}}.
+#'
+#'   For each gear type, the mean TCPUE is calculated, \eqn{\overline{TCPUE}}.
+#'   Next, to standardize each gear, CPUE for each taxa *i* is divided by
+#'   \eqn{\overline{TCPUE}}.
+#'   \deqn{MSC_{ij} = \frac{CPUE_{ij}}{\overline{TCPUE}}}
+#'   \eqn{MSC_{ij}} is the mean standardized catch of species *i* in observation
+#'   *j*. The units of sampling effort are cancelled in the calculation of
+#'   \eqn{MSC_{ij}}, but patterns of relative abundance
+#'   of species within and across observations are preserved. The function then
+#'   sums the \eqn{MSC_{ij}} among gear types, resulting in a single row of data for
+#'   each sampling event, regardless of the number of gear types used, such that
+#'   setting \code{standardize = "CPUE"} will result in more rows within the output
+#'    dataset than \code{standardize = "MGMS"}. See Gibson-Reinemer et al. (2017)
+#'    for more information regarding the computation of MGMS
+#'
+#'
+#'   Some of the samples lacked information on either stream length sampled or
+#'   sampling effort. Therefore,
+#'   if a user is interested in occurrence (pres/abs) data only, then set
+#'   \code{dataType = "occur" and standardize = "none"}, which will provide an
+#'   occurrence dataset the samples that are otherwise dropped with standardization.
+#'   Be aware that setting \code{dataType = "occur"} will result in a larger
+#'   dataset with additional samples/sites than when \code{dataType = "abun"}.
+#'
+
 #'
 #' @author Michael Mahon, Ethan Brown, Samantha Rumschlag, Terry Brown
 #'
@@ -176,13 +189,13 @@ getFishData <- function(dataType = "occur",
     taxonLevel.nrsa = ifelse(taxonLevel.nrsa == "SPECIES",
                              "SCIENTIFIC",
                              taxonLevel.nrsa)
-    ##UPDATE THIS FOR NRSA_MYCOLS
+
     mycols = c("FAMILY",
                "GENUS",
                "SPECIES",
                "SCIENTIFIC",
                "FINAL_NAME")
-
+    NRSA_FISH_wSite
     mycols <- mycols[!(mycols %in% (taxonLevel.nrsa))]
 
     NRSA_FISH_comm <- NRSA_FISH_wSite %>%
@@ -203,7 +216,24 @@ getFishData <- function(dataType = "occur",
                   values_from = TOTAL,
                   values_fn = sum,
                   values_fill = 0)
-    ####Need to add if group here for just "abundance"
+
+    if(taxonLevel.nrsa == "SCIENTIFIC"){
+      NRSA_FISH_comm <- NRSA_FISH_comm  %>%
+        dplyr::mutate(`tax_No fish collected` = ifelse(`tax_No fish collected` == 0,
+                                                "Fish Collected",
+                                                "No Fish Collected")) %>%
+        dplyr::rename("FishCollection" = "tax_No fish collected") %>%
+        dplyr::relocate(tidyselect::contains("tax_"), .after = FishCollection)
+    } else{
+      NRSA_FISH_comm <- NRSA_FISH_comm  %>%
+        dplyr::mutate(`tax_No fish` = ifelse(`tax_No fish` == 0,
+                                      "Fish Collected",
+                                      "No Fish Collected")) %>%
+        dplyr::rename("FishCollection" = "tax_No fish")%>%
+        dplyr::relocate(tidyselect::contains("tax_"), .after = FishCollection)
+    }
+
+
 
     cat('\r',"Applying count standardization to EPA data                    ")
 
@@ -236,7 +266,8 @@ getFishData <- function(dataType = "occur",
                              mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
                                     # StandardMethod = as.character(StandardMethod),
                                     WettedWidth = NA,
-                                    Agency = "USGS") %>%
+                                    Agency = "USGS",
+                                    FishCollection = "Fish Collected") %>%
                              dplyr::select(-StateFIPSCode, -CountyFIPSCode, -MethodCode),
                            NRSA_FISH_comm2 %>% mutate(Agency = "EPA")) %>%
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
@@ -258,12 +289,7 @@ getFishData <- function(dataType = "occur",
 
   full_fish <- full_fish %>%
     ungroup() %>%
-    left_join(.allsitesCOMID %>% filter(SiteNumber %in% full_fish$SiteNumber), by = dplyr::join_by(SiteNumber)) %>%
-    mutate(`tax_No fish collected` = ifelse(`tax_No fish collected` == 0,
-                                            "Fish Collected",
-                                            "No Fish Collected")) %>%
-    dplyr::rename("FishCollection" = "tax_No fish collected")
-
+    left_join(.allsitesCOMID %>% filter(SiteNumber %in% full_fish$SiteNumber), by = dplyr::join_by(SiteNumber))
 
   ##remove 0 column sum fish (not sure why they're even included, but remove anyway)
   full_fish <- full_fish  %>%

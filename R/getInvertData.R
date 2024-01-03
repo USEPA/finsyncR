@@ -2,7 +2,8 @@
 #'
 #' @description
 #' This function generates an occurrence or abundance community matrix for
-#' benthic macroinvertebrates sampled in rivers and streams.
+#' benthic macroinvertebrates sampled in rivers and streams from the US EPA
+#' National Rivers and Streams Assessment and USGS BioData.
 #'
 #' @param dataType Output data type for the community matrix, either \code{"abun"}
 #'  (abundance) or \code{"occur"} (occurrence).
@@ -15,7 +16,8 @@
 #' @param agency The agency name or names (e.g., "USGS" and "EPA") that are the
 #'   source of data for the output community matrix. See \code{Details} below for more information.
 #' @param lifestage logical. For USGS data only, should the output dataset include
-#' lifestage information for each individual?  \code{TRUE} or \code{FALSE}.
+#'   lifestage information for each taxa?  \code{TRUE} or \code{FALSE}. Default
+#'   is \code{FALSE}.
 #' @param rarefy logical. Should samples be standardized by the number of individuals
 #'   identified within each sample? \code{TRUE} or \code{FALSE}. See \code{Details}
 #'   below for more information.
@@ -26,7 +28,7 @@
 #'   iteration of the function. Value gets passed to \code{set.seed} internally.
 #' @param sharedTaxa logical. Should Genera be limited to those that appear in
 #'   both the EPA and USGS datasets? \code{TRUE} or \code{FALSE}. Must be set to
-#'   \code{FALSE} when only one agency is specified.
+#'   \code{FALSE} when only one agency is specified. Default is \code{FALSE}
 #' @param boatableStreams logical. Should EPA boatable streams be included in the
 #'   output dataset?  \code{TRUE} or \code{FALSE}. Note: all USGS streams are wadable.
 #'   It is not advisable to include boatable streams when building a dataset including
@@ -36,40 +38,55 @@
 #' @return A taxa by sample data frame with site, stream reach, and sample information.
 #'
 #' @details
-#'   \code{taxonFix} provides options to account for changes in taxonomy across time,
-#'   especially in instances in which species have been reorganized into new genera.
-#'   \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
-#'   makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
-#'   by giving a unified genera name to all species and genera that have been linked
-#'   through changes in taxonomy through time (e.g. genera1/genera2/genera3). Note:
-#'   of 98 problematic genera that exist throughout both datasets,
-#'   \code{taxonFix = "lump"} results in 13 "lumped" genera. Most new "lumped"
-#'   genera are fewer than five "old" genera joined. One "lumped" genera (within
-#'   Ephemeroptera) includes 70 unique genera names. So, it is not advisable to
-#'   examine changes in Ephemeroptera genera. \code{taxonFix = "remove"} prioritizes
-#'   accurate identifications of organisms by dropping observations from problematic
-#'   genera that do not have species-level identification. Without a species-level
-#'   identification, there is no way to assure correct membership in an updated genus.
-#'   Organisms with a species-level identification are cross-walked to an updated genus.
-#'   NOTE on “slash” genera: When \code{taxonFix = "lump"}, these "slash"
-#'   genera are rolled into the larger linked genera, as above. \code{taxonFix = "remove"}
-#'   prioritizes accurate identifications by dropping all slash genera are, including
-#'   those organisms identified as a “slash” genus at the bend; this option will
-#'   result in many fewer genera in the final dataset. Finally, \code{taxonFix = "none"},
-#'   includes "slash" genera, but it does not connect these genera to larger linked genera.
-#'   See \code{vignette("GettingStarted")} for more information.
-#'
 #'   \code{agency} refers to the \code{agency} that collected the invertebrate samples.
 #'   If you want to use data from both agencies, set \code{agency} = c("USGS", "EPA"),
 #'   which is the default. For USGS data, sampling data include all USGS BioData
-#'   with `SampleMethodCode` of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE", and "PNAMP".
+#'   with `SampleMethodCode` of "BERW", "IRTH", "SWAMP", "EMAP", "CDPHE RR", and "PNAMP".
 #'   Note that by default, only moving waters classified as "wadeable" are
 #'   included but setting \code{boatableStreams = TRUE} will include observations from
 #'   non-wadeable streams. Some information included in the EPA dataset are not
 #'   included in the USGS datasets, specifically observed wetted width of the
 #'   stream/river.
 #'
-#'   If \code{rarefy = TRUE},  samples with \code{rarefyCount}+ individuals
+#'   \code{taxonFix} provides options to account for changes in taxonomy across time,
+#'   especially in instances in which species have been reorganized into new genera.
+#'   \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
+#'   makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
+#'   by giving a unified "slash" genera name to all species and genera that have been linked
+#'   through changes in taxonomy through time (e.g. genera1/genera2/genera3). Note:
+#'   of 98 problematic genera that exist throughout both datasets,
+#'   \code{taxonFix = "lump"} results in 13 "lumped" genera. All but two complexes
+#'   of genera were composed of two individual genera. A single complex of genera
+#'   within the Ephemeroptera order included 70 individual genera, and a second
+#'   complex of Ephemeroptera genera included six individual genera. Because of
+#'   the complexity of Ephemeroptera taxonomy, careful consideration should be
+#'   given to inferences that can be made when evaluating Ephemeroptera trends.
+#'   The authors, for instance, do not advise that users evaluate temporal changes
+#'   in abundance or richness of the linked groups of Ephemeroptera genera because
+#'   taxonomic reorganizations likely obscure temporal patterns.
+#'
+#'   Alternatively, genera linked by taxonomic reorganization can be removed with
+#'   \code{taxonFix = "remove"}. This option prioritizes accurate identification by
+#'   dropping observations that cannot be confidently identified to a single genus,
+#'   as in the complexes of genera previously described.  Without a species-level
+#'   identification, there is no way to assure correct membership in an updated genus.
+#'   Organisms with a species-level identification are cross-walked to an updated genus.
+#'   NOTE on “slash” genera: When \code{taxonFix = "lump"}, these "slash"
+#'   genera are rolled into the larger linked genera, as above. \code{taxonFix = "remove"}
+#'   prioritizes accurate identifications by dropping all slash genera are, including
+#'   those organisms identified as a “slash” genus in the lab; this option will
+#'   result in many fewer genera in the final dataset. Finally, \code{taxonFix = "none"},
+#'   includes "slash" genera, but it does not connect these genera to larger linked genera.
+#'
+#'   \code{taxonFix} operates on the genus level, so set \code{taxonFix = "none"}
+#'   when taxonLevel is set to \code{"Family"} or higher taxonomic resolution.
+#'   Care should be taken to harmonize taxonomy either with the approaches provided
+#'   or some alternative when long time scale datasets on the entire community
+#'   of macroinvertebrates are generated because changes in taxonomy can make it
+#'   artificially appear as though some genera are either appearing or disappearing
+#'   in time. See \code{vignette("GettingStarted")} for more information.
+#'
+#'   If \code{rarefy = TRUE}, samples with \code{rarefyCount}+ individuals
 #'   identified (raw count) are retained. Thus, a percentage of samples will be
 #'   removed, as they have <\code{rarefyCount} individuals sampled. The rarefaction
 #'   threshold is default is 300 organisms, because 1) with every 50 individuals
@@ -86,27 +103,18 @@
 #'   are the measure of interest.
 #'
 #'   When dataType = “abun”, the function calculates taxa densities from samples
-#'   using lab subsampling ratios and area sampled \deqn{Taxa~abundance = n*\frqc{1}{Subsampling~Ratio}}
-#'   where *n* is the number of specimens identified and *Subsampling Ratio* is the
+#'   using lab subsampling ratios and area sampled
+#'   \deqn{Taxa~abundance = n*\frqc{1}{PropID}}
+#'   \deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}}
+#'   where *n* is the number of specimens identified and *PropID* is the
 #'   proportion of the sample that was identified at the lab bench. For
 #'   the USGS dataset, this incorporates both "field split ratio" (proportion of
 #'   the sample that was brought into the lab for specimen identification) and
 #'   the "lab subsampling ratio" (proportion of grids used to identify invertebrates
 #'   at the lab bench). For the EPA datasets, this is just the "lab subsampling ratio", the
-#'   proportion of grids used to identify invertebrates at the lab bench. Then,
-#'   \deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}} where taxa abundance
-#'   is simply divided by area sampled to estimate density. See
+#'   proportion of grids used to identify invertebrates at the lab bench. See
 #'   \code{vignette("GettingStarted")} for more details on the calculation of
 #'   taxa densities.
-#'
-#'   Note: There are 81 sampling events (sampling location - collection
-#'   date) with replicate samples (not duplicates). We have left these replicate
-#'   samples in the dataset, because some replicates are different in the stream
-#'   habitat sampled, which may be of interest for certain ecological questions.
-#'   For users who would like to remove these data to reduce potential effects of
-#'   replicate samples on their analyses, use
-#'   `data %>% group_by(Site_Number, CollectionDayOfYear) %>% slice(1)` to retain
-#'   only one replicate from each sampling event from the dataset.
 #'
 #' @author Michael Mahon, Devin Jones, Samantha Rumschlag, Terry Brown
 #'
@@ -162,7 +170,7 @@ getInvertData <- function(dataType = "occur",
   }
 
   if(isTRUE(sharedTaxa) && (all(grepl("USGS", agency)) | all(grepl("EPA", agency))) ){
-    stop('sharedTaxa can only be set to TRUE when agency is set to c("USGS", "EPA")')
+    stop('sharedTaxa must be set to FALSE when agency is set to "USGS" or "EPA" alone')
   }
 
   if(boatableStreams == TRUE && any(grepl("USGS", agency))){

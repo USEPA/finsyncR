@@ -377,7 +377,7 @@ Available area of interest (AOI): Cat, Ws (_Cat or _Ws follows column specifying
 
 Continuous. Percent.
 
-## Grouped NLCD Columns (`group = TRUE`)
+### Grouped NLCD Columns (`group = TRUE`)
 
 #### PctCrop[_AOI]
 
