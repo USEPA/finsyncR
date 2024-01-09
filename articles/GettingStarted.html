@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">finsyncR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,49 +80,52 @@
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>United States (US) federal biomonitoring programs exist to assess the
-state of freshwater communities. These programs use standardized
-sampling protocols to produce data that is unparalleled in terms of
-spatial extent, temporal scope, and diversity of taxa surveyed. These
-data are used by the US government in assessment frameworks, but a
-wealth of additional knowledge can be gleaned from unique applications
-of these data. While most data associated with these biomonitoring
-efforts are publicly available, barriers remain for new, outside users
-to apply these data without institutional guidance.</p>
+status and trends of the physical, chemical and biological condition of
+US waters, and collect data on freshwater communities. These programs
+use standardized sampling protocols to produce data that is unparalleled
+in terms of spatial extent, temporal scope, and diversity of taxa
+surveyed. These data are used by the US government in assessment
+frameworks, but a wealth of additional knowledge can be gleaned from
+unique applications of these data. While most data associated with these
+biomonitoring efforts are publicly available, barriers remain for new,
+outside users to apply these data without institutional guidance.</p>
 <p><code>finsyncR</code> (<strong>f</strong>ish and
 <strong>in</strong>vertebrate <strong>sync</strong>hronizer in
 <strong>R</strong>) is an R package that flexibly acquires, processes,
 and integrates national-level aquatic biomonitoring datasets in the US,
 with a focus on fish and macroinvertebrates in rivers and streams. The
 package streamlines the process of retrieving and harmonizing these
-data, improving access to cleaned data and making the application of
+data, improving access to cleaned data, and making the application of
 these data straightforward for researchers. The sources of data for this
-package are the United States Environmental Protection Agency’s (USEPA)
+package are the United States Environmental Protection Agency’s (EPA)
 National Aquatic Resource Surveys (NARS), namely the National River and
 Streams Assessment (NRSA), and United States Geological Survey’s (USGS)
 BioData.</p>
 <p>The package provides abundance and occurrence data for fish and
-macroinvertebrates at a variety of levels of taxonomic resolution. The
-package provides flexibility for common data integration and processing
-issues for temporal biologic datasets. Data management options include
-harmonization of macroinvertebrate taxonomy across the two federal
-sources of data and through time, and the option to drop hybrid
-organisms altogether for fish. Macroinvertebrate samples, which often
-vary in the number of individuals can be rarefied to a user specified
-count. Additionally, fish samples can be standardized to catch per-unit
-effort and to account for catchability differences between fish sampling
-methods. The package can also match sampling sites for fish and
-macroinvertebrates to data from the National Land Cover Database.</p>
-<p>In this Getting Started Vignette, we guide users on how to use the
-package and on certain nuances of the data that could influence
-analyses, in some instances. In particular, we describe the spatial
-sampling designs, the timing and frequency of monitoring efforts,
-variation in sampling efforts (e.g. sampling area and proportion of
-samples identified), and improvements in taxonomic identifications
-through time in some orders of macroinvertebrates. Potential uses of the
-data include studies of changes in fish and macroinvertebrate
-communities across space and time and the environmental causes and
-ecological consequences of those changes (see <a href="#Table1">Table
-1</a>).</p>
+macroinvertebrates at a variety of levels of taxonomic resolution.</p>
+<p>The package provides flexibility for common data integration and
+processing issues for temporal biologic datasets. The package can also
+match sampling sites to land cover data. The goals of the package are
+to: 1) unify EPA NRSA and USGS BioData creating a single national-scale,
+long-term dataset for fish and macroinvertebrates, 2) to streamline the
+process of acquiring, processing, and integrating these data, 3) to
+increase access to cleaned data and make the application of these data
+straightforward for users, and 4) to help users forgo common issues in
+data management by documenting the barriers to data use and by providing
+flexible strategies to overcome these barriers. These barriers include
+understanding spatial sampling designs and sampling frequencies,
+processing and integrating datasets across years and federal agencies,
+accounting for differences in taxonomy between agencies and through
+time, calculating densities and standardized abundances from field
+counts of organisms, accounting for differences in sampling effort
+across sampling events, and accounting for improvements in taxonomic
+identifications through time. In this Getting Started Vignette, we
+discuss these barriers and strategies to overcome them, so users can
+make informed decisions about the data given their specific research
+questions. Potential future uses of the data include studies of changes
+in fish and macroinvertebrate communities across space and time and the
+environmental causes and ecological consequences of those changes (see
+<a href="#Table1">Table 1</a>).</p>
 <p><br><a id="Table1"></a> <strong>Table 1.</strong> Example code to
 generate macroinvertebrates and fish datasets given hypothetical
 research questions.</p>
@@ -205,21 +208,29 @@ are directly downloaded by the package from the website: <a href="https://www.ep
 <h2 id="biotic-datasets">Biotic Datasets<a class="anchor" aria-label="anchor" href="#biotic-datasets"></a>
 </h2>
 <p>The package is organized into two groups of functions, namely
-functions that generate biotic and abiotic datasets. Two functions
+functions that assemble biotic and abiotic datasets. Two functions
 generate biotic datasets: <code><a href="../reference/getInvertData.html">getInvertData()</a></code> and
 <code><a href="../reference/getFishData.html">getFishData()</a></code>, which generate community matrices for
 macroinvertebrates and fish, respectively. The data management workflow
 for these functions generally follows three major steps: acquiring data
 and initial formatting, processing data separately by agency, and
-finally integrating data between USEPA and USGS sources (<a href="#Figure1">Figure 1</a>).</p>
-<p><br><a id="Figure1"></a>
-<img src="https://github.com/mahonmb/Misc/blob/main/WorkFlow.png?raw=TRUE" alt="\label{pizzhat}**Figure 1**. Workflow diagram of the simplified data management steps used in the construction of community matrices for macroinvertebrates, `getInvertData()`, and fish, `getfishData()`. Function parameters specified in each step of data management are provided." width="700px" style="display: block; margin: auto;"></p>
+finally integrating data between EPA and USGS sources (<a href="#Figure1">Figure 1</a>).</p>
+<br><center>
+<p><a id="Figure1"></a></p>
+<div class="figure">
+<img src="https://github.com/mahonmb/Misc/blob/main/WorkFlow.png?raw=TRUE" width="700" alt=""><p class="caption"><strong>Figure 1</strong>. Workflow diagram of the
+simplified data management steps used in the construction of community
+matrices for macroinvertebrates, <code><a href="../reference/getInvertData.html">getInvertData()</a></code>, and fish,
+<code>getfishData()</code>. Function parameters specified in each step
+of data management are provided.</p>
+</div>
+</center>
 <p><br></p>
 <div class="section level3">
 <h3 id="macroinvertebrates">Macroinvertebrates<a class="anchor" aria-label="anchor" href="#macroinvertebrates"></a>
 </h3>
 <p><code><a href="../reference/getInvertData.html">getInvertData()</a></code> retrieves, cleans, and compiles the
-stream macroinvertebrate datasets collected by the USGS and USEPA. The
+stream macroinvertebrate datasets collected by the USGS and EPA. The
 function harmonizes taxonomy of macroinvertebrates across agencies and
 through time. In addition, it accounts for differences in sample
 splitting, which vary by agency. The parameters in the
@@ -235,9 +246,9 @@ the sample by taxa community matrix contains abundance
 presence (1) or absence (0).</p>
 <p><code>taxonLevel</code> refers to the taxonomic resolution (Genus,
 Class, Family, etc.) for the sample by taxa matrix. The input values for
-this parameter must start with a capital letter. All observations
-taxonomically coarser than the <code>taxonLevel</code> provided are
-dropped from the output community matrix. For instance, if
+this parameter are case sensitive and must start with a capital letter.
+All observations taxonomically coarser than the <code>taxonLevel</code>
+provided are dropped from the output community matrix. For instance, if
 <code>taxonLevel = "Genus"</code> , then observations identified at
 Family, Order, Class, or Phylum levels are dropped. “Genus” is the
 finest level of taxonomic resolution provided for macroinvertebrates.
@@ -280,7 +291,7 @@ genera that have been linked through changes in taxonomy through time.
 With this approach, there is no temporal increase or decrease in the
 number of genera, given that individual genera (e.g. genus1) never
 appear outside of the unified genera name (e.g. genus1/genus2/genus3).
-So in the hypothetical example above, <em>Hereiam</em> and
+Thus, in the hypothetical example above, <em>Hereiam</em> and
 <em>Thereiam</em> would occur as “<em>Hereiam/Thereiam</em>” throughout
 the generated dataset. In total, 98 genera exist that were linked
 through changes in taxonomy through time (<a href="#Figure2">Figure
@@ -293,28 +304,30 @@ complexity of Ephemeroptera taxonomy, careful consideration should be
 given to inferences that can be made when evaluating Ephemeroptera
 trends. The authors, for instance, do not advise users evaluate temporal
 changes in abundance or richness of the linked groups of Ephemeroptera
-genera because taxonomic reorganizations likely obscure temporal
-patterns.</p>
-<p><br><a id="Figure2"></a></p>
+genera because taxonomic reorganizations over the last decades likely
+obscure temporal patterns.</p>
+<br><center>
+<p><a id="Figure2"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/GenusClusters.jpg?raw=true" width="350" alt=""><p class="caption"><strong>Figure 2.</strong> Visualization of the
 relationships among genera linked by taxonomic reorganization through
 time. Each numbered circle represents an individual genus. Lines between
-genera indicate that the taxonomic designation of at least one species
-from one of the genus pairs was updated to be in the other genus in the
-pair. Clusters (genera complexes) are formed by sets of these linked
-genera. See <a href="#TableA1">Appendix Table A1</a> for table linking
-numbers in the above cluster to genera names.</p>
+genera pairs indicate that the taxonomic designation of at least one
+species from one of the genus pairs was updated to be in the other genus
+in the pair. Clusters (genera complexes) are formed by sets of these
+linked genera. See <a href="#TableA1">Appendix Table A1</a> for table
+linking numbers in the above cluster to genera names.</p>
 </div>
+</center>
 <p><br></p>
 <p>The second option, <code>taxonFix = "remove"</code>, prioritizes
 accurate identification by dropping observations that cannot be
 confidently identified to a single genus, which includes the complexes
 of genera previously described. In addition,
-<code>taxonFix = "remove"</code> also removes orgnaisms identified as
-slash genera (e.g. genus1/genus2), which are identifications given to an
-organism during identification when multiple genera are not
-distinguished in an identification key. So,
+<code>taxonFix = "remove"</code> also removes organisms identified as
+slash genera (e.g. Cricotopus/Orthocladius), which are identifications
+given to organisms during identification when multiple genera cannot be
+distinguished according to an identification key. So,
 <code>taxonFix = "remove"</code> results in a dataset that has fewer
 genera compared to a dataset generated with
 <code>taxonFix = "lump"</code>. <code>taxonFix = "remove"</code> is the
@@ -324,71 +337,80 @@ returns identifications in their original forms. The
 <code>taxonFix = "none"</code> option generates slash genera for
 organisms that are given a slash genus either at the time of
 identification or to harmonize occurrences of slash genera between USGS
-and EPA observations, as described above. Care should be taken to
-harmonize taxonomy either with the approaches described above or by some
-alternative when generating long time scale datasets on the entire
-community of macroinvertebrates because changes in taxonomy can make it
+and EPA observations, as described above.</p>
+<p><code>taxonFix</code> operates on the genus level, so
+<code>taxonFix</code> must be set to <code>"none"</code> when taxonLevel
+is set to “Family” or higher taxonomic resolution. Care should be taken
+to harmonize taxonomy either with the approaches provided or some
+alternative when long time scale datasets on the entire community of
+macroinvertebrates are generated because changes in taxonomy can make it
 artificially appear as though some genera are either appearing or
-disappearing in time.</p>
-<p><code>taxonFix</code> operates on the genus level, so set
-<code>taxonFix = "none"</code> when taxonLevel is set to “Subfamily” or
-higher taxonomic resolution. Care should be taken to harmonize taxonomy
-either with the approaches provided or some alternative when long time
-scale datasets on the entire community of macroinvertebrates are
-generated because changes in taxonomy can make it artificially appear as
-though some genera are either appearing or disappearing in time. No
-matter the value provided to <code>taxonFix</code>, taxonomy is
-harmonized in three additional ways to appropriately join USGS and EPA
-datasets. First, in instances when a given organism has been identified
-at the species level and the genus that was originally given at the time
-of identification has been updated to a new genus, the package updates
-the genus designation by cross walking the bench identification to the
-current genus (<em>Hereiam there</em> becomes <em>Thereiam there</em>
-from the hypothetical example previously described). Second, there are
+disappearing in time. No matter the value provided to
+<code>taxonFix</code>, taxonomy is harmonized in three additional ways
+to appropriately join USGS and EPA datasets. First, in instances when a
+given organism has been identified at the species level and the genus
+that was given at the time of identification has been updated to a new
+genus, the package updates the genus by cross walking the bench
+identification to the current genus (<em>Hereiam there</em> becomes
+<em>Thereiam there</em> from the previous example). Second, there are
 instances when a slash genus was not used consistently between USGS and
-EPA. Slash genera are designations of multiple genera given to an
-organism during bench identification when multiple genera are
-indistinguishable (such as Cricotopus/Orthocladius). As a hypothetical
-example, the USGS data contains an organism identified as genus1/genus2,
-while EPA data included separate identifications of genus1 and genus2.
-To ensure consistency between the agencies, the package renames all
-single instances of genus1 and genus2 to genus1/genus2 when combining
-the EPA and USGS samples into a single dataset. Third, within the EPA
-dataset, a group of chironomids were identified to a genus-group
-(<em>Thienemannimyia</em> genus group), which consists of the chironomid
-genera <em>Arctopelopia</em>, <em>Conchapelopia</em>,
-<em>Hayesomyia</em>, <em>Helopelopia</em>, <em>Meropelopia</em>,
-<em>Rheopelopia</em>, <em>Telopelopia</em>, and
+EPA. As a hypothetical example, the USGS data contains an organism
+identified as genus1/genus2, while EPA data included separate
+identifications of genus1 and genus2. To ensure consistency between the
+agencies, the package renames all single instances of genus1 and genus2
+to genus1/genus2 when combining the EPA and USGS samples into a single
+dataset. Third, within the EPA dataset, a group of chironomids were
+identified to a genus-group (<em>Thienemannimyia</em> genus group),
+which consists of the chironomid genera <em>Arctopelopia</em>,
+<em>Conchapelopia</em>, <em>Hayesomyia</em>, <em>Helopelopia</em>,
+<em>Meropelopia</em>, <em>Rheopelopia</em>, <em>Telopelopia</em>, and
 <em>Thienemannimyia.</em> The package replaces instances of organisms
 identified to one of these individual genera or the
 <em>Thienemannimyia</em> genus group with a single slash genus,
 <em>Arctopelopia/Conchapelopia/Hayesomyia/Helopelopia/Meropelopia/Rheopelopia/Telopelopia/Thienemannimyia</em>.
-Taxonomy dataset used to harmonize was provided by USGS BioData.</p>
+The taxonomy dataset used to harmonize was provided by USGS BioData.</p>
 <p><code>agency</code> refers to the agency that collected the data. The
 default is <code>c("USGS", "EPA")</code> and results in the largest
 dataset. Users should be aware that the sampling designs (strategies for
 selecting sampling locations) from each agency are quite different (<a href="#Figure3">Figure 3</a>).</p>
-<p><br><a id="Figure3"></a>
-<img src="https://github.com/mahonmb/Misc/blob/main/sitesthrutime.png?raw=TRUE" alt="**Figure 3.** EPA and USGS sampling locations through years for both fish and macroinvertebrates. Sampling locations for USGS are set by research priorities of a given time period and those priorities change through time. The USGS sampling design results in a clustered pattern in some early years, and in later years, sites are more dispersed across the US. The EPA Wadeable Streams Assessment (WSA), which is part of NRSA from 2000-2004, used a randomized sampling design but surveyed only wadeable streams in either eastern or western portions of the US in each year. In all other rounds of the NRSA, a randomized sampling strategy is used across the entirety of the US and included both wadeable and boatable waterbodies, resulting in data that is representative of rivers and streams across the nation." width="550px" style="display: block; margin: auto;"></p>
+<br><center>
+<p><a id="Figure3"></a></p>
+<div class="figure">
+<img src="https://github.com/mahonmb/Misc/blob/main/sitesthrutime.png?raw=TRUE" width="550" alt=""><p class="caption"><strong>Figure 3.</strong> EPA and USGS sampling
+locations through years for both fish and macroinvertebrates. Sampling
+locations for USGS are set by research priorities of a given time period
+and those priorities change through time. The USGS sampling design
+results in a clustered pattern in some early years, and in later years,
+sites are more dispersed across the US. The EPA Wadeable Streams
+Assessment (WSA), which is part of NRSA from 2000-2004, used a
+randomized sampling design but surveyed only wadeable streams in either
+eastern or western portions of the US in each year. In subsequent rounds
+of NRSA, a randomized sampling strategy is used across the entirety of
+the US and included both wadeable and boatable waterbodies, resulting in
+data that is representative of rivers and streams across the contiguous
+US.</p>
+</div>
+</center>
 <p><br></p>
 <p>Sampling locations for USGS are set by research priorities of a given
 time period and assessment, and those priorities change through time.
 The BioData sampling design results in a clustered pattern in some early
 years, and in later years, sites are more dispersed throughout the US
-(<a href="#Figure3">Figure 3</a>). Conversely, EPA NARS uses a
-randomized sampling design to ensure that data collected are
-representative of water bodies across the contiguous US. The surveys of
-rivers and streams is called the National Rivers and Streams Assessment
-(NRSA). Generally, sampling rounds of NRSA occur every five years and
-each round of sampling occurs across two years (<a href="#Figure3">Figure 3</a>). An exception is an early iteration of
-NRSA called the Wadeable Streams Assessment (WSA). From 2000 to 2004,
-WSA surveyed only wadeable streams in either eastern or western portions
-of the US in each year. For more information see the sampling manuals
-from each of the agencies: <a href="https://pubs.usgs.gov/publication/ofr93406" class="external-link">USGS NAWQA</a> and <a href="https://www.epa.gov/national-aquatic-resource-surveys/manuals-used-national-aquatic-resource-surveys#National%20Rivers%20&amp;%20Streams%20Assessment" class="external-link">EPA
+(<a href="#Figure3">Figure 3</a>). Conversely, EPA NARS uses a spatially
+balanced survey design to ensure that data collected are representative
+of water bodies across the contiguous US. The surveys of rivers and
+streams is called the National Rivers and Streams Assessment (NRSA). EPA
+sampling efforts are generally two years in length with four years in
+between each effort (<a href="#Figure3">Figure 3</a>). An exception is
+an early iteration of NRSA called the Wadeable Streams Assessment (WSA).
+From 2000 to 2004, WSA surveyed only wadeable streams in either eastern
+or western portions of the US in each year. For more information see the
+sampling manuals from the agencies: <a href="https://pubs.usgs.gov/publication/ofr93406" class="external-link">USGS NAWQA</a> and <a href="https://www.epa.gov/national-aquatic-resource-surveys/manuals-used-national-aquatic-resource-surveys#National%20Rivers%20&amp;%20Streams%20Assessment" class="external-link">EPA
 NRSA</a>. Most sites across both EPA and USGS are sampled for a single
 year, although subsets of sites within each agency have been resampled
 across years (<a href="#Figure4">Figure 4</a>).</p>
-<p><br><a id="Figure4"></a></p>
+<br><center>
+<p><a id="Figure4"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/TimesSampledBoth.png?raw=TRUE" width="500" alt=""><p class="caption"><strong>Figure 4.</strong> Histograms showing the
 distributions in the number of unique years sites were sampled for
@@ -397,14 +419,27 @@ sites are sampled once. There are 60 sites with macroinvertebrates
 sampled in 10 or more years and 76 sites with fish sampled in 10 or more
 years from the USGS.</p>
 </div>
+</center>
 <p><br></p>
+<p>About 10% of EPA sites are resampled within a sampling round
+(e.g. 2008/2009), and about 40-50% of sites are resampled across
+consecutive sampling rounds (e.g. 2008/2009 to 2013/2014). However, the
+sites that are resampled between each set of consecutive rounds are not
+the same, so the 40-50% of 2008/2009 sites resampled in 2013/2014 are
+not the same 40-50% of 2013/2014 sites resampled in 2018/2019. EPA site
+names have been harmonized so that sites sampled in more than one year
+have the same name. The strength of the data in this package is its
+spatial coverage and extent, not the average number of times individual
+sites were sampled through time.</p>
 <p><code>boatableStreams</code> provides the option to include data from
-large streams and rivers that are too deep to sample by wading. All USGS
-sampling locations are considered wadeable streams, while EPA samples
-both wadeable streams and boatable rivers. As such,
+large streams and rivers that are too deep to be sampled by wading. All
+USGS sampling locations are considered wadeable streams, while EPA
+samples both wadeable streams and boatable rivers. As such,
 <code>boatableStreams</code> should only be <code>TRUE</code> when
 <code>agency</code> is set to <code>“EPA”</code> only, to ensure the
-highest comparability between the two agency datasets.</p>
+highest comparability between the two agency datasets.
+<code>boatableStreams</code> should be <code>FALSE</code> when users
+want to include WSA (EPA samples from 2000-2004) in analyses.</p>
 <p><code>rarefy</code> provides an option to randomly subsample samples
 to a user defined number of individuals. The target number of organisms
 identified within a sample varies across programs, agencies, time, and
@@ -418,13 +453,16 @@ retained. The rarefaction level defaults to 300 individuals,
 <code>rarefyCount = 300</code>, to balance the proportion of the samples
 dropped that failed to meet the rarefaction level with the addition of
 genera gained at the rarefaction level (<a href="#Figure5">Figure
-5</a>). With a rarefaction level of 300, ~91% of samples are retained,
-and with every 50 individuals identified, ~1 genus is added to the
-average sample. So, lowering the threshold to 200 individuals would have
-removed ~2 genera per sample and would have retained 94.5% of samples.
-Similarly, increasing the threshold to 400 individuals would have added
-~2 genera per sample but would have retained only 70.6% of samples.</p>
-<p><br><a id="Figure5"></a></p>
+5</a>). All samples with &lt;300 individuals sampled are removed from
+the output dataset. With a rarefaction level of 300, ~91% of all samples
+are retained, and with every 50 individuals identified, ~1 genus is
+added to the average sample. So, lowering the threshold to 200
+individuals would have removed ~2 genera per sample and would have
+retained 94.5% of all samples. Similarly, increasing the threshold to
+400 individuals would have added ~2 genera per sample but would have
+retained only 70.6% of all samples.</p>
+<br><center>
+<p><a id="Figure5"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/invertRare.png?raw=TRUE" width="350" alt=""><p class="caption"><strong>Figure 5.</strong> Visualization of the
 relationship between mean number of genera gained, the proportion of
@@ -432,6 +470,7 @@ samples with at least n number of organisms identified, and the number
 of organisms identified per sample in all streams, justifying the use of
 300 as the default rarefication threshold.</p>
 </div>
+</center>
 <p><br></p>
 <p>Use <code>seed =</code> and provide an integer to consistently
 generate output from the function. This parameter is passed to
@@ -441,8 +480,8 @@ generate output from the function. This parameter is passed to
 <p><code>lifestage</code> refers to whether the generated site by taxa
 matrix should include lifestage information for each organism. If
 <code>lifestage = TRUE</code>, the generated matrix will have separate
-columns for the various lifestages collected for each taxa. Lifestage is
-only provided for the USGS samples.</p>
+columns for the various lifestages collected for each taxon. Lifestage
+is only provided for the USGS samples.</p>
 <p><code>sharedTaxa</code> refers to whether the resulting dataset
 should retain only taxa that are found by both agencies. Set
 <code>sharedTaxa = FALSE</code> when generating a dataset for only one
@@ -464,27 +503,34 @@ dataset with both agencies, so that species pools are consistent.</p>
  finsyncR data synchronization complete</code></pre>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Inverts</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">26</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##   Agency ProjectLabel           SiteNumber                 StudyReachName CollectionDate CollectionYear CollectionMonth CollectionDayOfYear Latitude_dd Longitude_dd</span></span>
-<span><span class="co">## 1   USGS  WHMI BioTDB USGS-393259085101200 393259085101200-A-NAWQA-BioTDB     1999-07-13           1999               7                 194    39.54977    -85.16996</span></span>
-<span><span class="co">## 2   USGS  WHMI BioTDB        USGS-03245500        03245500-A-NAWQA-BioTDB     1999-07-14           1999               7                 195    39.17145    -84.29799</span></span>
-<span><span class="co">## 3   USGS  WHMI BioTDB        USGS-03246400        03246400-A-NAWQA-BioTDB     1999-07-15           1999               7                 196    39.05895    -84.05132</span></span>
-<span><span class="co">## 4   USGS  WHMI BioTDB USGS-395534084091400 395534084091400-A-NAWQA-BioTDB     1999-07-07           1999               7                 188    39.92617    -84.15383</span></span>
-<span><span class="co">## 5   USGS  WHMI BioTDB USGS-395650083504400 395650083504400-A-NAWQA-BioTDB     1999-07-06           1999               7                 187    39.94728    -83.84549</span></span>
-<span><span class="co">## 6   USGS  WHMI BioTDB USGS-392246084340100 392246084340100-A-NAWQA-BioTDB     1999-07-13           1999               7                 194    39.37950    -84.56689</span></span>
-<span><span class="co">##   CoordinateDatum    COMID StreamOrder WettedWidth PredictedWettedWidth_m NARS_Ecoregion SampleTypeCode AreaSampTot_m2 FieldSplitRatio LabSubsamplingRatio PropID</span></span>
-<span><span class="co">## 1           NAD27  3923217           4          NA                  27.88            SAP           IRTH           1.25               1              0.0170 0.0170</span></span>
-<span><span class="co">## 2           NAD27 25243939           5          NA                  43.55            TPL           IRTH           1.25               1              0.0347 0.0347</span></span>
-<span><span class="co">## 3           NAD27  3936150           4          NA                     NA            TPL           IRTH           1.25               1              0.0397 0.0397</span></span>
-<span><span class="co">## 4           NAD27  3985952           5          NA                  46.70            TPL           IRTH           1.25               1              0.0149 0.0149</span></span>
-<span><span class="co">## 5           NAD27  3985520           5          NA                  28.50            TPL           IRTH           1.25               1              0.0298 0.0298</span></span>
-<span><span class="co">## 6           NAD27  3885882           7          NA                 100.42            TPL           IRTH           1.25               1              0.0113 0.0113</span></span>
-<span><span class="co">##   Gen_ID_Prop</span></span>
-<span><span class="co">## 1   0.8838527</span></span>
-<span><span class="co">## 2   0.8655914</span></span>
-<span><span class="co">## 3   0.8084416</span></span>
-<span><span class="co">## 4   0.7481297</span></span>
-<span><span class="co">## 5   0.7476923</span></span>
-<span><span class="co">## 6   0.8468208</span></span>
+<pre><code><span><span class="co">##   Agency ProjectLabel           SiteNumber                 StudyReachName CollectionDate</span></span>
+<span><span class="co">## 1   USGS  WHMI BioTDB USGS-393259085101200 393259085101200-A-NAWQA-BioTDB     1999-07-13</span></span>
+<span><span class="co">## 2   USGS  WHMI BioTDB        USGS-03245500        03245500-A-NAWQA-BioTDB     1999-07-14</span></span>
+<span><span class="co">## 3   USGS  WHMI BioTDB        USGS-03246400        03246400-A-NAWQA-BioTDB     1999-07-15</span></span>
+<span><span class="co">## 4   USGS  WHMI BioTDB USGS-395534084091400 395534084091400-A-NAWQA-BioTDB     1999-07-07</span></span>
+<span><span class="co">## 5   USGS  WHMI BioTDB USGS-395650083504400 395650083504400-A-NAWQA-BioTDB     1999-07-06</span></span>
+<span><span class="co">## 6   USGS  WHMI BioTDB USGS-392246084340100 392246084340100-A-NAWQA-BioTDB     1999-07-13</span></span>
+<span><span class="co">##   CollectionYear CollectionMonth CollectionDayOfYear Latitude_dd Longitude_dd CoordinateDatum    COMID</span></span>
+<span><span class="co">## 1           1999               7                 194    39.54977    -85.16996           NAD27  3923217</span></span>
+<span><span class="co">## 2           1999               7                 195    39.17145    -84.29799           NAD27 25243939</span></span>
+<span><span class="co">## 3           1999               7                 196    39.05895    -84.05132           NAD27  3936150</span></span>
+<span><span class="co">## 4           1999               7                 188    39.92617    -84.15383           NAD27  3985952</span></span>
+<span><span class="co">## 5           1999               7                 187    39.94728    -83.84549           NAD27  3985520</span></span>
+<span><span class="co">## 6           1999               7                 194    39.37950    -84.56689           NAD27  3885882</span></span>
+<span><span class="co">##   StreamOrder WettedWidth PredictedWettedWidth_m NARS_Ecoregion SampleTypeCode AreaSampTot_m2</span></span>
+<span><span class="co">## 1           4          NA                  27.88            SAP           IRTH           1.25</span></span>
+<span><span class="co">## 2           5          NA                  43.55            TPL           IRTH           1.25</span></span>
+<span><span class="co">## 3           4          NA                     NA            TPL           IRTH           1.25</span></span>
+<span><span class="co">## 4           5          NA                  46.70            TPL           IRTH           1.25</span></span>
+<span><span class="co">## 5           5          NA                  28.50            TPL           IRTH           1.25</span></span>
+<span><span class="co">## 6           7          NA                 100.42            TPL           IRTH           1.25</span></span>
+<span><span class="co">##   FieldSplitRatio LabSubsamplingRatio PropID Gen_ID_Prop</span></span>
+<span><span class="co">## 1               1              0.0170 0.0170   0.8838527</span></span>
+<span><span class="co">## 2               1              0.0347 0.0347   0.8655914</span></span>
+<span><span class="co">## 3               1              0.0397 0.0397   0.8084416</span></span>
+<span><span class="co">## 4               1              0.0149 0.0149   0.7481297</span></span>
+<span><span class="co">## 5               1              0.0298 0.0298   0.7476923</span></span>
+<span><span class="co">## 6               1              0.0113 0.0113   0.8468208</span></span>
 <span><span class="co">##   Acentrella.Acerpenna.Amercaenis.Americabaetis.Anafroptilum.Anthopotamus.Apobaetis.Attenella.Baetis.Baetisca.Barbaetis.Brachycercus.Caenis.Callibaetis.Campsurus.Caudatella.Centroptilum.Choroterpes.Cinygma.Cinygmula.Cloe.Cloeon.Dannella.Dentatella.Diph ...</span></span>
 <span><span class="co">## 1                                                                                                                                                                                                                                                         3104.8</span></span>
 <span><span class="co">## 2                                                                                                                                                                                                                                                         1497.6</span></span>
@@ -499,6 +545,7 @@ dataset with both agencies, so that species pools are consistent.</p>
 <span><span class="co">## 4    53.6                                 107.2                   3332.8</span></span>
 <span><span class="co">## 5     0.0                                 994.4                   2124.0</span></span>
 <span><span class="co">## 6     0.0                                   0.0                   1058.4</span></span></code></pre>
+<p><br></p>
 <div class="section level4">
 <h4 id="using-the-macroinvertebrate-data">Using the macroinvertebrate data<a class="anchor" aria-label="anchor" href="#using-the-macroinvertebrate-data"></a>
 </h4>
@@ -506,10 +553,11 @@ dataset with both agencies, so that species pools are consistent.</p>
 covariate data that describes details of sampling methods. Two
 covariates, proportion of sample identified (<code>PropID</code>) and
 area sampled (<code>AreaSampledTotal_m</code>), are of particular
-interest to users because they are used to calculate densities of
-macroinvertebrates (<a href="#Figure6">Figure 6</a>) and they represent
+interest because they are used to calculate densities of
+macroinvertebrates (<a href="#Figure6">Figure 6</a>) and represent
 different facets of sampling effort.</p>
-<p><br><a id="Figure6"></a></p>
+<br><center>
+<p><a id="Figure6"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/InvertAbun.png?raw=TRUE" width="525" alt=""><p class="caption"><strong>Figure 6</strong>.Calculation of sample
 densities for USGS and EPA samples. The field split ratio is the
@@ -518,6 +566,7 @@ be identified. Note that only the USGS data included field split ratios.
 Lab subsampling ratio is the proportion of grids in a subsampling tray
 used to identify and enumerate macroinvertebrates in the lab.</p>
 </div>
+</center>
 <p><br></p>
 <p>For macroinvertebrates, density calculations are simply
 macroinvertebrate abundance divided by the area sampled (<a href="#Figure6">Figure 6</a>). Macroinvertebrate abundance is the number
@@ -538,9 +587,9 @@ calculated by multiplying the “field split ratio” and the “lab
 subsampling ratio” (<a href="#Figure6">Figure 6</a>). For EPA samples,
 <code>PropID</code> is equal to the “lab subsampling ratio” (<a href="#Figure6">Figure 6</a>).</p>
 <p>Sampling effort is a source of variation and should be considered in
-the context of research questions because these factors influence sample
-abundances and probability of detection of any given organism. For
-instance, sampling effort varies across sampling events and is also
+the context of research questions because sampling effort can influence
+sample abundances and probability of detection of any given organism.
+For instance, sampling effort varies across sampling events and is also
 correlated with time in some cases, which could lead to biased
 interpretation in certain analyses. Given that <code>PropID</code> and
 <code>AreaSampledTotal_m</code> are facets of sampling effort, they
@@ -551,43 +600,54 @@ total density of macroinvertebrates decreases, and as time proceeds
 potential that early years could be biased to large sample densities and
 later years could be biased to low sample densities, which would make it
 appear as though total densities decline over time.</p>
-<p><br><a id="Figure7"></a></p>
+<br><center>
+<p><a id="Figure7"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/proparea.png?raw=TRUE" width="550" alt=""><p class="caption"><strong>Figure 7</strong>. Associations among
 sampling variables (proportion of the sample identified
 (<code>propID</code>) and area sampled
-(<code>AreaSampledTotal_m</code>)), total macroinvertebrate densities
+(<code>AreaSampledTotal_m</code>), total macroinvertebrate densities
 within samples, and time for both EPA and USGS datasets. Trend lines are
 simple linear relationships between sets of variables. These
 associations suggest that users should carefully consider these sampling
 effort variables because ignoring these variables could lead to spurious
-results in some instances. For instance, as <code>propID</code> and
-<code>AreaSampledTotal_m</code> increase, the total density of
-macroinvertebrates decreases, and as time proceeds <code>propID</code>
-and <code>AreaSampledTotal_m</code> increase. Together, these trends
-suggest the potential that early years could be biased to high density
-measurements and later years could be biased to low density
-measurements, which would make it appear as though total densities
-decline over time.</p>
+results in some instances. For instance, as (A) <code>propID</code> and
+(B) <code>AreaSampledTotal_m</code> increase, the total density of
+macroinvertebrates decreases, and as time proceeds (C)
+<code>propID</code> and (D) <code>AreaSampledTotal_m</code> increase.
+Together, these trends suggest the potential that early years could be
+biased to high density measurements and later years could be biased to
+low density measurements, which would make it appear as though total
+densities decline over time.</p>
 </div>
+</center>
 <p><br></p>
-<p>The proportion of specimen within samples identified to genus
+<p>The proportion of organisms within samples identified to genus
 (<code>genPropID</code>) is a variable that describes potential changes
 in the ability of taxonomists to identify specimen through time. Within
-some orders, Gen_ID_Prop increases over time, likely indicating that
-taxonomists improved in their abilities to make identifications at the
-genus or species level, and as a result the probability of detection of
-these groups would appear to increase through time (<a href="#Figure8">Figure 8</a>). Users should take care to consider these
-patterns since they could lead to the false impression that new or more
-genera appear through time.</p>
-<p><br><a id="Figure8"></a></p>
+some orders, <code>Gen_ID_Prop</code> increases over time, likely
+indicating that taxonomists improved in their abilities to make
+identifications at the genus or species level, and as a result the
+probability of detection of these groups would appear to increase
+through time (<a href="#Figure8">Figure 8</a>). Similarly, within some
+orders within the EPA dataset, <code>Gen_ID_Prop</code> decreases over
+time. One possible explanation for these trends could be the time spent
+identificating and enumerating WSA samples was greater than NRSA
+samples, and as a result the probability of detection of these groups
+could appear to decrease through time (<a href="#Figure8">Figure 8</a>).
+Users should take care to consider these patterns since they could lead
+to the false impression that genera appear and disapear through
+time.</p>
+<br><center>
+<p><a id="Figure8"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/GenIDPropOrderThruTime.png?raw=TRUE" width="550" alt=""><p class="caption"><strong>Figure 8</strong>. Plots showing
 relationships between time and the proportion of specimens identified to
-genus within samples by order for EPA and USGS datasets. Positive trends
-likely indicate that within a given order, taxonomists improved in their
-abilities to make identifications at the genus level.</p>
+genus within samples by order for EPA and USGS datasets. Trends could
+indicate that within a given order, the abilities to make
+identifications at the genus level changed across time.</p>
 </div>
+</center>
 <p><br></p>
 </div>
 </div>
@@ -596,7 +656,7 @@ abilities to make identifications at the genus level.</p>
 </h3>
 <p><code><a href="../reference/getFishData.html">getFishData()</a></code> retrieves, cleans, and compiles the stream
 fish datasets collected by USGS and EPA. Fish species names output by
-the function are unified and current, such that species that may have
+the function are unified and current, meaning that species that may have
 had multiple, synonymous names in the raw datasets have been combined
 and have been replaced with the current scientific name.</p>
 <p>The parameters in the <code><a href="../reference/getFishData.html">getFishData()</a></code> function are
@@ -614,23 +674,23 @@ observations taxonomically coarser than the taxonLevel provided are
 dropped from the output community matrix. For instance, if
 <code>taxonLevel = "Genus"</code>, then observations identified at
 Family, Order, Class, or Phylum levels are dropped. The lowest level of
-taxonomic identification for fish is <code>"Species"</code>, because of
+taxonomic identification for fish is <code>"Species"</code> because of
 inconsistent subspecies identifications.</p>
 <p><code>agency</code> refers to the agency that collected the data. The
 default is c(“USGS”, “EPA”) and results in the largest dataset. Users
-should be aware that the sampling designs (strategies for selecting
-sampling locations) from each agency are quite different (<a href="#Figure3">Figure 3</a>). In addition, the majority of sites are
+should be aware that the sampling designs of each agency are quite
+different (<a href="#Figure3">Figure 3</a>). In addition, most sites are
 only sampled once (<a href="#Figure4">Figure 4</a>). For more
 information, see the discussion of the agency parameter for
 <code><a href="../reference/getInvertData.html">getInvertData()</a></code>.</p>
 <p><code>standardize</code> refers to whether the abundance values in
-the community matrix should be standardized by unit effort to account
-for differences in sampling effort and reach length fished.
+the community matrix should be standardized by unit effort and reach
+length fished to account for differences in sampling effort.
 Specifically, catch per unit effort, <code>standardize = "CPUE"</code>,
 results in abundances that are divided by the product of sampling effort
 (e.g. minutes shocked, number of seine hauls, or snorkel transects) and
-stream length sampled (<span class="math inline">\(\ref{eq:
-1}\)</span>).</p>
+stream length sampled ( <span class="math inline">\(\ref{eq: 1}\)</span>
+).</p>
 <p><span class="math display">\[\begin{equation}
   \tag{eq: 1}
   \label{eq: 1}
@@ -653,7 +713,7 @@ Catch Per Unit Effort for sample <em>j</em> (TCPUE<sub><em>j</em></sub>,
 \label{eq: 2}
 TCPUE_j = \sum_{} CPUE_{ij}
 \end{equation}\]</span></p>
-<p>For each gear type, the mean TCPUE is calculated, . Next, to
+<p>For each gear type, the mean TCPUE is then calculated. Next, to
 standardize each gear, CPUE for each taxa <em>i</em> is divided by mean
 TCPUE (<span class="math inline">\(\ref{eq: 3}\)</span>).</p>
 <p><span class="math display">\[\begin{equation}
@@ -663,13 +723,10 @@ MSC_{ij} = \frac{CPUE_{ij}}{\overline{TCPUE}}
 \end{equation}\]</span></p>
 <p>MSC<sub><em>ij</em></sub> is the mean standardized catch of species
 <em>i</em> in observation <em>j</em>. The units of sampling effort
-cancel in the calculation of MSC<sub><em>ij</em></sub>, but patterns of
-relative abundance of species within and across observations are
-preserved, which can be important for community analyses (e.g. relative
-evenness, Bray-Curtis distance calculation). The function then sums the
-MSC<sub><em>ij</em></sub> among gear types, resulting in a single row of
-data for each sampling event, regardless of the number of gear types
-used. See <a href="https://doi.org/10.1139/cjfas-2016-0003" class="external-link">Gibson-Reinemer et
+cancel in the calculation of MSC<sub><em>ij</em></sub>. The function
+then sums the MSC<sub><em>ij</em></sub> among gear types, resulting in a
+single row of data for each sampling event, regardless of the number of
+gear types used. See <a href="https://doi.org/10.1139/cjfas-2016-0003" class="external-link">Gibson-Reinemer et
 al. (2017)</a> for more regarding the computation of MGMS.</p>
 <p>Users should set standardize to either “<code>CPUE</code>” or
 “<code>MGMS</code>” if they are interested in comparing abundance values
@@ -686,14 +743,14 @@ the field, users should keep the default setting
 <p><code>sharedTaxa</code> refers to whether the resulting dataset
 should contain only taxa that are found in both agency datasets. Set
 <code>sharedTaxa = FALSE</code> when building a dataset with samples
-collected by one agency. We recommend using
+collected by only one agency. We recommend using
 <code>sharedTaxa = TRUE</code> when building a dataset with samples
 collected by both agencies, so that species pools are consistent.</p>
 <p>Finally, <code>boatableStreams</code> provides the option to include
 data from large streams and rivers that are too deep to sample by
-wading. All USGS sampling locations are considered wadeable streams,
+wading. Most USGS sampling locations are considered wadeable streams,
 while EPA samples both wadeable streams and boatable streams and rivers.
-So, set <code>boatableStreams</code> to <code>TRUE</code> when
+Thus, set <code>boatableStreams</code> to <code>TRUE</code> when
 <code>agency</code> is set to “<code>EPA</code>” only, to ensure the
 highest comparability between the two agency datasets.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -712,46 +769,13 @@ highest comparability between the two agency datasets.</p>
  Gathering, joining, and cleaning EPA raw data                    
  Applying taxonomic fixes to EPA data</code></pre>
 <pre><code><span><span class="co">## Error in `dplyr::mutate()`:</span></span>
-<span><span class="co">## ℹ In argument: `tax_No fish = ifelse(`tax_No fish` == 0, "Fish Collected", "No Fish Collected")`.</span></span>
+<span><span class="co">## ℹ In argument: `tax_No fish = ifelse(`tax_No fish` == 0, "Fish Collected", "No Fish</span></span>
+<span><span class="co">##   Collected")`.</span></span>
 <span><span class="co">## Caused by error in `ifelse()`:</span></span>
 <span><span class="co">## ! object 'tax_No fish' not found</span></span></code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Fish</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">28</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate CollectionYear CollectionMonth</span></span>
-<span><span class="co">## 1   USGS     MMSD Eco USGS-04086600 04086600-A-MMSD Eco     2007-09-10           2007               9</span></span>
-<span><span class="co">## 2   USGS     MMSD Eco USGS-04087030 04087030-A-MMSD Eco     2007-09-05           2007               9</span></span>
-<span><span class="co">## 3   USGS     MMSD Eco USGS-04087070 04087070-A-MMSD Eco     2007-09-05           2007               9</span></span>
-<span><span class="co">## 4   USGS     MMSD Eco USGS-04087088 04087088-A-MMSD Eco     2007-09-04           2007               9</span></span>
-<span><span class="co">## 5   USGS     MMSD Eco USGS-04087119 04087119-A-MMSD Eco     2007-09-12           2007               9</span></span>
-<span><span class="co">## 6   USGS     MMSD Eco USGS-04087204 04087204-A-MMSD Eco     2007-09-07           2007               9</span></span>
-<span><span class="co">##   CollectionDayOfYear Latitude_dd Longitude_dd CoordinateDatum    COMID StreamOrder WettedWidth</span></span>
-<span><span class="co">## 1                 253    43.28028    -87.94250           NAD83 12162572           5          NA</span></span>
-<span><span class="co">## 2                 248    43.17278    -88.10389           NAD83 12163826           3          NA</span></span>
-<span><span class="co">## 3                 248    43.12361    -88.04361           NAD83 12163856           3          NA</span></span>
-<span><span class="co">## 4                 247    43.05472    -88.04611           NAD83 12163882           2          NA</span></span>
-<span><span class="co">## 5                 255    43.04383    -88.00511           NAD83 12163888           1          NA</span></span>
-<span><span class="co">## 6                 250    42.92500    -87.87000           NAD83 12168981           2          NA</span></span>
-<span><span class="co">##   PredictedWettedWidth_m NARS_Ecoregion SampleTypeCode FishCollection ReachLengthFished_m SampleMethod</span></span>
-<span><span class="co">## 1                  46.17            TPL Large Wadeable Fish Collected                 300        Seine</span></span>
-<span><span class="co">## 2                   8.98            TPL Small Wadeable Fish Collected                 150        Seine</span></span>
-<span><span class="co">## 3                   8.50            TPL Small Wadeable Fish Collected                 150        Seine</span></span>
-<span><span class="co">## 4                   6.72            TPL Small Wadeable Fish Collected                 150        Seine</span></span>
-<span><span class="co">## 5                   5.12            TPL Small Wadeable Fish Collected                 150        Seine</span></span>
-<span><span class="co">## 6                   7.26            TPL Small Wadeable Fish Collected                 150        Seine</span></span>
-<span><span class="co">##   MethodEffort MethodEffort_units Luxilus.cornutus Micropterus.dolomieu Notropis.atherinoides</span></span>
-<span><span class="co">## 1            3    Number of Hauls                1                    1                     1</span></span>
-<span><span class="co">## 2            3    Number of Hauls                1                    0                     0</span></span>
-<span><span class="co">## 3            3    Number of Hauls                1                    0                     0</span></span>
-<span><span class="co">## 4            5    Number of Hauls                1                    0                     0</span></span>
-<span><span class="co">## 5            3    Number of Hauls                0                    0                     0</span></span>
-<span><span class="co">## 6            3    Number of Hauls                0                    0                     0</span></span>
-<span><span class="co">##   Ambloplites.rupestris Ameiurus.natalis Campostoma.anomalum</span></span>
-<span><span class="co">## 1                     0                0                   0</span></span>
-<span><span class="co">## 2                     0                0                   0</span></span>
-<span><span class="co">## 3                     0                0                   0</span></span>
-<span><span class="co">## 4                     0                0                   1</span></span>
-<span><span class="co">## 5                     0                0                   0</span></span>
-<span><span class="co">## 6                     0                0                   0</span></span></code></pre>
+<pre><code><span><span class="co">## Error in head(Fish): object 'Fish' not found</span></span></code></pre>
 <div class="section level4">
 <h4 id="using-the-fish-data">Using the fish data<a class="anchor" aria-label="anchor" href="#using-the-fish-data"></a>
 </h4>
@@ -773,7 +797,8 @@ sampling variables vary randomly through time. There could conceivably
 be instances in which fish sampling variables are important to consider
 in analyses given their wide variation and correlation with number of
 fish within samples.</p>
-<p><br><a id="Figure9"></a></p>
+<br><center>
+<p><a id="Figure9"></a></p>
 <div class="figure">
 <img src="https://github.com/mahonmb/Misc/blob/main/propareaFish.png?raw=TRUE" width="550" alt=""><p class="caption"><strong>Figure 9</strong>. Associations among
 sampling variables (minutes spent electroshocking
@@ -781,39 +806,48 @@ sampling variables (minutes spent electroshocking
 [<code>ReachLengthFished_m</code>]), catch per unit effort (CPUE), and
 time for both EPA and USGS datasets. These associations suggest that
 users should consider these sampling effort variables. For instance, as
-<code>MethodEffort</code> and <code>ReachLengthFished_m</code> increase,
-the total number of fish decreases. However, unlike the
-macroinvertebrate sampling variables (<a href="#Figure7">Figure 7</a>),
-these fish sampling variables randomly vary through time.</p>
+(A) <code>MethodEffort</code> and (B) <code>ReachLengthFished_m</code>
+increase, the total number of fish decreases. However, unlike the
+macroinvertebrate sampling variables (compare <a href="#Figure7">Figure
+7C-D</a> with Figure 9C-D), these fish sampling variables randomly vary
+through time. There could be instances in which fish sampling variables
+are still important to consider in analyses given their wide variation
+and correlation with number of fish within samples.</p>
 </div>
+</center>
 <p><br></p>
 </div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="abiotic-dataset-national-land-cover-database-from-usgs">Abiotic Dataset: National Land Cover Database from USGS<a class="anchor" aria-label="anchor" href="#abiotic-dataset-national-land-cover-database-from-usgs"></a>
+<h2 id="abiotic-dataset-national-land-cover-database">Abiotic Dataset: National Land Cover Database<a class="anchor" aria-label="anchor" href="#abiotic-dataset-national-land-cover-database"></a>
 </h2>
 <p>There is one abiotic function that generates land cover data,
 <code><a href="../reference/getNLCDData.html">getNLCDData()</a></code>. <code><a href="../reference/getNLCDData.html">getNLCDData()</a></code> retrieves land
-cover data from the National Land Cover Database (NLCD) for sampling
-sites at the catchment and watershed scales. This function directly
-accesses the USEPA StreamCat API (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/1752-1688.12372" class="external-link">Hill
+cover data from the Multi-Resolution Land Characteristics Consortium’s
+National Land Cover Database (NLCD) for sampling sites at the catchment
+and watershed scales. This function directly accesses the EPA StreamCat
+API (<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/1752-1688.12372" class="external-link">Hill
 et al. 2015</a>) to gather NLCD data based on sampling location from
 NHDPlus COMIDs and collection year.</p>
 <p><code><a href="../reference/getNLCDData.html">getNLCDData()</a></code> matches sampling sites to NLCD data in
-time. NLCD data are available in the following years: 2001, 2004, 2006,
-2008, 2011, 2013, 2016, and 2019. For instances of samples that do not
-have a match in collection year to a year of NLCD data, samples are
-matched to the closest year of NLCD data For instance, a site sampled in
-1995 is matched to 2001 NLCD data. For samples (e.g. collection year
-2005) that fall at the midpoint of two NLCD years (e.g. 2004 and 2006
-NLCD data), the function pulls NLCD data from the earlier year
-(e.g. 2004 NLCD data).</p>
+time. NLCD data are currently available within StreamCat for the
+following years: 2001, 2004, 2006, 2008, 2011, 2013, 2016, and 2019,
+with plans to include subsequent years as they become available. For
+instances of samples that do not have a match in collection year to a
+year of NLCD data, samples are matched to the closest year of NLCD data.
+For instance, a site sampled in 1995 is matched to 2001 NLCD data. For
+samples (e.g. collection year 2005) that fall at the midpoint of two
+NLCD years (e.g. 2004 and 2006 NLCD data), the function pulls NLCD data
+from the earlier year (e.g. 2004 NLCD data).</p>
 <p>Users can specify whether NLCD data should be extracted at the
-catchment <code>Cat</code> or watershed <code>Ws</code> scales. A
-watershed is larger than a catchment and includes land that drains
-downstream of the sampling location, and a catchment includes only land
-that is upstream of the sampling location. See <a href="https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset" class="external-link">StreamCat</a>
+catchment <code>Cat</code> or watershed <code>Ws</code> scales. The
+catchment includes only land that drains directly to the stream segment
+of the sampling location, excluding contributions from upstream segments
+of the watershed. In contrast, watersheds are larger than catchments and
+include land that drains directly to the stream segment from the
+surrounding uplands, plus all upstream contributions from flow-connected
+stream segments. See <a href="https://www.epa.gov/national-aquatic-resource-surveys/streamcat-dataset" class="external-link">StreamCat</a>
 documentation for more information.</p>
 <p>NLCD data can be grouped into five broad categories using
 <code>group = TRUE</code>. These categories include “water” (grouping of
@@ -828,61 +862,78 @@ and hay/pasture land covers), and “crop” (cultivated crop land use).</p>
 <span><span class="fu"><a href="../reference/getNLCDData.html">getNLCDData</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>,</span>
 <span>            scale <span class="op">=</span> <span class="st">"Cat"</span>,</span>
 <span>            group <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat</span></span>
-<span><span class="co">## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11</span></span>
-<span><span class="co">## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11</span></span>
-<span><span class="co">## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11</span></span>
-<span><span class="co">##   PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat</span></span>
-<span><span class="co">## 1         2.81       38.56          0         0         0            0         0.46         3.20</span></span>
-<span><span class="co">## 2         2.64       38.56          0         0         0            0         0.46         3.10</span></span>
-<span><span class="co">## 3         2.50       38.56          0         0         0            0         0.46         2.92</span></span>
-<span><span class="co">##   PCTWDWET_Cat</span></span>
-<span><span class="co">## 1         8.44</span></span>
-<span><span class="co">## 2         8.44</span></span>
-<span><span class="co">## 3         8.59</span></span></code></pre>
+<pre><code><span><span class="co">##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat</span></span>
+<span><span class="co">## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0</span></span>
+<span><span class="co">## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0</span></span>
+<span><span class="co">## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0</span></span>
+<span><span class="co">##   PCTURBHI_Cat PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat</span></span>
+<span><span class="co">## 1         0.11         2.81       38.56          0         0         0            0         0.46</span></span>
+<span><span class="co">## 2         0.11         2.64       38.56          0         0         0            0         0.46</span></span>
+<span><span class="co">## 3         0.11         2.50       38.56          0         0         0            0         0.46</span></span>
+<span><span class="co">##   PCTURBOP_Cat PCTWDWET_Cat</span></span>
+<span><span class="co">## 1         3.20         8.44</span></span>
+<span><span class="co">## 2         3.10         8.44</span></span>
+<span><span class="co">## 3         2.92         8.59</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">##select 10 random samples from the dataset to get LULC data for</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">Fish_forNLCD</span> <span class="op">=</span> <span class="va">Fish</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>,<span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,<span class="op">]</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">SiteNumber</span>, <span class="va">CollectionYear</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/getNLCDData.html">getNLCDData</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">Fish_forNLCD</span>,</span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">SiteNumber</span>, <span class="va">CollectionYear</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Error in dplyr::select(., SiteNumber, CollectionYear): object 'Fish' not found</span></span></code></pre>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/getNLCDData.html">getNLCDData</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">Fish_forNLCD</span>,</span>
 <span>            scale <span class="op">=</span> <span class="st">"Cat"</span>,</span>
 <span>            group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##       SiteNumber CollectionYear PctCrop_Cat PctFst_Cat PctOpn_Cat PctUrb_Cat PctWater_Cat</span></span>
-<span><span class="co">## 1  USGS-01072845           2000        0.00      75.35       8.53       5.30        10.81</span></span>
-<span><span class="co">## 2  USGS-05318630           1997       89.00       0.40       0.60       5.29         4.70</span></span>
-<span><span class="co">## 3  USGS-01089743           2000        0.00      55.50       1.16      29.45        13.91</span></span>
-<span><span class="co">## 4  USGS-05288705           1997        0.03       1.12       2.12      95.04         1.69</span></span>
-<span><span class="co">## 5  USGS-05082625           1993       69.39       3.81       2.94       5.51        18.35</span></span>
-<span><span class="co">## 6  USGS-02458150           2001        0.00       8.38       0.67      90.22         0.73</span></span>
-<span><span class="co">## 7  USGS-08050800           1993        0.00      30.26      63.96       4.30         1.50</span></span>
-<span><span class="co">## 8  USGS-01096544           2000        0.44      32.19      19.34      25.82        22.20</span></span>
-<span><span class="co">## 9  USGS-06775900           1993        0.00       2.31      96.99       0.19         0.50</span></span>
-<span><span class="co">## 10 USGS-01144000           1993        0.00      87.58       5.25       6.66         0.50</span></span></code></pre>
+<pre><code><span><span class="co">## Error in dplyr::left_join(data, (.allsitesCOMID[, -c(3, 4, 5)] %&gt;% dplyr::filter(SiteNumber %in% : object 'Fish_forNLCD' not found</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="parting-words">Parting words<a class="anchor" aria-label="anchor" href="#parting-words"></a>
 </h2>
-<p>For metadata on output datasets, check out the “Metadata” vignette
+<p>For metadata on output datasets, see the “Metadata” vignette
 <code>vignettes("Metadata", "finsyncR")</code>.</p>
 <p>We anticipate that this package will grow and change in the coming
 years. In particular, as the NRSA continues to sample rivers and streams
 throughout the contiguous US, we intend to incorporate each new round of
 sampling into this R package when the newest data are made public. So,
 the timespan of these data will grow.</p>
-<p>We are indebted to the federal and state biologists and contractors
-who planned these surveys, collected the samples in the field, and
-processed and identified samples. We thank them for their efforts in
-building these datasets that we consider a national treasure. We are
-especially grateful to Sarah Lehmann, Richard Mitchell, Amanda Nahlik,
-Dave Peck, and Alan Herlihy at USEPA, Travis Schmidt, Scott Grotheer,
-Robert Zuellig, and Peter Ruhl at USGS for the intellectual support of
-this work and the many conversations about the nuances of these
-data.</p>
+<p>We are indebted to the federal, state, and tribal biologists and
+contractors who planned these surveys, collected the samples in the
+field, and processed and identified samples. We thank them for their
+efforts in building these datasets that we consider a national treasure.
+We are especially grateful to Sarah Lehmann, Richard Mitchell, Amanda
+Nahlik, Dave Peck, and Alan Herlihy at EPA, and Travis Schmidt, Scott
+Grotheer, Robert Zuellig, and Peter Ruhl at USGS for the intellectual
+support of this work and the many conversations about the nuances of
+these data.</p>
+<p>Of note, the approach provided in this package concerning the way the
+USEPA National Rivers and Streams Assessment data are treated is not
+necessarily the same as the approach used in the National Rivers and
+Streams Assessment national reports.</p>
 <p>If you have any questions or any issues with these functions, please
 post on our Github repository <a href="https://github.com/USEPA/finsyncR/issues" class="external-link">Github</a> or reach out
 to Samantha Rumschlag (<a href="mailto:rumschlag.samantha@epa.gov" class="email">rumschlag.samantha@epa.gov</a>) or Michael Mahon (<a href="mailto:mahon.michael@epa.gov" class="email">mahon.michael@epa.gov</a>).</p>
+<p>Data from USGS BioData were obtained from Pete Ruhl (<a href="mailto:pmruhl@usgs.gov" class="email">pmruhl@usgs.gov</a>), and
+data from the National Aquatic Resource Surveys are directly downloaded
+by the package from the NARS website.</p>
+</div>
+<div class="section level2">
+<h2 id="data-citations">Data Citations:<a class="anchor" aria-label="anchor" href="#data-citations"></a>
+</h2>
+<p>U.S. Geological Survey, 2020. BioData - Aquatic bioassessment data
+for the Nation: U.S. Geological Survey database, accessed 17 December
+2020, at <a href="https://doi.org/10.5066/F77W698B" class="external-link uri">https://doi.org/10.5066/F77W698B</a></p>
+<p>U.S. Environmental Protection Agency. 2006. National Aquatic Resource
+Surveys. Wadeable Streams Assessment 2004 (data and metadata files).
+Available from U.S. EPA web page: <a href="https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys" class="external-link uri">https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys</a>.</p>
+<p>U.S. Environmental Protection Agency. 2016. National Aquatic Resource
+Surveys. National Rivers and Streams Assessment 2008-2009 (data and
+metadata files). Available from U.S. EPA web page: <a href="https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys" class="external-link uri">https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys</a>.</p>
+<p>U.S. Environmental Protection Agency. 2020. National Aquatic Resource
+Surveys. National Rivers and Streams Assessment 2013-2014 (data and
+metadata files). Available from U.S. EPA web page: <a href="https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys" class="external-link uri">https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys</a>.</p>
+<p>U.S. Environmental Protection Agency. 2022. National Aquatic Resource
+Surveys. National Rivers and Streams Assessment 2018-2019 (data and
+metadata files). Available from U.S. EPA web page: <a href="https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys" class="external-link uri">https://www.epa.gov/national-aquatic-resource-surveys/data-national-aquatic-resource-surveys</a>.</p>
 <p><br></p>
 </div>
 <div class="section level2">

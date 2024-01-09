@@ -14,7 +14,7 @@ Assessment and USGS BioData."><!-- mathjax --><script src="https://cdnjs.cloudfl
     
     <a class="navbar-brand me-2" href="../index.html">finsyncR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,8 +141,7 @@ effort (<code>standardize = "CPUE"</code>). When (<code>standardize = "MGMS"</co
 taxa abundances are standardized for each gear type (i.e. electroshock, seine net,
 snorkel), as above in <code>CPUE</code>. Then, for each gear type, the CPUE
 of all <em>i</em> taxa in each sample <em>j</em> is summed to get Total Catch Per Unit Effort
-for sample <em>j</em> (TCPUE~<em>j</em>~):</p>
-<p>\(TCPUE_j = \sum_{} CPUE_{ij}\).</p>
+for sample <em>j</em> (TCPUE~<em>j</em>~): $$TCPUE_j = \sum_{} CPUE_{ij}$$</p>
 <p>For each gear type, the mean TCPUE is calculated, \(\overline{TCPUE}\).
 Next, to standardize each gear, CPUE for each taxa <em>i</em> is divided by
 \(\overline{TCPUE}\).
