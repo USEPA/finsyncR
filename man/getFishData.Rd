@@ -77,9 +77,7 @@ effort (\code{standardize = "CPUE"}). When (\code{standardize = "MGMS"}), indivi
 taxa abundances are standardized for each gear type (i.e. electroshock, seine net,
 snorkel), as above in \code{CPUE}. Then, for each gear type, the CPUE
 of all \emph{i} taxa in each sample \emph{j} is summed to get Total Catch Per Unit Effort
-for sample \emph{j} (TCPUE~\emph{j}~):
-
-\eqn{TCPUE_j = \sum_{} CPUE_{ij}}.
+for sample \emph{j} (TCPUE~\emph{j}~): \deqn{TCPUE_j = \sum_{} CPUE_{ij}}
 
 For each gear type, the mean TCPUE is calculated, \eqn{\overline{TCPUE}}.
 Next, to standardize each gear, CPUE for each taxa \emph{i} is divided by

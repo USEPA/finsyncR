@@ -104,7 +104,7 @@
 #'
 #'   When dataType = “abun”, the function calculates taxa densities from samples
 #'   using lab subsampling ratios and area sampled
-#'   \deqn{Taxa~abundance = n*\frqc{1}{PropID}}
+#'   \deqn{Taxa~abundance = n*frac{1}{PropID}}
 #'   \deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}}
 #'   where *n* is the number of specimens identified and *PropID* is the
 #'   proportion of the sample that was identified at the lab bench. For

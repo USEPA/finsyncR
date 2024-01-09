@@ -103,7 +103,7 @@ Categorical. Levels:
 
 #### COMID
 
-Description: Waterbody unique identifier from US National Hydrography Dataset Plus (NHDPlus).
+Description: Waterbody unique identifier from medium resolution US National Hydrography Dataset Plus (NHDPlus) version 2.1.
 
 Integer.
 

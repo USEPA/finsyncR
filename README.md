@@ -41,7 +41,6 @@ library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species",
                     agency = c("USGS","EPA"))
-#>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Harmonizing USGS and EPA data                                      Finalizing data for output                           finsyncR data synchronization complete
 
 head(Fish)[,c(1:5,36,90,400)]
 #>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate

@@ -55,9 +55,7 @@
 #'   taxa abundances are standardized for each gear type (i.e. electroshock, seine net,
 #'   snorkel), as above in `CPUE`. Then, for each gear type, the CPUE
 #'   of all *i* taxa in each sample *j* is summed to get Total Catch Per Unit Effort
-#'   for sample *j* (TCPUE~*j*~):
-#'
-#'   \eqn{TCPUE_j = \sum_{} CPUE_{ij}}.
+#'   for sample *j* (TCPUE~*j*~): \deqn{TCPUE_j = \sum_{} CPUE_{ij}}
 #'
 #'   For each gear type, the mean TCPUE is calculated, \eqn{\overline{TCPUE}}.
 #'   Next, to standardize each gear, CPUE for each taxa *i* is divided by
