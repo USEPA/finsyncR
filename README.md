@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# finsyncR -this is where the hexsticker will go
+# finsyncR <a href="https://didactic-carnival-mz54op5.pages.github.io/"><img src="man/figures/logo.png" align="right" height="138" /></a>
 
 <!-- badges: start -->
 
@@ -41,6 +41,7 @@ library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species",
                     agency = c("USGS","EPA"))
+#>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Harmonizing USGS and EPA data                                      Finalizing data for output                           finsyncR data synchronization complete
 
 head(Fish)[,c(1:5,36,90,400)]
 #>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate
@@ -50,13 +51,13 @@ head(Fish)[,c(1:5,36,90,400)]
 #> 4   USGS     MMSD Eco USGS-04087088 04087088-A-MMSD Eco     2007-09-04
 #> 5   USGS     MMSD Eco USGS-04087119 04087119-A-MMSD Eco     2007-09-12
 #> 6   USGS     MMSD Eco USGS-04087204 04087204-A-MMSD Eco     2007-09-07
-#>   Ameiurus.melas Clinostomus.funduloides Strongylura.marina
-#> 1              0                       0                  0
-#> 2              0                       0                  0
-#> 3              0                       0                  0
-#> 4              0                       0                  0
-#> 5              0                       0                  0
-#> 6              0                       0                  0
+#>   Pimephales.notatus Pomoxis.nigromaculatus Astyanax.mexicanus
+#> 1                  0                      0                  0
+#> 2                  0                      0                  0
+#> 3                  0                      0                  0
+#> 4                  1                      0                  0
+#> 5                  0                      0                  0
+#> 6                  0                      0                  0
 ```
 
 ## Metadata
