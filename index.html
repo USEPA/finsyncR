@@ -15,6 +15,12 @@
     Agency’s National Aquatic Resources Surveys, namely the National River and
     Streams Assessment, and United States Geological Survey’s BioData. ">
 <title>An R Package to synchronize fish and invertebrate datasets from federal sources in the United States • finsyncR</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -29,6 +35,7 @@
     resources used in this package are from United States Environmental Protection
     Agency’s National Aquatic Resources Surveys, namely the National River and
     Streams Assessment, and United States Geological Survey’s BioData. ">
+<meta property="og:image" content="https://didactic-carnival-mz54op5.pages.github.io/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -74,8 +81,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="finsyncr--this-is-where-the-hexsticker-will-go">finsyncR -this is where the hexsticker will go<a class="anchor" aria-label="anchor" href="#finsyncr--this-is-where-the-hexsticker-will-go"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="finsyncr-">finsyncR 
+<a class="anchor" aria-label="anchor" href="#finsyncr-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
 <p><code>finsyncR</code> (<strong>f</strong>ish and <strong>in</strong>vertebrate <strong>sync</strong>hronizer in <strong>R</strong>) is a data management package that integrates and processes national-level aquatic biomonitoring datasets in the U.S., with a focus on fish and macroinvertebrates sampled in rivers and streams. The package streamlines the process of retrieving and harmonizing these data, improving access to cleaned data and making the application these data straightforward for researchers. The sources of data for this package are the United States Environmental Protection Agency’s (USEPA) National Aquatic Resource Surveys (NARS), namely the National River and Streams Assessment (NRSA), and United States Geological Survey’s (USGS) BioData.</p>
@@ -97,6 +107,7 @@
 <span></span>
 <span><span class="va">Fish</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/getFishData.html">getFishData</a></span><span class="op">(</span>taxonLevel <span class="op">=</span> <span class="st">"Species"</span>,</span>
 <span>                    agency <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USGS"</span>,<span class="st">"EPA"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Harmonizing USGS and EPA data                                      Finalizing data for output                           finsyncR data synchronization complete</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Fish</span><span class="op">)</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">36</span>,<span class="fl">90</span>,<span class="fl">400</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate</span></span>
@@ -106,13 +117,13 @@
 <span><span class="co">#&gt; 4   USGS     MMSD Eco USGS-04087088 04087088-A-MMSD Eco     2007-09-04</span></span>
 <span><span class="co">#&gt; 5   USGS     MMSD Eco USGS-04087119 04087119-A-MMSD Eco     2007-09-12</span></span>
 <span><span class="co">#&gt; 6   USGS     MMSD Eco USGS-04087204 04087204-A-MMSD Eco     2007-09-07</span></span>
-<span><span class="co">#&gt;   Ameiurus.melas Clinostomus.funduloides Strongylura.marina</span></span>
-<span><span class="co">#&gt; 1              0                       0                  0</span></span>
-<span><span class="co">#&gt; 2              0                       0                  0</span></span>
-<span><span class="co">#&gt; 3              0                       0                  0</span></span>
-<span><span class="co">#&gt; 4              0                       0                  0</span></span>
-<span><span class="co">#&gt; 5              0                       0                  0</span></span>
-<span><span class="co">#&gt; 6              0                       0                  0</span></span></code></pre></div>
+<span><span class="co">#&gt;   Pimephales.notatus Pomoxis.nigromaculatus Astyanax.mexicanus</span></span>
+<span><span class="co">#&gt; 1                  0                      0                  0</span></span>
+<span><span class="co">#&gt; 2                  0                      0                  0</span></span>
+<span><span class="co">#&gt; 3                  0                      0                  0</span></span>
+<span><span class="co">#&gt; 4                  1                      0                  0</span></span>
+<span><span class="co">#&gt; 5                  0                      0                  0</span></span>
+<span><span class="co">#&gt; 6                  0                      0                  0</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="metadata">Metadata<a class="anchor" aria-label="anchor" href="#metadata"></a>
