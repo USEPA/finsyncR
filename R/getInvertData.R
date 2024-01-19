@@ -9,7 +9,7 @@
 #'  (density) or \code{"occur"} (occurrence).
 #' @param taxonLevel Level of taxonomic resolution for the community matrix. Input must be one of:
 #'   \code{"Phylum"}, \code{"Class"}, \code{"Order"},
-#'   \code{"Family"}, \code{"Subfamily"}, \code{"Genus"}, or \code{"Species"}.
+#'   \code{"Family"}, \code{"Subfamily"}, \code{"Genus"}, or \code{"Mixed"}.
 #' @param taxonFix Option to account for changes in taxonomy across time, must be
 #'   one of: \code{"none"}, \code{"lump"}, \code{"remove"}. See \code{Details}
 #'   below for more information.
@@ -143,7 +143,7 @@ getInvertData <- function(dataType = "occur",
   if(!(dataType %in% c("density", "occur"))) {
     stop('dataType must be either "density" or "occur".')}
 
-  if(!(taxonLevel %in% .TaxLevCols_Inverts$Phylum$taxcols)){
+  if(!(taxonLevel %in% c("Phylum","Order","Class","Family","Subfamily","Genus", "Mixed"))){
     stop(paste('taxonLevel must be set between ranks "Phylum" and "Genus";',
                'see "Details" in ?getInvertData.'))
   }

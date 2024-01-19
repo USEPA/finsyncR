@@ -1578,7 +1578,10 @@ invertTaxFix <- function(dataset,
   }
 
   ##Bind these together
-  fix_slash <- dplyr::bind_rows(probslashl)
+  fix_slash <- data.frame(dplyr::bind_rows(probslashl))
+
+  ##add this...
+  fix_slash[nrow(fix_slash) + 1,] = c("Chironomus","Chironomus/Einfeldia",NA,"Chironomus/Einfeldia/Glyptotendipes")
 
   ##Fix a naming issue; going to make sure this is fixed.
 
@@ -1652,6 +1655,12 @@ invertTaxFix <- function(dataset,
                             Order))
 
     if(taxonLevel %in% c("Genus","Mixed")){
+
+      ##Convert those genera that need to be updated
+      dataset$Genus <- ifelse(dataset$Genus %in% .switch1to1$BenchGenus,
+                              .switch1to1$Genus[match(dataset$Genus,
+                                                      .switch1to1$BenchGenus)],
+                              dataset$Genus)
 
         #If genera that are one of genera in dat1, rename the Genus with the slash
         #label from dat1, else, keep the original Genus label

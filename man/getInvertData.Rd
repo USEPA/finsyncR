@@ -23,7 +23,7 @@ getInvertData(
 
 \item{taxonLevel}{Level of taxonomic resolution for the community matrix. Input must be one of:
 \code{"Phylum"}, \code{"Class"}, \code{"Order"},
-\code{"Family"}, \code{"Subfamily"}, \code{"Genus"}, or \code{"Species"}.}
+\code{"Family"}, \code{"Subfamily"}, \code{"Genus"}, or \code{"Mixed"}.}
 
 \item{taxonFix}{Option to account for changes in taxonomy across time, must be
 one of: \code{"none"}, \code{"lump"}, \code{"remove"}. See \code{Details}
