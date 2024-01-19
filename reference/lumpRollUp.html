@@ -75,8 +75,10 @@ resolution for all genera in the lumped genus.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>In some instances, like when calculating MMIs for example, it may be useful
 to roll the "lumped" genera to their lowest common taxonomic resolution
-(Subfamily, Family, or Order). This function gathers the lowest common taxonomic resolution all lump genus
-members share. The function then replaces the "lump genus" name
+(Subfamily, Family, or Order). This function does not adjust "slash" taxa, or
+those organisms that were identified to a slash genus designation in the lab
+(see the Getting Started vignette for more details). This function gathers the lowest common
+taxonomic resolution all lump genus members share. The function then replaces the "lump genus" name
 (e.g., Elimia/Pleurocera) with the lowest common taxonomic resolution
 designation (e.g., Pleuroceridae). The function then sums occurrence or density data
 within duplicate broader taxonomic designations. For instance, if
