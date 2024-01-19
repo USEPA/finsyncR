@@ -72,14 +72,14 @@ National Rivers and Streams Assessment and USGS BioData.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>dataType</dt>
-<dd><p>Output data type for the community matrix, either <code>"abun"</code>
-(abundance) or <code>"occur"</code> (occurrence).</p></dd>
+<dd><p>Output data type for the community matrix, either <code>"density"</code>
+(density) or <code>"occur"</code> (occurrence).</p></dd>
 
 
 <dt>taxonLevel</dt>
 <dd><p>Level of taxonomic resolution for the community matrix. Input must be one of:
 <code>"Phylum"</code>, <code>"Class"</code>, <code>"Order"</code>,
-<code>"Family"</code>, <code>"Genus"</code>, or <code>"Species"</code>.</p></dd>
+<code>"Family"</code>, <code>"Subfamily"</code>, <code>"Genus"</code>, or <code>"Species"</code>.</p></dd>
 
 
 <dt>taxonFix</dt>
@@ -197,7 +197,7 @@ rarefaction. NOTE: <code>rarefy = TRUE</code> can be used when a user wants
 occurrence data (presence/absence) OR proportional data (each taxon represents
 a certain proportion of a sample). Use <code>rarefy = FALSE</code> when densities
 are the measure of interest.</p>
-<p>When dataType = “abun”, the function calculates taxa densities from samples
+<p>When dataType = "density", the function calculates taxa densities from samples
 using lab subsampling ratios and area sampled
 $$Taxa~abundance = n*frac{1}{PropID}$$
 $$Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}$$
