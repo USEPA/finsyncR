@@ -740,10 +740,10 @@ acquireData <- function(taxa,
         )
 
         ##Create UID based on WSA, Site_id, and Visit_no
-        NRSA_0304_inverts$UID <- paste("200304",
+        NRSA_0304_inverts$UID <- paste("200004",
                                        NRSA_0304_inverts$SITE_ID,
                                        NRSA_0304_inverts$VISIT_NO,
-                                       sep = "_")
+                                       sep = "-")
 
         ##Update column names to match those of 08/09 and 13/14
         colnames(NRSA_0304_inverts)[c(4,10)] = c("SAMPLE_TYPE", "TOTAL")
@@ -753,6 +753,15 @@ acquireData <- function(taxa,
           dplyr::relocate(any_of(c("UID", "SITE_ID", "YEAR", "VISIT_NO", "SAMPLE_TYPE",
                                    "TARGET_TAXON", "TOTAL", "PHYLUM", "CLASS", "ORDER",
                                    "FAMILY", "GENUS")))
+
+        NRSA_0304_inverts <- NRSA_0304_inverts %>%
+          dplyr::left_join(NRSA_0809_inverts_tax %>%
+                             dplyr::select(SUBFAMILY, GENUS),
+                           by = "GENUS") %>%
+          dplyr::mutate(SUBFAMILY = ifelse(is.na(SUBFAMILY),
+                                    "",
+                                    SUBFAMILY)) %>%
+          dplyr::relocate("SUBFAMILY",.after = "FAMILY")
 
         ##2008/2009
         ##Filter to BERW; remove columns that are not needed
@@ -766,7 +775,7 @@ acquireData <- function(taxa,
         ##Join the count data to the taxa data to match those of 03/04
         NRSA_0809_inverts<- NRSA_0809_inverts %>%
           dplyr::left_join(NRSA_0809_inverts_tax %>%
-                             dplyr::select(TAXA_ID, PHYLUM, CLASS, ORDER, FAMILY, GENUS),
+                             dplyr::select(TAXA_ID, PHYLUM, CLASS, ORDER, FAMILY, SUBFAMILY, GENUS),
                            by = "TAXA_ID")
 
         ##Update this weird TARGET_TAXON that is THIENEMANNIMYIA GENUS GR., but does not
@@ -785,7 +794,7 @@ acquireData <- function(taxa,
         ##not available in all datasets, so remove those that are not found across data)
         NRSA_1314_inverts = NRSA_1314_inverts %>%
           dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -TOTAL300_OE,
-                        -PUBLICATION_DATE, -TRIBE, -SUBFAMILY, -TAXA_ID)
+                        -PUBLICATION_DATE, -TRIBE, -TAXA_ID)
 
         ##Update this weird TARGET_TAXON that is THIENEMANNIMYIA GENUS GR., but does not
         ##have a genus associated with it; so make genus = "THIENEMANNIMYIA"
@@ -793,13 +802,14 @@ acquireData <- function(taxa,
                                          "THIENEMANNIMYIA",
                                          NRSA_1314_inverts$GENUS)
 
+
         ##2018/2019
 
         ##Filter to BERW; remove columns that are not needed (taxonomic resolutions are
         ##not available in all datasets, so remove those that are not found across data)
         NRSA_1819_inverts <- NRSA_1819_inverts %>%
           dplyr::select(-IS_DISTINCT, -TOTAL300, -IS_DISTINCT300, -EPA_REG,
-                        -PUBLICATION_DATE, -TRIBE, -SUBFAMILY, -TAXA_ID,
+                        -PUBLICATION_DATE, -TRIBE, -TAXA_ID,
                         -FFG, -HABIT, -PTV, -AG_ECO9, -NON_TARGET, -SITESAMP,
                         -STATE, -UNIQUE_ID) %>%
           dplyr::mutate(YEAR = str_sub(DATE_COL, -4,-1),
@@ -930,8 +940,8 @@ acquireData <- function(taxa,
                                                         "Im",
                                                         "")))) %>%
             dplyr::mutate(URBAN = "",
-                          UID = paste("200304", SITE_ID, VISIT_NO,
-                                      sep = "_"),
+                          UID = paste("200004", SITE_ID, VISIT_NO,
+                                      sep = "-"),
                           DATE_COL = as.Date(DATE_COL, format = "%m/%d/%Y"),
                           VISIT_NO = as.character(VISIT_NO),
                           MASTER_SITEID = SITE_ID) %>%
@@ -1641,7 +1651,7 @@ invertTaxFix <- function(dataset,
                             "",
                             Order))
 
-    if(taxonLevel == "Genus"){
+    if(taxonLevel %in% c("Genus","Mixed")){
 
         #If genera that are one of genera in dat1, rename the Genus with the slash
         #label from dat1, else, keep the original Genus label
@@ -1701,6 +1711,24 @@ invertTaxFix <- function(dataset,
       }
     } else if(taxonLevel != "Genus"){}
 
+    dataset$Mixed = ifelse(dataset$Genus != "",
+                           dataset$Genus,
+                           ifelse(dataset$Subfamily != "",
+                                  dataset$Subfamily,
+                                  ifelse(dataset$Family != "",
+                                         dataset$Family,
+                                         ifelse(dataset$Order != "",
+                                                dataset$Order,
+                                                ifelse(dataset$Class != "",
+                                                       dataset$Class,
+                                                       dataset$Phylum)))))
+
+    if(taxonLevel == "Subfamily"){
+      dataset$Subfamily = ifelse(dataset$Subfamily == "",
+                                 dataset$Family,
+                                 dataset$Subfamily)
+    }
+
   }
   else if(agency == "EPA"){
 
@@ -1721,7 +1749,7 @@ invertTaxFix <- function(dataset,
 
     taxonLevel.nrsa <- base::toupper(taxonLevel)
 
-    if(taxonLevel == "Genus"){
+    if(taxonLevel %in% c("Genus","Mixed")){
 
       ##Convert those genera that need to be updated
       dataset$GENUS <- ifelse(dataset$GENUS %in% .switch1to1$BenchGenus,
@@ -1772,12 +1800,29 @@ invertTaxFix <- function(dataset,
         dplyr::filter(!(grepl("/", GENUS)))
     }}
 
-  else if(taxonLevel != "Genus"){
-    NRSA_inverts <- NRSA_inverts %>%
+  else if(taxonLevel != "Genus" | taxonLevel != "Mixed"){
+    dataset <- dataset %>%
       dplyr::mutate(across(tidyselect::all_of(taxonLevel.nrsa), ~ stringr::str_to_sentence(.)))
   }
 
-}
+    dataset$MIXED = ifelse(dataset$GENUS != "",
+                           dataset$GENUS,
+                           ifelse(dataset$SUBFAMILY != "",
+                                  stringr::str_to_sentence(dataset$SUBFAMILY),
+                                  ifelse(dataset$FAMILY != "",
+                                         stringr::str_to_sentence(dataset$FAMILY),
+                                         ifelse(dataset$ORDER != "",
+                                                stringr::str_to_sentence(dataset$ORDER),
+                                                ifelse(dataset$CLASS != "",
+                                                       stringr::str_to_sentence(dataset$CLASS),
+                                                       stringr::str_to_sentence(dataset$PHYLUM))))))
+
+    if(taxonLevel == "Subfamily"){
+      dataset$SUBFAMILY = ifelse(dataset$SUBFAMILY == "",
+                                 stringr::str_to_sentence(dataset$FAMILY),
+                                 dataset$SUBFAMILY)
+    }
+    }
 
 return(dataset)
 }

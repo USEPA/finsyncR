@@ -22,6 +22,12 @@ Categorical. Levels:
 -   "EPA" - United States Environmental Protection Agency
 -   "USGS" - United States Geological Survey
 
+#### SampleID
+
+Description: Sample identification number - a unique sample identifier. For USGS data, this is 'SIDNO' variable and BDB prefix indicates that BioData system is source of the identifier. For EPA samples, this is the 'UID' variable for NRSA 08/09, 13/14, and 18/19, but is the joining of 'SITE_ID' and 'VISIT_NO' (as 200004-'SITE_ID'-'VISIT_NO') variables for 2000-2004 EPA data (EMAP-West and WSA).
+
+Categorical.
+
 #### ProjectLabel
 
 Description: Project short name assigned by the project owner. For USGS data, ProjectLabel is explicitly provided by the USGS. For EPA, ProjectLabel is the sampling round/type (e.g., NRSA0809).

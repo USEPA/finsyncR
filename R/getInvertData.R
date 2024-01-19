@@ -5,11 +5,11 @@
 #' benthic macroinvertebrates sampled in rivers and streams from the US EPA
 #' National Rivers and Streams Assessment and USGS BioData.
 #'
-#' @param dataType Output data type for the community matrix, either \code{"abun"}
-#'  (abundance) or \code{"occur"} (occurrence).
+#' @param dataType Output data type for the community matrix, either \code{"density"}
+#'  (density) or \code{"occur"} (occurrence).
 #' @param taxonLevel Level of taxonomic resolution for the community matrix. Input must be one of:
 #'   \code{"Phylum"}, \code{"Class"}, \code{"Order"},
-#'   \code{"Family"}, \code{"Genus"}, or \code{"Species"}.
+#'   \code{"Family"}, \code{"Subfamily"}, \code{"Genus"}, or \code{"Species"}.
 #' @param taxonFix Option to account for changes in taxonomy across time, must be
 #'   one of: \code{"none"}, \code{"lump"}, \code{"remove"}. See \code{Details}
 #'   below for more information.
@@ -102,7 +102,7 @@
 #'   a certain proportion of a sample). Use \code{rarefy = FALSE} when densities
 #'   are the measure of interest.
 #'
-#'   When dataType = “abun”, the function calculates taxa densities from samples
+#'   When dataType = "density", the function calculates taxa densities from samples
 #'   using lab subsampling ratios and area sampled
 #'   \deqn{Taxa~abundance = n*frac{1}{PropID}}
 #'   \deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}}
@@ -140,11 +140,11 @@ getInvertData <- function(dataType = "occur",
                           seed = 0,
                           boatableStreams = FALSE){
 
-  if(!(dataType %in% c("abun", "occur"))) {
-    stop('dataType must be either "abun" or "occur".')}
+  if(!(dataType %in% c("density", "occur"))) {
+    stop('dataType must be either "density" or "occur".')}
 
   if(!(taxonLevel %in% .TaxLevCols_Inverts$Phylum$taxcols)){
-    stop(paste('taxonLevel must be set between ranks "Phylum" and "Subspecies";',
+    stop(paste('taxonLevel must be set between ranks "Phylum" and "Genus";',
                'see "Details" in ?getInvertData.'))
   }
   if(!(taxonFix %in% c("none", "lump","remove"))){
@@ -161,7 +161,7 @@ getInvertData <- function(dataType = "occur",
     stop('rarefy must be set to either TRUE or FALSE.')
   }
 
-  if(rarefy == TRUE && dataType == "abun"){
+  if(rarefy == TRUE && dataType == "density"){
     stop('rarefy must be set to FALSE when requesting abundance data')
   }
 
@@ -186,8 +186,15 @@ getInvertData <- function(dataType = "occur",
     ##These are the column names that should be removed (mycols) and which rows
     ##of data should be retained based on taxonomic resolution
     ##(eg if taxonLevel == "Family", retain ALL taxonomic levels at Family and Below)
-    mycols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$mycols
-    taxcols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$taxcols
+
+    if(taxonLevel != "Mixed"){
+         mycols = c(.TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$mycols,"Mixed")
+        taxcols = c(.TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$taxcols,"Mixed")
+    } else {
+      taxcols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == "Phylum")]]$taxcols
+      mycols = c("Phylum",.TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == "Phylum")]]$mycols)
+    }
+
 
     ##Before any final data manipulation, if dataset is occurence and rarify is true
     ##then rarify based on the RAWCOUNT (individuals actually identified)
@@ -312,7 +319,7 @@ getInvertData <- function(dataType = "occur",
 
     ##If datatype is abundance, remove all instances of when areasampled total is
     ##not recorded OR is equal to 0
-    if(dataType == "abun"){
+    if(dataType == "density"){
       invert_comms1 = invert_comms1 %>%
         dplyr::filter(!is.na(AreaSampTot_m2)) %>%
         dplyr::filter(AreaSampTot_m2 != 0)
@@ -321,9 +328,8 @@ getInvertData <- function(dataType = "occur",
     ##site x species matrix, select only those columns that we need
     invert_comms1 = invert_comms1 %>%
       dplyr::select(-Identifier,
-                    -SIDNO,
                     -ReleaseCategory) %>%
-      dplyr::relocate(tidyselect::any_of(c(.ReorderUSGSBioDataColNames[-26],
+      dplyr::relocate(tidyselect::any_of(c("SIDNO",.ReorderUSGSBioDataColNames[-26],
                                            "FieldSplitRatio", "LabSubsamplingRatio",
                                            "PropID", "AreaSampTot_m2"))) %>%
       dplyr::mutate(SiteNumber = paste("USGS-", SiteNumber, sep = ""))
@@ -331,7 +337,7 @@ getInvertData <- function(dataType = "occur",
     invert_comms1 <- invert_comms1  %>%
       mutate(WettedWidth = NA,
              Agency = "USGS") %>%
-      select(Agency, tidyselect::any_of(.InvertIDCols), tidyselect::contains("tax_"))
+      select(Agency, SIDNO, tidyselect::any_of(.InvertIDCols), tidyselect::contains("tax_"))
   }
 
   if(any(grepl("EPA", agency))){
@@ -384,7 +390,7 @@ getInvertData <- function(dataType = "occur",
     } else {}
 
     ##Incorporate abundance conversions
-    if(dataType == "abun"){
+    if(dataType == "density"){
 
       ##Join the datasets together; convert TOTAL to density, using the
       ##DenAbunRatio; multiple this by 10.76 to convert from ind ft^-2 to ind m^-2
@@ -403,7 +409,6 @@ getInvertData <- function(dataType = "occur",
                                   taxonLevel = taxonLevel)
 
       taxonLevel.nrsa <- base::toupper(taxonLevel)
-
 
     if(isTRUE(sharedTaxa) & any(grepl("EPA", agency)) & any(grepl("USGS", agency))){
       cat('\r',"Removing taxa not in both USGS and EPA datasets                 ")
@@ -443,7 +448,9 @@ getInvertData <- function(dataType = "occur",
                "CLASS",
                "ORDER",
                "FAMILY",
-               "GENUS")
+               "SUBFAMILY",
+               "GENUS",
+               "MIXED")
 
     mycols <- mycols[!(mycols %in% (taxonLevel.nrsa))]
 
@@ -467,7 +474,8 @@ getInvertData <- function(dataType = "occur",
     ##remove the UNIQUEID column, as it is no longer needed
     nrsa_comms1 <- nrsa_comms1 %>%
       mutate(Agency = "EPA") %>%
-      select(Agency, tidyselect::any_of(.InvertIDCols), tidyselect::contains("tax_"))
+      rename("SIDNO" = "ProjectAssignedSampleLabel") %>%
+      select(Agency, SIDNO, tidyselect::any_of(.InvertIDCols), tidyselect::contains("tax_"))
 
   }
 
@@ -496,6 +504,7 @@ getInvertData <- function(dataType = "occur",
                                               CollectionDayOfYear == CollectionDayOfYear))
 
   invert_comms1 <- invert_comms1  %>%
+    dplyr::rename("SampleID" = "SIDNO") %>%
     dplyr::select(any_of(.finalcovarorder), tidyselect::contains("tax_")) %>%
     dplyr::relocate(tidyselect::contains("tax_"), .after = last_col())
 

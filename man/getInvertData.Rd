@@ -18,12 +18,12 @@ getInvertData(
 )
 }
 \arguments{
-\item{dataType}{Output data type for the community matrix, either \code{"abun"}
-(abundance) or \code{"occur"} (occurrence).}
+\item{dataType}{Output data type for the community matrix, either \code{"density"}
+(density) or \code{"occur"} (occurrence).}
 
 \item{taxonLevel}{Level of taxonomic resolution for the community matrix. Input must be one of:
 \code{"Phylum"}, \code{"Class"}, \code{"Order"},
-\code{"Family"}, \code{"Genus"}, or \code{"Species"}.}
+\code{"Family"}, \code{"Subfamily"}, \code{"Genus"}, or \code{"Species"}.}
 
 \item{taxonFix}{Option to account for changes in taxonomy across time, must be
 one of: \code{"none"}, \code{"lump"}, \code{"remove"}. See \code{Details}
@@ -130,7 +130,7 @@ occurrence data (presence/absence) OR proportional data (each taxon represents
 a certain proportion of a sample). Use \code{rarefy = FALSE} when densities
 are the measure of interest.
 
-When dataType = “abun”, the function calculates taxa densities from samples
+When dataType = "density", the function calculates taxa densities from samples
 using lab subsampling ratios and area sampled
 \deqn{Taxa~abundance = n*frac{1}{PropID}}
 \deqn{Taxa~density = frac{Taxa~abundance}{Area~sampled~(m^2)}}

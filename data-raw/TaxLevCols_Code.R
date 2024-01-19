@@ -386,6 +386,7 @@ sysdata_filenames <- load("R/sysdata.rda")
 
 .finalcovarorder <-
   c("Agency",
+    "SampleID",
     "ProjectLabel",
     "SiteNumber",
     "StudyReachName",
@@ -420,7 +421,7 @@ sysdata_filenames <- load("R/sysdata.rda")
 .slashgen_fin <- c(.slashgen_fin, "Arctopelopia/Conchapelopia/Hayesomyia/Helopelopia/Meropelopia/Rheopelopia/Telopelopia/Thienemannimyia")
 
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames[-16], ".finalcovarorder"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames[-7], ".clust_labels"), file = "R/sysdata.rda",
      compress = "xz")
 
 

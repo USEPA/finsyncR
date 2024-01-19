@@ -43,7 +43,7 @@ Potential future uses of the data include studies of changes in fish and macroin
 
 | Research question | Output dataset requested | Macroinvertebrates | Fish |
 |:-----------------|:-----------------|----------------------:|----------------------:|
-| How does density/CPUE change through time across EPA and USGS samples? | Density/CPUE at sites for lowest taxonomic resolution, with shared taxa only, removing hybrid fish, and excluding boatable streams/rivers | `getInvertData(dataType = "abun",` <br> `taxonLevel = "Genus",` <br> `taxonFix = "lump",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = FALSE,` <br> `sharedTaxa = TRUE,` <br> `seed = 0,` <br> `boatableStreams = FALSE)` | `getFishData(dataType = "abun",` <br> `taxonLevel = "Species",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "CPUE",` <br> `hybrids = FALSE,` <br> `sharedTaxa = TRUE,` <br> `boatableStreams = FALSE)` |
+| How does density/CPUE change through time across EPA and USGS samples? | Density/CPUE at sites for lowest taxonomic resolution, with shared taxa only, removing hybrid fish, and excluding boatable streams/rivers | `getInvertData(dataType = "density",` <br> `taxonLevel = "Genus",` <br> `taxonFix = "lump",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = FALSE,` <br> `sharedTaxa = TRUE,` <br> `seed = 0,` <br> `boatableStreams = FALSE)` | `getFishData(dataType = "density",` <br> `taxonLevel = "Species",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "CPUE",` <br> `hybrids = FALSE,` <br> `sharedTaxa = TRUE,` <br> `boatableStreams = FALSE)` |
 | How does the composition of families differ between EPA and USGS samples? | Occurrence at sites for Family resolution, with all taxa, rarefying macroinvertebrate counts to 300 individuals, and excluding boatable streams/rivers | `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = TRUE,`<br> `rarefyCount = 300,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = FALSE)` | `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = FALSE)`
 | What are spatial occupancy patterns within the Upper-Midwest Ecoregion using the randomized sampling design of the EPA NARS? | Occurrence for  lowest taxonomic resolution for only EPA samples, then filtered to the UWM Ecoregion | `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("EPA"),` <br> `rarefy = TRUE,`<br> `rarefyCount = 500,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` | `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` |
 
@@ -81,13 +81,14 @@ The data management workflow for these functions generally follows three major s
 `getInvertData()` retrieves, cleans, and compiles the stream macroinvertebrate datasets collected by the USGS and EPA.
 The function harmonizes taxonomy of macroinvertebrates across agencies and through time.
 In addition, it accounts for differences in sample splitting, which vary by agency.
-The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `taxonFix`, `agency`, `lifestage`, `rarefy`, `rarefyCount`, `sharedTaxa`, `seed` and `boatableStreams.` `dataType` refers to whether the sample by taxa community matrix contains abundance (`dataType = "abun"`) or occurrence (`dataType = "occur"`) values.
-Abundance values are densities (number of organisms per m^2^) and occurrence values are presence (1) or absence (0).
+The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `taxonFix`, `agency`, `lifestage`, `rarefy`, `rarefyCount`, `sharedTaxa`, `seed` and `boatableStreams.` `dataType` refers to whether the sample by taxa community matrix contains density (`dataType = "density"`) or occurrence (`dataType = "occur"`) values.
+Density values are standardized abundances (number of organisms per m^2^) and occurrence values are presence (1) or absence (0).
 
 `taxonLevel` refers to the taxonomic resolution (Genus, Class, Family, etc.) for the sample by taxa matrix.
 The input values for this parameter are case sensitive and must start with a capital letter.
 All observations taxonomically coarser than the `taxonLevel` provided are dropped from the output community matrix.
-For instance, if `taxonLevel = "Genus"` , then observations identified at Family, Order, Class, or Phylum levels are dropped.
+For instance, if `taxonLevel = "Genus"` , then observations identified at Subfamily, Family, Order, Class, or Phylum levels are dropped.
+When `taxonLevel = "Subfamily"`, for taxa without subfamilies, the Family-level designation is returned.
 "Genus" is the finest level of taxonomic resolution provided for macroinvertebrates.
 The package does not provide USGS species-level identifications for two reasons.
 First, we limit USGS identification to the genus-level to make the EPA and USGS data comparable.
@@ -113,7 +114,7 @@ The approach described above reduces these 98 genera to 13 complexes of genera.
 All but two complexes of genera were composed of two individual genera.
 A single complex of genera within the Ephemeroptera order included 70 individual genera, and a second complex of Ephemeroptera genera included six individual genera.
 Because of the complexity of Ephemeroptera taxonomy, careful consideration should be given to inferences that can be made when evaluating Ephemeroptera trends.
-The authors, for instance, do not advise users evaluate temporal changes in abundance or richness of the linked groups of Ephemeroptera genera because taxonomic reorganizations over the last decades likely obscure temporal patterns.
+The authors, for instance, do not advise users evaluate temporal changes in density or richness of the linked groups of Ephemeroptera genera because taxonomic reorganizations over the last decades likely obscure temporal patterns.
 
 <br>
 <center>
@@ -132,7 +133,7 @@ So, `taxonFix = "remove"` results in a dataset that has fewer genera compared to
 Finally, `taxonFix = "none"` makes no adjustment and returns identifications in their original forms.
 The `taxonFix = "none"` option generates slash genera for organisms that are given a slash genus either at the time of identification or to harmonize occurrences of slash genera between USGS and EPA observations, as described above.
 
-`taxonFix` operates on the genus level, so `taxonFix` must be set to `"none"` when taxonLevel is set to "Family" or higher taxonomic resolution.
+`taxonFix` operates on the genus level, so `taxonFix` must be set to `"none"` when taxonLevel is set to "Subfamily" or higher taxonomic resolution.
 Care should be taken to harmonize taxonomy either with the approaches provided or some alternative when long time scale datasets on the entire community of macroinvertebrates are generated because changes in taxonomy can make it artificially appear as though some genera are either appearing or disappearing in time.
 No matter the value provided to `taxonFix`, taxonomy is harmonized in three additional ways to appropriately join USGS and EPA datasets.
 First, in instances when a given organism has been identified at the species level and the genus that was given at the time of identification has been updated to a new genus, the package updates the genus by cross walking the bench identification to the current genus (*Hereiam there* becomes *Thereiam there* from the previous example).
@@ -198,7 +199,7 @@ Similarly, increasing the threshold to 400 individuals would have added \~2 gene
 
 Use `seed =` and provide an integer to consistently generate output from the function.
 This parameter is passed to `set.seed()` internally.
-When generating density values, use `dataType = "abun"` and `rarefy = FALSE` (default).
+When generating density values, use `dataType = "density"` and `rarefy = FALSE` (default).
 
 `lifestage` refers to whether the generated site by taxa matrix should include lifestage information for each organism.
 If `lifestage = TRUE`, the generated matrix will have separate columns for the various lifestages collected for each taxon.
@@ -213,7 +214,7 @@ We recommend using `sharedTaxa = TRUE` for building a dataset with both agencies
 ##This code will generate density estimates at the Genus level for all samples
 ##in USGS BioData. Lifestage information will be ignored.
 
-Inverts <- getInvertData(dataType = "abun",
+Inverts <- getInvertData(dataType = "density",
                          taxonLevel = "Genus",
                          agency = "USGS",
                          lifestage = FALSE,
