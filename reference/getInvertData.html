@@ -147,6 +147,16 @@ included but setting <code>boatableStreams = TRUE</code> will include observatio
 non-wadeable streams. Some information included in the EPA dataset are not
 included in the USGS datasets, specifically observed wetted width of the
 stream/river.</p>
+<p><code>taxonLevel</code> refers to the taxonomic resolution (Genus, Class, Family, etc.)
+for the sample by taxa matrix. The input values for this parameter are case
+sensitive and must start with a capital letter. All observations taxonomically
+coarser than the <code>taxonLevel</code> provided are dropped from the output community matrix.
+For instance, if <code>taxonLevel = "Genus"</code> , then observations identified at
+Subfamily, Family, Order, Class, or Phylum levels are dropped. When
+<code>taxonLevel = "Subfamily"</code>, for taxa without subfamilies, the Family-level
+designation is returned. When <code>taxonLevel = "Subfamily"</code>, for taxa without subfamilies, the Family-level
+designation is returned. "Genus" is the finest level of taxonomic resolution
+provided for macroinvertebrates.</p>
 <p><code>taxonFix</code> provides options to account for changes in taxonomy across time,
 especially in instances in which species have been reorganized into new genera.
 <code>taxonFix</code> operates on the genera level. <code>taxonFix = "none"</code>

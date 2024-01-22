@@ -157,11 +157,11 @@ and USGS samples?</td>
 with shared taxa only, removing hybrid fish, and excluding boatable
 streams/rivers</td>
 <td align="right">
-<code>getInvertData(dataType = "abun",</code> <br><code>taxonLevel = "Genus",</code> <br><code>taxonFix = "lump",</code>
+<code>getInvertData(dataType = "density",</code> <br><code>taxonLevel = "Genus",</code> <br><code>taxonFix = "lump",</code>
 <br><code>agency = c("USGS","EPA"),</code> <br><code>lifestage = FALSE,</code> <br><code>rarefy = FALSE,</code> <br><code>sharedTaxa = TRUE,</code> <br><code>seed = 0,</code> <br><code>boatableStreams = FALSE)</code>
 </td>
 <td align="right">
-<code>getFishData(dataType = "abun",</code> <br><code>taxonLevel = "Species",</code> <br><code>agency = c("USGS","EPA"),</code> <br><code>standardize = "CPUE",</code> <br><code>hybrids = FALSE,</code>
+<code>getFishData(dataType = "density",</code> <br><code>taxonLevel = "Species",</code> <br><code>agency = c("USGS","EPA"),</code> <br><code>standardize = "CPUE",</code> <br><code>hybrids = FALSE,</code>
 <br><code>sharedTaxa = TRUE,</code> <br><code>boatableStreams = FALSE)</code>
 </td>
 </tr>
@@ -246,25 +246,27 @@ splitting, which vary by agency. The parameters in the
 <code>lifestage</code>, <code>rarefy</code>, <code>rarefyCount</code>,
 <code>sharedTaxa</code>, <code>seed</code> and
 <code>boatableStreams.</code> <code>dataType</code> refers to whether
-the sample by taxa community matrix contains abundance
-(<code>dataType = "abun"</code>) or occurrence
-(<code>dataType = "occur"</code>) values. Abundance values are densities
-(number of organisms per m<sup>2</sup>) and occurrence values are
-presence (1) or absence (0).</p>
+the sample by taxa community matrix contains density
+(<code>dataType = "density"</code>) or occurrence
+(<code>dataType = "occur"</code>) values. Density values are
+standardized abundances (number of organisms per m<sup>2</sup>) and
+occurrence values are presence (1) or absence (0).</p>
 <p><code>taxonLevel</code> refers to the taxonomic resolution (Genus,
 Class, Family, etc.) for the sample by taxa matrix. The input values for
 this parameter are case sensitive and must start with a capital letter.
 All observations taxonomically coarser than the <code>taxonLevel</code>
 provided are dropped from the output community matrix. For instance, if
 <code>taxonLevel = "Genus"</code> , then observations identified at
-Family, Order, Class, or Phylum levels are dropped. “Genus” is the
-finest level of taxonomic resolution provided for macroinvertebrates.
-The package does not provide USGS species-level identifications for two
-reasons. First, we limit USGS identification to the genus-level to make
-the EPA and USGS data comparable. Second, species-level identifications
-of some groups of macroinvertebrates are inherently difficult to make,
-so we limit identifications to the genus-level to avoid potentially
-inaccurate identifications.</p>
+Subfamily, Family, Order, Class, or Phylum levels are dropped. When
+<code>taxonLevel = "Subfamily"</code>, for taxa without subfamilies, the
+Family-level designation is returned. “Genus” is the finest level of
+taxonomic resolution provided for macroinvertebrates. The package does
+not provide USGS species-level identifications for two reasons. First,
+we limit USGS identification to the genus-level to make the EPA and USGS
+data comparable. Second, species-level identifications of some groups of
+macroinvertebrates are inherently difficult to make, so we limit
+identifications to the genus-level to avoid potentially inaccurate
+identifications.</p>
 <p>Across the time span of the USGS and EPA macroinvertebrate datasets,
 the taxonomy of many macroinvertebrates changed, specifically membership
 of species within genera. <code>taxonFix</code> provides options to
@@ -310,13 +312,13 @@ of Ephemeroptera genera included six individual genera. Because of the
 complexity of Ephemeroptera taxonomy, careful consideration should be
 given to inferences that can be made when evaluating Ephemeroptera
 trends. The authors, for instance, do not advise users evaluate temporal
-changes in abundance or richness of the linked groups of Ephemeroptera
+changes in density or richness of the linked groups of Ephemeroptera
 genera because taxonomic reorganizations over the last decades likely
 obscure temporal patterns.</p>
 <br><center>
 <p><a id="Figure2"></a></p>
 <div class="figure">
-<img src="https://github.com/mahonmb/Misc/blob/main/GenusClusters.jpg?raw=true" width="350" alt=""><p class="caption"><strong>Figure 2.</strong> Visualization of the
+<img src="https://github.com/mahonmb/Misc/blob/main/GenusClustersUpdate.jpg?raw=true" width="350" alt=""><p class="caption"><strong>Figure 2.</strong> Visualization of the
 relationships among genera linked by taxonomic reorganization through
 time. Each numbered circle represents an individual genus. Lines between
 genera pairs indicate that the taxonomic designation of at least one
@@ -347,8 +349,8 @@ identification or to harmonize occurrences of slash genera between USGS
 and EPA observations, as described above.</p>
 <p><code>taxonFix</code> operates on the genus level, so
 <code>taxonFix</code> must be set to <code>"none"</code> when taxonLevel
-is set to “Family” or higher taxonomic resolution. Care should be taken
-to harmonize taxonomy either with the approaches provided or some
+is set to “Subfamily” or higher taxonomic resolution. Care should be
+taken to harmonize taxonomy either with the approaches provided or some
 alternative when long time scale datasets on the entire community of
 macroinvertebrates are generated because changes in taxonomy can make it
 artificially appear as though some genera are either appearing or
@@ -482,7 +484,7 @@ of organisms identified per sample in all streams, justifying the use of
 <p>Use <code>seed =</code> and provide an integer to consistently
 generate output from the function. This parameter is passed to
 <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> internally. When generating density values, use
-<code>dataType = "abun"</code> and <code>rarefy = FALSE</code>
+<code>dataType = "density"</code> and <code>rarefy = FALSE</code>
 (default).</p>
 <p><code>lifestage</code> refers to whether the generated site by taxa
 matrix should include lifestage information for each organism. If
@@ -498,60 +500,14 @@ dataset with both agencies, so that species pools are consistent.</p>
 <code class="sourceCode R"><span><span class="co">##This code will generate density estimates at the Genus level for all samples</span></span>
 <span><span class="co">##in USGS BioData. Lifestage information will be ignored.</span></span>
 <span></span>
-<span><span class="va">Inverts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getInvertData.html">getInvertData</a></span><span class="op">(</span>dataType <span class="op">=</span> <span class="st">"abun"</span>,</span>
-<span>                         taxonLevel <span class="op">=</span> <span class="st">"Genus"</span>,</span>
-<span>                         agency <span class="op">=</span> <span class="st">"USGS"</span>,</span>
-<span>                         lifestage <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                         rarefy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                         boatableStreams <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<pre><code>##  Gathering and cleaning USGS raw data                    
- Applying taxonomy fixes to USGS data                    
- Finalizing data for output                          
- finsyncR data synchronization complete</code></pre>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Inverts</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">26</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##   Agency ProjectLabel           SiteNumber                 StudyReachName CollectionDate</span></span>
-<span><span class="co">## 1   USGS  WHMI BioTDB USGS-393259085101200 393259085101200-A-NAWQA-BioTDB     1999-07-13</span></span>
-<span><span class="co">## 2   USGS  WHMI BioTDB        USGS-03245500        03245500-A-NAWQA-BioTDB     1999-07-14</span></span>
-<span><span class="co">## 3   USGS  WHMI BioTDB        USGS-03246400        03246400-A-NAWQA-BioTDB     1999-07-15</span></span>
-<span><span class="co">## 4   USGS  WHMI BioTDB USGS-395534084091400 395534084091400-A-NAWQA-BioTDB     1999-07-07</span></span>
-<span><span class="co">## 5   USGS  WHMI BioTDB USGS-395650083504400 395650083504400-A-NAWQA-BioTDB     1999-07-06</span></span>
-<span><span class="co">## 6   USGS  WHMI BioTDB USGS-392246084340100 392246084340100-A-NAWQA-BioTDB     1999-07-13</span></span>
-<span><span class="co">##   CollectionYear CollectionMonth CollectionDayOfYear Latitude_dd Longitude_dd CoordinateDatum    COMID</span></span>
-<span><span class="co">## 1           1999               7                 194    39.54977    -85.16996           NAD27  3923217</span></span>
-<span><span class="co">## 2           1999               7                 195    39.17145    -84.29799           NAD27 25243939</span></span>
-<span><span class="co">## 3           1999               7                 196    39.05895    -84.05132           NAD27  3936150</span></span>
-<span><span class="co">## 4           1999               7                 188    39.92617    -84.15383           NAD27  3985952</span></span>
-<span><span class="co">## 5           1999               7                 187    39.94728    -83.84549           NAD27  3985520</span></span>
-<span><span class="co">## 6           1999               7                 194    39.37950    -84.56689           NAD27  3885882</span></span>
-<span><span class="co">##   StreamOrder WettedWidth PredictedWettedWidth_m NARS_Ecoregion SampleTypeCode AreaSampTot_m2</span></span>
-<span><span class="co">## 1           4          NA                  27.88            SAP           IRTH           1.25</span></span>
-<span><span class="co">## 2           5          NA                  43.55            TPL           IRTH           1.25</span></span>
-<span><span class="co">## 3           4          NA                     NA            TPL           IRTH           1.25</span></span>
-<span><span class="co">## 4           5          NA                  46.70            TPL           IRTH           1.25</span></span>
-<span><span class="co">## 5           5          NA                  28.50            TPL           IRTH           1.25</span></span>
-<span><span class="co">## 6           7          NA                 100.42            TPL           IRTH           1.25</span></span>
-<span><span class="co">##   FieldSplitRatio LabSubsamplingRatio PropID Gen_ID_Prop</span></span>
-<span><span class="co">## 1               1              0.0170 0.0170   0.8838527</span></span>
-<span><span class="co">## 2               1              0.0347 0.0347   0.8655914</span></span>
-<span><span class="co">## 3               1              0.0397 0.0397   0.8084416</span></span>
-<span><span class="co">## 4               1              0.0149 0.0149   0.7481297</span></span>
-<span><span class="co">## 5               1              0.0298 0.0298   0.7476923</span></span>
-<span><span class="co">## 6               1              0.0113 0.0113   0.8468208</span></span>
-<span><span class="co">##   Acentrella.Acerpenna.Amercaenis.Americabaetis.Anafroptilum.Anthopotamus.Apobaetis.Attenella.Baetis.Baetisca.Barbaetis.Brachycercus.Caenis.Callibaetis.Campsurus.Caudatella.Centroptilum.Choroterpes.Cinygma.Cinygmula.Cloe.Cloeon.Dannella.Dentatella.Diph ...</span></span>
-<span><span class="co">## 1                                                                                                                                                                                                                                                         3104.8</span></span>
-<span><span class="co">## 2                                                                                                                                                                                                                                                         1497.6</span></span>
-<span><span class="co">## 3                                                                                                                                                                                                                                                         2217.6</span></span>
-<span><span class="co">## 4                                                                                                                                                                                                                                                         2419.2</span></span>
-<span><span class="co">## 5                                                                                                                                                                                                                                                         1263.2</span></span>
-<span><span class="co">## 6                                                                                                                                                                                                                                                         1058.4</span></span>
-<span><span class="co">##   Antocha Cardiocladius.Eukiefferiella.Tvetenia Ceratopsyche.Hydropsyche</span></span>
-<span><span class="co">## 1    94.4                                1176.0                   7291.2</span></span>
-<span><span class="co">## 2     0.0                                  68.8                   1659.2</span></span>
-<span><span class="co">## 3     0.0                                   0.0                     80.0</span></span>
-<span><span class="co">## 4    53.6                                 107.2                   3332.8</span></span>
-<span><span class="co">## 5     0.0                                 994.4                   2124.0</span></span>
-<span><span class="co">## 6     0.0                                   0.0                   1058.4</span></span></code></pre>
+<span><span class="co">#Inverts &lt;- getInvertData(dataType = "density",</span></span>
+<span><span class="co">#                         taxonLevel = "Genus",</span></span>
+<span><span class="co">#                         agency = "USGS",</span></span>
+<span><span class="co">#                         lifestage = FALSE,</span></span>
+<span><span class="co">#                         rarefy = FALSE,</span></span>
+<span><span class="co">#                         boatableStreams = FALSE)</span></span>
+<span><span class="co">#</span></span>
+<span><span class="co">#head(Inverts)[,1:26]</span></span></code></pre></div>
 <p><br></p>
 <div class="section level4">
 <h4 id="using-the-macroinvertebrate-data">Using the macroinvertebrate data<a class="anchor" aria-label="anchor" href="#using-the-macroinvertebrate-data"></a>
@@ -760,29 +716,18 @@ while EPA samples both wadeable streams and boatable streams and rivers.
 Thus, set <code>boatableStreams</code> to <code>TRUE</code> when
 <code>agency</code> is set to “<code>EPA</code>” only, to ensure the
 highest comparability between the two agency datasets.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">##This code will generate occurrences at the Family level for all samples</span></span>
 <span><span class="co">##in both the USGS and EPA databases.</span></span>
 <span></span>
-<span><span class="va">Fish</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFishData.html">getFishData</a></span><span class="op">(</span>dataType <span class="op">=</span> <span class="st">"occur"</span>,</span>
-<span>                    taxonLevel <span class="op">=</span> <span class="st">"Family"</span>,</span>
-<span>                    agency <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USGS"</span>, <span class="st">"EPA"</span><span class="op">)</span>,</span>
-<span>                    standardize <span class="op">=</span> <span class="st">"none"</span>,</span>
-<span>                    hybrids <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                    boatableStreams <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<pre><code>##  Gathering and cleaning USGS raw data                    
- Applying taxonomic fixes to USGS data                    
- Applying count standardization to USGS data                    
- Gathering, joining, and cleaning EPA raw data                    
- Applying taxonomic fixes to EPA data</code></pre>
-<pre><code><span><span class="co">## Error in `dplyr::mutate()`:</span></span>
-<span><span class="co">## ℹ In argument: `tax_No fish = ifelse(`tax_No fish` == 0, "Fish Collected", "No Fish</span></span>
-<span><span class="co">##   Collected")`.</span></span>
-<span><span class="co">## Caused by error in `ifelse()`:</span></span>
-<span><span class="co">## ! object 'tax_No fish' not found</span></span></code></pre>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Fish</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">28</span><span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">## Error in head(Fish): object 'Fish' not found</span></span></code></pre>
+<span><span class="co">#Fish &lt;- getFishData(dataType = "occur",</span></span>
+<span><span class="co">#                    taxonLevel = "Family",</span></span>
+<span><span class="co">#                    agency = c("USGS", "EPA"),</span></span>
+<span><span class="co">#                    standardize = "none",</span></span>
+<span><span class="co">#                    hybrids = FALSE,</span></span>
+<span><span class="co">#                   boatableStreams = TRUE)</span></span>
+<span></span>
+<span><span class="co">#head(Fish)[,1:28]</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="using-the-fish-data">Using the fish data<a class="anchor" aria-label="anchor" href="#using-the-fish-data"></a>
 </h4>
@@ -862,32 +807,28 @@ all wetland and open water land covers), “urban” (grouping of all urban
 land use), “forest” (grouping of deciduous, coniferous, and mixed
 forests land covers), “open” (grouping of shrub, barren land, grassland,
 and hay/pasture land covers), and “crop” (cultivated crop land use).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>SiteNumber <span class="op">=</span> <span class="st">"USGS-05276005"</span>,</span>
 <span>                 CollectionYear <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2005</span>, <span class="fl">2007</span>, <span class="fl">2009</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/getNLCDData.html">getNLCDData</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>,</span>
 <span>            scale <span class="op">=</span> <span class="st">"Cat"</span>,</span>
 <span>            group <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat</span></span>
-<span><span class="co">## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0</span></span>
-<span><span class="co">## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0</span></span>
-<span><span class="co">## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0</span></span>
-<span><span class="co">##   PCTURBHI_Cat PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat</span></span>
-<span><span class="co">## 1         0.11         2.81       38.56          0         0         0            0         0.46</span></span>
-<span><span class="co">## 2         0.11         2.64       38.56          0         0         0            0         0.46</span></span>
-<span><span class="co">## 3         0.11         2.50       38.56          0         0         0            0         0.46</span></span>
-<span><span class="co">##   PCTURBOP_Cat PCTWDWET_Cat</span></span>
-<span><span class="co">## 1         3.20         8.44</span></span>
-<span><span class="co">## 2         3.10         8.44</span></span>
-<span><span class="co">## 3         2.92         8.59</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat</span></span>
+<span><span class="co">## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11</span></span>
+<span><span class="co">## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11</span></span>
+<span><span class="co">## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11</span></span>
+<span><span class="co">##   PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat PCTWDWET_Cat</span></span>
+<span><span class="co">## 1         2.81       38.56          0         0         0            0         0.46         3.20         8.44</span></span>
+<span><span class="co">## 2         2.64       38.56          0         0         0            0         0.46         3.10         8.44</span></span>
+<span><span class="co">## 3         2.50       38.56          0         0         0            0         0.46         2.92         8.59</span></span></code></pre>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">##select 10 random samples from the dataset to get LULC data for</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">Fish_forNLCD</span> <span class="op">=</span> <span class="va">Fish</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>,<span class="fl">10</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,<span class="op">]</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">SiteNumber</span>, <span class="va">CollectionYear</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Error in dplyr::select(., SiteNumber, CollectionYear): object 'Fish' not found</span></span></code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/getNLCDData.html">getNLCDData</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">Fish_forNLCD</span>,</span>
 <span>            scale <span class="op">=</span> <span class="st">"Cat"</span>,</span>
 <span>            group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -947,509 +888,598 @@ metadata files). Available from U.S. EPA web page: <a href="https://www.epa.gov/
 <h2 id="appendix">Appendix<a class="anchor" aria-label="anchor" href="#appendix"></a>
 </h2>
 <p><br><a id="TableA1"></a> <strong>Table A1.</strong> Table linking
-genus numbers from <a href="#Figure1">Figure 1</a> to genera names and
+genus numbers from <a href="#Figure1">Figure 1</a> to genera names, the
+number of samples in each agency in which the genera were found, and
 associated genus cluster.</p>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="50%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
 <th align="right">Genus Number</th>
 <th align="right">Genus</th>
+<th align="right">EPA Samples</th>
+<th align="right">USGS Samples</th>
 <th align="left">Group</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="right">1</td>
 <td align="right">Acentrella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">1108</td>
+<td align="right">1269</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">2</td>
 <td align="right">Acerpenna</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">651</td>
+<td align="right">283</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">4</td>
 <td align="right">Amercaenis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">51</td>
+<td align="right">38</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">5</td>
 <td align="right">Americabaetis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">6</td>
 <td align="right">Anafroptilum</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">2089</td>
+<td align="right">297</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">8</td>
-<td align="right">Anthopotamus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Apobaetis</td>
+<td align="right">61</td>
+<td align="right">3</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">9</td>
-<td align="right">Apobaetis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">11</td>
+<td align="right">Attenella</td>
+<td align="right">292</td>
+<td align="right">62</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">12</td>
-<td align="right">Attenella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Baetis</td>
+<td align="right">3870</td>
+<td align="right">3445</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">13</td>
-<td align="right">Baetis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Baetisca</td>
+<td align="right">349</td>
+<td align="right">66</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">14</td>
-<td align="right">Baetisca</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Barbaetis</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">15</td>
-<td align="right">Barbaetis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Brachycercus</td>
+<td align="right">243</td>
+<td align="right">3</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">16</td>
-<td align="right">Brachycercus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Caenis</td>
+<td align="right">3611</td>
+<td align="right">1221</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">17</td>
-<td align="right">Caenis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Callibaetis</td>
+<td align="right">758</td>
+<td align="right">105</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">18</td>
-<td align="right">Callibaetis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Caudatella</td>
+<td align="right">194</td>
+<td align="right">30</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">19</td>
-<td align="right">Campsurus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Centroptilum</td>
+<td align="right">2089</td>
+<td align="right">297</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">20</td>
-<td align="right">Caudatella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">21</td>
+<td align="right">Cinygma</td>
+<td align="right">141</td>
+<td align="right">2</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">21</td>
-<td align="right">Centroptilum</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">22</td>
+<td align="right">Cinygmula</td>
+<td align="right">726</td>
+<td align="right">167</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">23</td>
-<td align="right">Choroterpes</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">24</td>
-<td align="right">Cinygma</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">25</td>
-<td align="right">Cinygmula</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">26</td>
-<td align="right">Cloe</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">27</td>
 <td align="right">Cloeon</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="odd">
+<td align="right">25</td>
+<td align="right">Dannella</td>
+<td align="right">46</td>
+<td align="right">55</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="even">
+<td align="right">26</td>
+<td align="right">Dentatella</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="odd">
+<td align="right">27</td>
+<td align="right">Diphetor</td>
+<td align="right">822</td>
+<td align="right">311</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="even">
+<td align="right">28</td>
+<td align="right">Drunella</td>
+<td align="right">1084</td>
+<td align="right">472</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">29</td>
-<td align="right">Dannella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">30</td>
-<td align="right">Dentatella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">31</td>
-<td align="right">Diphetor</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">32</td>
-<td align="right">Drunella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">33</td>
 <td align="right">Ecdyonurus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">1133</td>
+<td align="right">478</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">34</td>
-<td align="right">Ecdyurus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">37</td>
+<td align="right">31</td>
 <td align="right">Epeorus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">1073</td>
+<td align="right">602</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
-<tr class="even">
-<td align="right">38</td>
+<tr class="odd">
+<td align="right">32</td>
 <td align="right">Ephemera</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">359</td>
+<td align="right">112</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
-<tr class="odd">
-<td align="right">39</td>
+<tr class="even">
+<td align="right">33</td>
 <td align="right">Ephemerella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">40</td>
-<td align="right">Ephoron</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">1077</td>
+<td align="right">434</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">41</td>
-<td align="right">Eurycaenis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">42</td>
+<td align="right">34</td>
 <td align="right">Eurylophella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">625</td>
+<td align="right">95</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="even">
+<td align="right">35</td>
+<td align="right">Fallceon</td>
+<td align="right">830</td>
+<td align="right">656</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">43</td>
-<td align="right">Euthyplocia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">40</td>
+<td align="right">Heptagenia</td>
+<td align="right">253</td>
+<td align="right">240</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="even">
+<td align="right">41</td>
+<td align="right">Heterocloeon</td>
+<td align="right">252</td>
+<td align="right">185</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="odd">
+<td align="right">42</td>
+<td align="right">Hexagenia</td>
+<td align="right">746</td>
+<td align="right">49</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">44</td>
-<td align="right">Fallceon</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Ironodes</td>
+<td align="right">162</td>
+<td align="right">39</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">48</td>
-<td align="right">Habrophlebia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">45</td>
+<td align="right">Iswaeon</td>
+<td align="right">108</td>
+<td align="right">5</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">49</td>
-<td align="right">Habrophlebiodes</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">46</td>
+<td align="right">Labiobaetis</td>
+<td align="right">381</td>
+<td align="right">295</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">50</td>
-<td align="right">Heptagenia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">49</td>
+<td align="right">Leucrocuta</td>
+<td align="right">1133</td>
+<td align="right">478</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">51</td>
-<td align="right">Heterocloeon</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Litobrancha</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">52</td>
-<td align="right">Hexagenia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Maccaffertium</td>
+<td align="right">2039</td>
+<td align="right">1117</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">55</td>
-<td align="right">Iron</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">56</td>
-<td align="right">Ironodes</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">57</td>
-<td align="right">Iswaeon</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">53</td>
+<td align="right">Matriella</td>
+<td align="right">29</td>
+<td align="right">17</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">58</td>
-<td align="right">Labiobaetis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Nixe</td>
+<td align="right">1133</td>
+<td align="right">478</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">60</td>
-<td align="right">Leptophlebia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">59</td>
+<td align="right">Paracloeodes</td>
+<td align="right">449</td>
+<td align="right">123</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">61</td>
-<td align="right">Leucrocuta</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">64</td>
-<td align="right">Litobrancha</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">65</td>
-<td align="right">Maccaffertium</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Penelomax</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">66</td>
-<td align="right">Matriella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Plauditus</td>
+<td align="right">576</td>
+<td align="right">499</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="odd">
+<td align="right">67</td>
+<td align="right">Procloeon</td>
+<td align="right">2089</td>
+<td align="right">297</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
+</tr>
+<tr class="even">
+<td align="right">68</td>
+<td align="right">Pseudocloeon</td>
+<td align="right">685</td>
+<td align="right">0</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">69</td>
-<td align="right">Neochoroterpes</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Raptoheptagenia</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">71</td>
-<td align="right">Nixe</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">70</td>
+<td align="right">Rhithrogena</td>
+<td align="right">705</td>
+<td align="right">421</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">72</td>
-<td align="right">Palingenia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">71</td>
+<td align="right">Serratella</td>
+<td align="right">565</td>
+<td align="right">108</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">73</td>
-<td align="right">Paracloeodes</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">72</td>
+<td align="right">Sparbarus</td>
+<td align="right">158</td>
+<td align="right">16</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">74</td>
-<td align="right">Paraleptophlebia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">Stenacron</td>
+<td align="right">964</td>
+<td align="right">495</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
 <td align="right">75</td>
-<td align="right">Penelomax</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">80</td>
-<td align="right">Plauditus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">82</td>
-<td align="right">Potamanthus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">83</td>
-<td align="right">Procloeon</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">84</td>
-<td align="right">Pseudocloeon</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">85</td>
-<td align="right">Raptoheptagenia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">86</td>
-<td align="right">Rhithrogena</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">87</td>
-<td align="right">Serratella</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">88</td>
-<td align="right">Sparbarus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="odd">
-<td align="right">90</td>
-<td align="right">Stenacron</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
-</tr>
-<tr class="even">
-<td align="right">91</td>
 <td align="right">Stenonema</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">2039</td>
+<td align="right">1117</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">92</td>
+<td align="right">76</td>
 <td align="right">Susperatus</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">6</td>
+<td align="right">1</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">93</td>
+<td align="right">77</td>
 <td align="right">Teloganopsis</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">165</td>
+<td align="right">132</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
-<td align="right">94</td>
+<td align="right">78</td>
 <td align="right">Timpanoga</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">135</td>
+<td align="right">13</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="even">
-<td align="right">96</td>
+<td align="right">80</td>
 <td align="right">Tsalia</td>
-<td align="left">1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="left">1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80</td>
 </tr>
 <tr class="odd">
 <td align="right">3</td>
 <td align="right">Allenhyphes</td>
-<td align="left">3,11,53,59,95,98</td>
+<td align="right">0</td>
+<td align="right">5</td>
+<td align="left">3,10,43,47,79,82</td>
 </tr>
 <tr class="even">
-<td align="right">11</td>
+<td align="right">10</td>
 <td align="right">Asioplax</td>
-<td align="left">3,11,53,59,95,98</td>
+<td align="right">67</td>
+<td align="right">58</td>
+<td align="left">3,10,43,47,79,82</td>
 </tr>
 <tr class="odd">
-<td align="right">53</td>
+<td align="right">43</td>
 <td align="right">Homoleptohyphes</td>
-<td align="left">3,11,53,59,95,98</td>
+<td align="right">12</td>
+<td align="right">13</td>
+<td align="left">3,10,43,47,79,82</td>
 </tr>
 <tr class="even">
-<td align="right">59</td>
+<td align="right">47</td>
 <td align="right">Leptohyphes</td>
-<td align="left">3,11,53,59,95,98</td>
+<td align="right">22</td>
+<td align="right">17</td>
+<td align="left">3,10,43,47,79,82</td>
 </tr>
 <tr class="odd">
-<td align="right">95</td>
+<td align="right">79</td>
 <td align="right">Tricorythodes</td>
-<td align="left">3,11,53,59,95,98</td>
+<td align="right">2747</td>
+<td align="right">1612</td>
+<td align="left">3,10,43,47,79,82</td>
 </tr>
 <tr class="even">
-<td align="right">98</td>
+<td align="right">82</td>
 <td align="right">Vacupernius</td>
-<td align="left">3,11,53,59,95,98</td>
+<td align="right">17</td>
+<td align="right">15</td>
+<td align="left">3,10,43,47,79,82</td>
 </tr>
 <tr class="odd">
 <td align="right">7</td>
 <td align="right">Anodonta</td>
-<td align="left">7,97</td>
-</tr>
-<tr class="even">
-<td align="right">97</td>
-<td align="right">Utterbackia</td>
-<td align="left">7,97</td>
-</tr>
-<tr class="odd">
-<td align="right">10</td>
-<td align="right">Armiger</td>
-<td align="left">10,47</td>
-</tr>
-<tr class="even">
-<td align="right">47</td>
-<td align="right">Gyraulus</td>
-<td align="left">10,47</td>
-</tr>
-<tr class="odd">
-<td align="right">22</td>
-<td align="right">Ceratopsyche</td>
-<td align="left">22,54</td>
-</tr>
-<tr class="even">
-<td align="right">54</td>
-<td align="right">Hydropsyche</td>
-<td align="left">22,54</td>
-</tr>
-<tr class="odd">
-<td align="right">28</td>
-<td align="right">Cystobranchus</td>
-<td align="left">28,76</td>
-</tr>
-<tr class="even">
-<td align="right">76</td>
-<td align="right">Piscicola</td>
-<td align="left">28,76</td>
-</tr>
-<tr class="odd">
-<td align="right">35</td>
-<td align="right">Einfeldia</td>
-<td align="left">35,46</td>
-</tr>
-<tr class="even">
-<td align="right">46</td>
-<td align="right">Glyptotendipes</td>
-<td align="left">35,46</td>
-</tr>
-<tr class="odd">
-<td align="right">36</td>
-<td align="right">Elimia</td>
-<td align="left">36,81</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="left">7,81</td>
 </tr>
 <tr class="even">
 <td align="right">81</td>
-<td align="right">Pleurocera</td>
-<td align="left">36,81</td>
+<td align="right">Utterbackia</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="left">7,81</td>
 </tr>
 <tr class="odd">
-<td align="right">45</td>
-<td align="right">Fluminicola</td>
-<td align="left">45,63</td>
+<td align="right">9</td>
+<td align="right">Armiger</td>
+<td align="right">5</td>
+<td align="right">2</td>
+<td align="left">9,37</td>
 </tr>
 <tr class="even">
-<td align="right">63</td>
-<td align="right">Lithoglyphus</td>
-<td align="left">45,63</td>
+<td align="right">37</td>
+<td align="right">Gyraulus</td>
+<td align="right">663</td>
+<td align="right">153</td>
+<td align="left">9,37</td>
 </tr>
 <tr class="odd">
-<td align="right">62</td>
-<td align="right">Libellula</td>
-<td align="left">62,79</td>
-</tr>
-<tr class="even">
-<td align="right">79</td>
-<td align="right">Plathemis</td>
-<td align="left">62,79</td>
-</tr>
-<tr class="odd">
+<td align="right">20</td>
+<td align="right">Choroterpes</td>
+<td align="right">204</td>
 <td align="right">67</td>
+<td align="left">20,38,39,48,56,60</td>
+</tr>
+<tr class="even">
+<td align="right">38</td>
+<td align="right">Habrophlebia</td>
+<td align="right">18</td>
+<td align="right">5</td>
+<td align="left">20,38,39,48,56,60</td>
+</tr>
+<tr class="odd">
+<td align="right">39</td>
+<td align="right">Habrophlebiodes</td>
+<td align="right">19</td>
+<td align="right">1</td>
+<td align="left">20,38,39,48,56,60</td>
+</tr>
+<tr class="even">
+<td align="right">48</td>
+<td align="right">Leptophlebia</td>
+<td align="right">59</td>
+<td align="right">5</td>
+<td align="left">20,38,39,48,56,60</td>
+</tr>
+<tr class="odd">
+<td align="right">56</td>
+<td align="right">Neochoroterpes</td>
+<td align="right">54</td>
+<td align="right">52</td>
+<td align="left">20,38,39,48,56,60</td>
+</tr>
+<tr class="even">
+<td align="right">60</td>
+<td align="right">Paraleptophlebia</td>
+<td align="right">922</td>
+<td align="right">545</td>
+<td align="left">20,38,39,48,56,60</td>
+</tr>
+<tr class="odd">
+<td align="right">24</td>
+<td align="right">Cystobranchus</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="left">24,62</td>
+</tr>
+<tr class="even">
+<td align="right">62</td>
+<td align="right">Piscicola</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="left">24,62</td>
+</tr>
+<tr class="odd">
+<td align="right">30</td>
+<td align="right">Chironomus/Einfeldia</td>
+<td align="right">2813</td>
+<td align="right">.455</td>
+<td align="left">30,36</td>
+</tr>
+<tr class="even">
+<td align="right">36</td>
+<td align="right">Glyptotendipes</td>
+<td align="right">923</td>
+<td align="right">403</td>
+<td align="left">30,36</td>
+</tr>
+<tr class="odd">
+<td align="right">50</td>
+<td align="right">Libellula</td>
+<td align="right">56</td>
+<td align="right">3</td>
+<td align="left">50,65</td>
+</tr>
+<tr class="even">
+<td align="right">65</td>
+<td align="right">Plathemis</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="left">50,65</td>
+</tr>
+<tr class="odd">
+<td align="right">54</td>
 <td align="right">Menetus</td>
-<td align="left">67,68</td>
+<td align="right">711</td>
+<td align="right">52</td>
+<td align="left">54,55</td>
 </tr>
 <tr class="even">
-<td align="right">68</td>
+<td align="right">55</td>
 <td align="right">Micromenetus</td>
-<td align="left">67,68</td>
+<td align="right">0</td>
+<td align="right">120</td>
+<td align="left">54,55</td>
 </tr>
 <tr class="odd">
-<td align="right">70</td>
+<td align="right">57</td>
 <td align="right">Neostempellina</td>
-<td align="left">70,89</td>
+<td align="right">107</td>
+<td align="right">6</td>
+<td align="left">57,73</td>
 </tr>
 <tr class="even">
-<td align="right">89</td>
+<td align="right">73</td>
 <td align="right">Stempellina</td>
-<td align="left">70,89</td>
+<td align="right">847</td>
+<td align="right">73</td>
+<td align="left">57,73</td>
 </tr>
 <tr class="odd">
-<td align="right">77</td>
+<td align="right">63</td>
 <td align="right">Planorbella</td>
-<td align="left">77,78</td>
+<td align="right">200</td>
+<td align="right">69</td>
+<td align="left">63,64</td>
 </tr>
 <tr class="even">
-<td align="right">78</td>
+<td align="right">64</td>
 <td align="right">Planorbula</td>
-<td align="left">77,78</td>
+<td align="right">9</td>
+<td align="right">0</td>
+<td align="left">63,64</td>
 </tr>
 </tbody>
 </table>
