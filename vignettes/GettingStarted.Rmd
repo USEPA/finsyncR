@@ -43,7 +43,7 @@ Potential future uses of the data include studies of changes in fish and macroin
 
 | Research question | Output dataset requested | Macroinvertebrates | Fish |
 |:-----------------|:-----------------|----------------------:|----------------------:|
-| How does density/CPUE change through time across EPA and USGS samples? | Density/CPUE at sites for lowest taxonomic resolution, with shared taxa only, removing hybrid fish, and excluding boatable streams/rivers | `getInvertData(dataType = "abun",` <br> `taxonLevel = "Genus",` <br> `taxonFix = "lump",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = FALSE,` <br> `sharedTaxa = TRUE,` <br> `seed = 0,` <br> `boatableStreams = FALSE)` | `getFishData(dataType = "abun",` <br> `taxonLevel = "Species",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "CPUE",` <br> `hybrids = FALSE,` <br> `sharedTaxa = TRUE,` <br> `boatableStreams = FALSE)` |
+| How does density/CPUE change through time across EPA and USGS samples? | Density/CPUE at sites for lowest taxonomic resolution, with shared taxa only, removing hybrid fish, and excluding boatable streams/rivers | `getInvertData(dataType = "density",` <br> `taxonLevel = "Genus",` <br> `taxonFix = "lump",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = FALSE,` <br> `sharedTaxa = TRUE,` <br> `seed = 0,` <br> `boatableStreams = FALSE)` | `getFishData(dataType = "density",` <br> `taxonLevel = "Species",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "CPUE",` <br> `hybrids = FALSE,` <br> `sharedTaxa = TRUE,` <br> `boatableStreams = FALSE)` |
 | How does the composition of families differ between EPA and USGS samples? | Occurrence at sites for Family resolution, with all taxa, rarefying macroinvertebrate counts to 300 individuals, and excluding boatable streams/rivers | `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = TRUE,`<br> `rarefyCount = 300,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = FALSE)` | `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = FALSE)`
 | What are spatial occupancy patterns within the Upper-Midwest Ecoregion using the randomized sampling design of the EPA NARS? | Occurrence for  lowest taxonomic resolution for only EPA samples, then filtered to the UWM Ecoregion | `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("EPA"),` <br> `rarefy = TRUE,`<br> `rarefyCount = 500,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` | `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` |
 
@@ -83,13 +83,14 @@ The data management workflow for these functions generally follows three major s
 `getInvertData()` retrieves, cleans, and compiles the stream macroinvertebrate datasets collected by the USGS and EPA.
 The function harmonizes taxonomy of macroinvertebrates across agencies and through time.
 In addition, it accounts for differences in sample splitting, which vary by agency.
-The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `taxonFix`, `agency`, `lifestage`, `rarefy`, `rarefyCount`, `sharedTaxa`, `seed` and `boatableStreams.` `dataType` refers to whether the sample by taxa community matrix contains abundance (`dataType = "abun"`) or occurrence (`dataType = "occur"`) values.
-Abundance values are densities (number of organisms per m^2^) and occurrence values are presence (1) or absence (0).
+The parameters in the `getInvertData()` function are `dataType`, `taxonLevel`, `taxonFix`, `agency`, `lifestage`, `rarefy`, `rarefyCount`, `sharedTaxa`, `seed` and `boatableStreams.` `dataType` refers to whether the sample by taxa community matrix contains density (`dataType = "density"`) or occurrence (`dataType = "occur"`) values.
+Density values are standardized abundances (number of organisms per m^2^) and occurrence values are presence (1) or absence (0).
 
 `taxonLevel` refers to the taxonomic resolution (Genus, Class, Family, etc.) for the sample by taxa matrix.
 The input values for this parameter are case sensitive and must start with a capital letter.
 All observations taxonomically coarser than the `taxonLevel` provided are dropped from the output community matrix.
-For instance, if `taxonLevel = "Genus"` , then observations identified at Family, Order, Class, or Phylum levels are dropped.
+For instance, if `taxonLevel = "Genus"` , then observations identified at Subfamily, Family, Order, Class, or Phylum levels are dropped.
+When `taxonLevel = "Subfamily"`, for taxa without subfamilies, the Family-level designation is returned.
 "Genus" is the finest level of taxonomic resolution provided for macroinvertebrates.
 The package does not provide USGS species-level identifications for two reasons.
 First, we limit USGS identification to the genus-level to make the EPA and USGS data comparable.
@@ -115,13 +116,13 @@ The approach described above reduces these 98 genera to 13 complexes of genera.
 All but two complexes of genera were composed of two individual genera.
 A single complex of genera within the Ephemeroptera order included 70 individual genera, and a second complex of Ephemeroptera genera included six individual genera.
 Because of the complexity of Ephemeroptera taxonomy, careful consideration should be given to inferences that can be made when evaluating Ephemeroptera trends.
-The authors, for instance, do not advise users evaluate temporal changes in abundance or richness of the linked groups of Ephemeroptera genera because taxonomic reorganizations over the last decades likely obscure temporal patterns.
+The authors, for instance, do not advise users evaluate temporal changes in density or richness of the linked groups of Ephemeroptera genera because taxonomic reorganizations over the last decades likely obscure temporal patterns.
 
 <br>
 <center>
 <a id="Figure2"></a>
 
-![**Figure 2.** Visualization of the relationships among genera linked by taxonomic reorganization through time. Each numbered circle represents an individual genus. Lines between genera pairs indicate that the taxonomic designation of at least one species from one of the genus pairs was updated to be in the other genus in the pair. Clusters (genera complexes) are formed by sets of these linked genera. See [Appendix Table A1](#TableA1) for table linking numbers in the above cluster to genera names.](https://github.com/mahonmb/Misc/blob/main/GenusClusters.jpg?raw=true){width="350"}
+![**Figure 2.** Visualization of the relationships among genera linked by taxonomic reorganization through time. Each numbered circle represents an individual genus. Lines between genera pairs indicate that the taxonomic designation of at least one species from one of the genus pairs was updated to be in the other genus in the pair. Clusters (genera complexes) are formed by sets of these linked genera. See [Appendix Table A1](#TableA1) for table linking numbers in the above cluster to genera names.](https://github.com/mahonmb/Misc/blob/main/GenusClustersUpdate.jpg?raw=true){width="350"}
 
 </center>
 <br>
@@ -134,7 +135,7 @@ So, `taxonFix = "remove"` results in a dataset that has fewer genera compared to
 Finally, `taxonFix = "none"` makes no adjustment and returns identifications in their original forms.
 The `taxonFix = "none"` option generates slash genera for organisms that are given a slash genus either at the time of identification or to harmonize occurrences of slash genera between USGS and EPA observations, as described above.
 
-`taxonFix` operates on the genus level, so `taxonFix` must be set to `"none"` when taxonLevel is set to "Family" or higher taxonomic resolution.
+`taxonFix` operates on the genus level, so `taxonFix` must be set to `"none"` when taxonLevel is set to "Subfamily" or higher taxonomic resolution.
 Care should be taken to harmonize taxonomy either with the approaches provided or some alternative when long time scale datasets on the entire community of macroinvertebrates are generated because changes in taxonomy can make it artificially appear as though some genera are either appearing or disappearing in time.
 No matter the value provided to `taxonFix`, taxonomy is harmonized in three additional ways to appropriately join USGS and EPA datasets.
 First, in instances when a given organism has been identified at the species level and the genus that was given at the time of identification has been updated to a new genus, the package updates the genus by cross walking the bench identification to the current genus (*Hereiam there* becomes *Thereiam there* from the previous example).
@@ -200,7 +201,7 @@ Similarly, increasing the threshold to 400 individuals would have added \~2 gene
 
 Use `seed =` and provide an integer to consistently generate output from the function.
 This parameter is passed to `set.seed()` internally.
-When generating density values, use `dataType = "abun"` and `rarefy = FALSE` (default).
+When generating density values, use `dataType = "density"` and `rarefy = FALSE` (default).
 
 `lifestage` refers to whether the generated site by taxa matrix should include lifestage information for each organism.
 If `lifestage = TRUE`, the generated matrix will have separate columns for the various lifestages collected for each taxon.
@@ -215,65 +216,14 @@ We recommend using `sharedTaxa = TRUE` for building a dataset with both agencies
 ##This code will generate density estimates at the Genus level for all samples
 ##in USGS BioData. Lifestage information will be ignored.
 
-Inverts <- getInvertData(dataType = "abun",
-                         taxonLevel = "Genus",
-                         agency = "USGS",
-                         lifestage = FALSE,
-                         rarefy = FALSE,
-                         boatableStreams = FALSE)
-```
-
-```
-##  Gathering and cleaning USGS raw data                     Applying taxonomy fixes to USGS data                     Finalizing data for output                           finsyncR data synchronization complete
-```
-
-```r
-head(Inverts)[,1:26]
-```
-
-```
-##   Agency ProjectLabel           SiteNumber                 StudyReachName CollectionDate
-## 1   USGS  WHMI BioTDB USGS-393259085101200 393259085101200-A-NAWQA-BioTDB     1999-07-13
-## 2   USGS  WHMI BioTDB        USGS-03245500        03245500-A-NAWQA-BioTDB     1999-07-14
-## 3   USGS  WHMI BioTDB        USGS-03246400        03246400-A-NAWQA-BioTDB     1999-07-15
-## 4   USGS  WHMI BioTDB USGS-395534084091400 395534084091400-A-NAWQA-BioTDB     1999-07-07
-## 5   USGS  WHMI BioTDB USGS-395650083504400 395650083504400-A-NAWQA-BioTDB     1999-07-06
-## 6   USGS  WHMI BioTDB USGS-392246084340100 392246084340100-A-NAWQA-BioTDB     1999-07-13
-##   CollectionYear CollectionMonth CollectionDayOfYear Latitude_dd Longitude_dd CoordinateDatum    COMID
-## 1           1999               7                 194    39.54977    -85.16996           NAD27  3923217
-## 2           1999               7                 195    39.17145    -84.29799           NAD27 25243939
-## 3           1999               7                 196    39.05895    -84.05132           NAD27  3936150
-## 4           1999               7                 188    39.92617    -84.15383           NAD27  3985952
-## 5           1999               7                 187    39.94728    -83.84549           NAD27  3985520
-## 6           1999               7                 194    39.37950    -84.56689           NAD27  3885882
-##   StreamOrder WettedWidth PredictedWettedWidth_m NARS_Ecoregion SampleTypeCode AreaSampTot_m2
-## 1           4          NA                  27.88            SAP           IRTH           1.25
-## 2           5          NA                  43.55            TPL           IRTH           1.25
-## 3           4          NA                     NA            TPL           IRTH           1.25
-## 4           5          NA                  46.70            TPL           IRTH           1.25
-## 5           5          NA                  28.50            TPL           IRTH           1.25
-## 6           7          NA                 100.42            TPL           IRTH           1.25
-##   FieldSplitRatio LabSubsamplingRatio PropID Gen_ID_Prop
-## 1               1              0.0170 0.0170   0.8838527
-## 2               1              0.0347 0.0347   0.8655914
-## 3               1              0.0397 0.0397   0.8084416
-## 4               1              0.0149 0.0149   0.7481297
-## 5               1              0.0298 0.0298   0.7476923
-## 6               1              0.0113 0.0113   0.8468208
-##   Acentrella.Acerpenna.Amercaenis.Americabaetis.Anafroptilum.Anthopotamus.Apobaetis.Attenella.Baetis.Baetisca.Barbaetis.Brachycercus.Caenis.Callibaetis.Campsurus.Caudatella.Centroptilum.Choroterpes.Cinygma.Cinygmula.Cloe.Cloeon.Dannella.Dentatella.Diph ...
-## 1                                                                                                                                                                                                                                                         3104.8
-## 2                                                                                                                                                                                                                                                         1497.6
-## 3                                                                                                                                                                                                                                                         2217.6
-## 4                                                                                                                                                                                                                                                         2419.2
-## 5                                                                                                                                                                                                                                                         1263.2
-## 6                                                                                                                                                                                                                                                         1058.4
-##   Antocha Cardiocladius.Eukiefferiella.Tvetenia Ceratopsyche.Hydropsyche
-## 1    94.4                                1176.0                   7291.2
-## 2     0.0                                  68.8                   1659.2
-## 3     0.0                                   0.0                     80.0
-## 4    53.6                                 107.2                   3332.8
-## 5     0.0                                 994.4                   2124.0
-## 6     0.0                                   0.0                   1058.4
+#Inverts <- getInvertData(dataType = "density",
+#                         taxonLevel = "Genus",
+#                         agency = "USGS",
+#                         lifestage = FALSE,
+#                         rarefy = FALSE,
+#                         boatableStreams = FALSE)
+#
+#head(Inverts)[,1:26]
 ```
 
 <br>
@@ -405,32 +355,14 @@ Finally, `boatableStreams` provides the option to include data from large stream
 ##This code will generate occurrences at the Family level for all samples
 ##in both the USGS and EPA databases.
 
-Fish <- getFishData(dataType = "occur",
-                    taxonLevel = "Family",
-                    agency = c("USGS", "EPA"),
-                    standardize = "none",
-                    hybrids = FALSE,
-                    boatableStreams = TRUE)
-```
+#Fish <- getFishData(dataType = "occur",
+#                    taxonLevel = "Family",
+#                    agency = c("USGS", "EPA"),
+#                    standardize = "none",
+#                    hybrids = FALSE,
+#                   boatableStreams = TRUE)
 
-```
-##  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data
-```
-
-```
-## Error in `dplyr::mutate()`:
-## ℹ In argument: `tax_No fish = ifelse(`tax_No fish` == 0, "Fish Collected", "No Fish
-##   Collected")`.
-## Caused by error in `ifelse()`:
-## ! object 'tax_No fish' not found
-```
-
-```r
-head(Fish)[,1:28]
-```
-
-```
-## Error in head(Fish): object 'Fish' not found
+#head(Fish)[,1:28]
 ```
 
 ### Using the fish data
@@ -481,18 +413,14 @@ getNLCDData(data = dat,
 ```
 
 ```
-##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat
-## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0
-## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0
-## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0
-##   PCTURBHI_Cat PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat
-## 1         0.11         2.81       38.56          0         0         0            0         0.46
-## 2         0.11         2.64       38.56          0         0         0            0         0.46
-## 3         0.11         2.50       38.56          0         0         0            0         0.46
-##   PCTURBOP_Cat PCTWDWET_Cat
-## 1         3.20         8.44
-## 2         3.10         8.44
-## 3         2.92         8.59
+##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat
+## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11
+## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11
+## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11
+##   PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat PCTWDWET_Cat
+## 1         2.81       38.56          0         0         0            0         0.46         3.20         8.44
+## 2         2.64       38.56          0         0         0            0         0.46         3.10         8.44
+## 3         2.50       38.56          0         0         0            0         0.46         2.92         8.59
 ```
 
 ```r
@@ -554,105 +482,90 @@ U.S. Environmental Protection Agency. 2022. National Aquatic Resource Surveys. N
 
 <br>
 <a id="TableA1"></a>
-**Table A1.** Table linking genus numbers from [Figure 1](#Figure1) to genera names and associated genus cluster.
+**Table A1.** Table linking genus numbers from [Figure 1](#Figure1) to genera names, the number of samples in each agency in which the genera were found, and associated genus cluster.
 
-| Genus Number |            Genus | Group                                                                                                                                                                                                              |
-|-----------------:|-----------------:|:-----------------------------------|
-|            1 |       Acentrella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            2 |        Acerpenna | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            4 |       Amercaenis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            5 |    Americabaetis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            6 |     Anafroptilum | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            8 |     Anthopotamus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            9 |        Apobaetis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           12 |        Attenella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           13 |           Baetis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           14 |         Baetisca | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           15 |        Barbaetis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           16 |     Brachycercus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           17 |           Caenis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           18 |      Callibaetis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           19 |        Campsurus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           20 |       Caudatella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           21 |     Centroptilum | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           23 |      Choroterpes | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           24 |          Cinygma | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           25 |        Cinygmula | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           26 |             Cloe | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           27 |           Cloeon | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           29 |         Dannella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           30 |       Dentatella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           31 |         Diphetor | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           32 |         Drunella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           33 |       Ecdyonurus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           34 |         Ecdyurus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           37 |          Epeorus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           38 |         Ephemera | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           39 |      Ephemerella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           40 |          Ephoron | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           41 |       Eurycaenis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           42 |     Eurylophella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           43 |      Euthyplocia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           44 |         Fallceon | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           48 |     Habrophlebia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           49 |  Habrophlebiodes | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           50 |       Heptagenia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           51 |     Heterocloeon | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           52 |        Hexagenia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           55 |             Iron | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           56 |         Ironodes | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           57 |          Iswaeon | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           58 |      Labiobaetis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           60 |     Leptophlebia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           61 |       Leucrocuta | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           64 |      Litobrancha | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           65 |    Maccaffertium | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           66 |        Matriella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           69 |   Neochoroterpes | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           71 |             Nixe | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           72 |       Palingenia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           73 |     Paracloeodes | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           74 | Paraleptophlebia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           75 |        Penelomax | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           80 |        Plauditus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           82 |      Potamanthus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           83 |        Procloeon | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           84 |     Pseudocloeon | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           85 |  Raptoheptagenia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           86 |      Rhithrogena | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           87 |       Serratella | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           88 |        Sparbarus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           90 |        Stenacron | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           91 |        Stenonema | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           92 |       Susperatus | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           93 |     Teloganopsis | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           94 |        Timpanoga | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|           96 |           Tsalia | 1,2,4,5,6,8,9,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27,29,30,<br>31,32,33,34,37,38,39,40,41,42,43,44,48,49,50,51,52,55,56,57,58,60,61,64,<br>65,66,69,71,72,73,74,75,80,82,83,84,85,86,87,88,90,91,92,93,94,96 |
-|            3 |      Allenhyphes | 3,11,53,59,95,98                                                                                                                                                                                                   |
-|           11 |         Asioplax | 3,11,53,59,95,98                                                                                                                                                                                                   |
-|           53 |  Homoleptohyphes | 3,11,53,59,95,98                                                                                                                                                                                                   |
-|           59 |      Leptohyphes | 3,11,53,59,95,98                                                                                                                                                                                                   |
-|           95 |    Tricorythodes | 3,11,53,59,95,98                                                                                                                                                                                                   |
-|           98 |      Vacupernius | 3,11,53,59,95,98                                                                                                                                                                                                   |
-|            7 |         Anodonta | 7,97                                                                                                                                                                                                               |
-|           97 |      Utterbackia | 7,97                                                                                                                                                                                                               |
-|           10 |          Armiger | 10,47                                                                                                                                                                                                              |
-|           47 |         Gyraulus | 10,47                                                                                                                                                                                                              |
-|           22 |     Ceratopsyche | 22,54                                                                                                                                                                                                              |
-|           54 |      Hydropsyche | 22,54                                                                                                                                                                                                              |
-|           28 |    Cystobranchus | 28,76                                                                                                                                                                                                              |
-|           76 |        Piscicola | 28,76                                                                                                                                                                                                              |
-|           35 |        Einfeldia | 35,46                                                                                                                                                                                                              |
-|           46 |   Glyptotendipes | 35,46                                                                                                                                                                                                              |
-|           36 |           Elimia | 36,81                                                                                                                                                                                                              |
-|           81 |       Pleurocera | 36,81                                                                                                                                                                                                              |
-|           45 |      Fluminicola | 45,63                                                                                                                                                                                                              |
-|           63 |     Lithoglyphus | 45,63                                                                                                                                                                                                              |
-|           62 |        Libellula | 62,79                                                                                                                                                                                                              |
-|           79 |        Plathemis | 62,79                                                                                                                                                                                                              |
-|           67 |          Menetus | 67,68                                                                                                                                                                                                              |
-|           68 |     Micromenetus | 67,68                                                                                                                                                                                                              |
-|           70 |   Neostempellina | 70,89                                                                                                                                                                                                              |
-|           89 |      Stempellina | 70,89                                                                                                                                                                                                              |
-|           77 |      Planorbella | 77,78                                                                                                                                                                                                              |
-|           78 |       Planorbula | 77,78                                                                                                                                                                                                              |
+| Genus Number |            Genus | EPA Samples | USGS Samples | Group                                                                                                                                                                                                              |
+|-----------------:|-----------------:|-----------------:|-----------------:|:-----------------------------------|
+|            1 | Acentrella | 1108 | 1269 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            2 | Acerpenna | 651 | 283 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            4 | Amercaenis | 51 | 38 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            5 | Americabaetis | 0 | 4 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            6 | Anafroptilum | 2089 | 297 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            8 | Apobaetis | 61 | 3 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            11 | Attenella | 292 | 62 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            12 | Baetis | 3870 | 3445 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            13 | Baetisca | 349 | 66 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            14 | Barbaetis | 1 | 0 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            15 | Brachycercus | 243 | 3 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            16 | Caenis | 3611 | 1221 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            17 | Callibaetis | 758 | 105 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            18 | Caudatella | 194 | 30 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            19 | Centroptilum | 2089 | 297 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            21 | Cinygma | 141 | 2 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            22 | Cinygmula | 726 | 167 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            23 | Cloeon | 7 | 0 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            25 | Dannella | 46 | 55 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            26 | Dentatella | 3 | 0 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            27 | Diphetor | 822 | 311 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            28 | Drunella | 1084 | 472 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            29 | Ecdyonurus | 1133 | 478 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            31 | Epeorus | 1073 | 602 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            32 | Ephemera | 359 | 112 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            33 | Ephemerella | 1077 | 434 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            34 | Eurylophella | 625 | 95 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            35 | Fallceon | 830 | 656 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            40 | Heptagenia | 253 | 240 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            41 | Heterocloeon | 252 | 185 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            42 | Hexagenia | 746 | 49 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            44 | Ironodes | 162 | 39 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            45 | Iswaeon | 108 | 5 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            46 | Labiobaetis | 381 | 295 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            49 | Leucrocuta | 1133 | 478 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            51 | Litobrancha | 12 | 0 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            52 | Maccaffertium | 2039 | 1117 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            53 | Matriella | 29 | 17 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            58 | Nixe | 1133 | 478 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            59 | Paracloeodes | 449 | 123 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            61 | Penelomax | 0 | 2 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            66 | Plauditus | 576 | 499 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            67 | Procloeon | 2089 | 297 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            68 | Pseudocloeon | 685 | 0 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            69 | Raptoheptagenia | 1 | 1 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            70 | Rhithrogena | 705 | 421 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            71 | Serratella | 565 | 108 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            72 | Sparbarus | 158 | 16 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            74 | Stenacron | 964 | 495 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            75 | Stenonema | 2039 | 1117 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            76 | Susperatus | 6 | 1 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            77 | Teloganopsis | 165 | 132 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            78 | Timpanoga | 135 | 13 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            80 | Tsalia | 0 | 1 | 1,2,4,5,6,8,11,12,13,14,15,16,17,18,19,21,22,23,25,26,27,28,29,<br>31,32,33,34,35,40,41,42,44,45,46,49,51,52,53,58,59,61,<br>66,67,68,69,70,71,72,74,75,76,77,78,80 |
+|            3 | Allenhyphes | 0 | 5 | 3,10,43,47,79,82 |
+|            10 | Asioplax | 67 | 58 | 3,10,43,47,79,82 |
+|            43 | Homoleptohyphes | 12 | 13 | 3,10,43,47,79,82 |
+|            47 | Leptohyphes | 22 | 17 | 3,10,43,47,79,82 |
+|            79 | Tricorythodes | 2747 | 1612 | 3,10,43,47,79,82 |
+|            82 | Vacupernius | 17 | 15 | 3,10,43,47,79,82 |
+|            7 | Anodonta | 9 | 0 | 7,81 |
+|            81 | Utterbackia | 3 | 0 | 7,81 |
+|            9 | Armiger | 5 | 2 | 9,37 |
+|            37 | Gyraulus | 663 | 153 | 9,37 |
+|            20 | Choroterpes | 204 | 67 | 20,38,39,48,56,60 |
+|            38 | Habrophlebia | 18 | 5 | 20,38,39,48,56,60 |
+|            39 | Habrophlebiodes | 19 | 1 | 20,38,39,48,56,60 |
+|            48 | Leptophlebia | 59 | 5 | 20,38,39,48,56,60 |
+|            56 | Neochoroterpes | 54 | 52 | 20,38,39,48,56,60 |
+|            60 | Paraleptophlebia | 922 | 545 | 20,38,39,48,56,60 |
+|            24 | Cystobranchus | 1 | 0 | 24,62 |
+|            62 | Piscicola | 8 | 0 | 24,62 |
+|            30 | Chironomus/Einfeldia | 2813 | .455 | 30,36 |
+|            36 | Glyptotendipes | 923 | 403 | 30,36 |
+|            50 | Libellula | 56 | 3 | 50,65 |
+|            65 | Plathemis | 6 | 0 | 50,65 |
+|            54 | Menetus | 711 | 52 | 54,55 |
+|            55 | Micromenetus | 0 | 120 | 54,55 |
+|            57 | Neostempellina | 107 | 6 | 57,73 |
+|            73 | Stempellina | 847 | 73 | 57,73 |
+|            63 | Planorbella | 200 | 69 | 63,64 |
+|            64 | Planorbula | 9 | 0 | 63,64 |
+

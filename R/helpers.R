@@ -1539,10 +1539,6 @@ invertTaxFix <- function(dataset,
   dat1 = data.frame(Genus = gns,
                     Slash = .slashgen_fin[cnt])
 
-
-  ##Fix a naming issue. Needs to include "Glyptotendipes"
-  dat1$Slash[grep("Chironomus/Einfeldia", dat1$Slash)] <- "Chironomus/Einfeldia/Glyptotendipes"
-
   dat1F <- dat1 %>%
     group_by(Genus) %>%
     slice(1) %>%
@@ -1571,7 +1567,7 @@ invertTaxFix <- function(dataset,
   probslashl <- split(probslash, probslash$Genus)
 
   ##Take the unique genera in the "slash" genera and join them into a larger
-  ##lump "slash" genus
+  ## "slash" genus
   for(i in 1:length(probslashl)){
     probslashl[[i]]$Fix <- paste(sort(unique(unlist(strsplit(probslashl[[i]]$Slash,"/")))),
                                  collapse = "/")
@@ -1579,9 +1575,6 @@ invertTaxFix <- function(dataset,
 
   ##Bind these together
   fix_slash <- data.frame(dplyr::bind_rows(probslashl))
-
-  ##add this...
-  fix_slash[nrow(fix_slash) + 1,] = c("Chironomus","Chironomus/Einfeldia",NA,"Chironomus/Einfeldia/Glyptotendipes")
 
   ##Fix a naming issue; going to make sure this is fixed.
 

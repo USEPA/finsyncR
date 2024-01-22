@@ -48,6 +48,17 @@
 #'   included in the USGS datasets, specifically observed wetted width of the
 #'   stream/river.
 #'
+#'   \code{taxonLevel} refers to the taxonomic resolution (Genus, Class, Family, etc.)
+#'   for the sample by taxa matrix. The input values for this parameter are case
+#'   sensitive and must start with a capital letter. All observations taxonomically
+#'   coarser than the `taxonLevel` provided are dropped from the output community matrix.
+#'   For instance, if `taxonLevel = "Genus"` , then observations identified at
+#'   Subfamily, Family, Order, Class, or Phylum levels are dropped. When
+#'   `taxonLevel = "Subfamily"`, for taxa without subfamilies, the Family-level
+#'   designation is returned. When `taxonLevel = "Subfamily"`, for taxa without subfamilies, the Family-level
+#'   designation is returned. "Genus" is the finest level of taxonomic resolution
+#'   provided for macroinvertebrates.
+#'
 #'   \code{taxonFix} provides options to account for changes in taxonomy across time,
 #'   especially in instances in which species have been reorganized into new genera.
 #'   \code{taxonFix} operates on the genera level. \code{taxonFix = "none"}
@@ -188,7 +199,7 @@ getInvertData <- function(dataType = "occur",
     ##(eg if taxonLevel == "Family", retain ALL taxonomic levels at Family and Below)
 
     if(taxonLevel != "Mixed"){
-         mycols = c(.TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$mycols,"Mixed")
+        mycols = c(.TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$mycols,"Mixed")
         taxcols = c(.TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == taxonLevel)]]$taxcols,"Mixed")
     } else {
       taxcols = .TaxLevCols_Inverts[[which(names(.TaxLevCols_Inverts) == "Phylum")]]$taxcols

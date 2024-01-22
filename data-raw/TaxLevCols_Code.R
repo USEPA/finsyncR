@@ -420,8 +420,10 @@ sysdata_filenames <- load("R/sysdata.rda")
 
 .slashgen_fin <- c(.slashgen_fin, "Arctopelopia/Conchapelopia/Hayesomyia/Helopelopia/Meropelopia/Rheopelopia/Telopelopia/Thienemannimyia")
 
+
+.slashgen_fin <- .slashgen_fin[-30]
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames[-7], ".clust_labels"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames[-15], ".clust_labels"), file = "R/sysdata.rda",
      compress = "xz")
 
 
