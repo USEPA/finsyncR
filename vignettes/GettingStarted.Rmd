@@ -99,7 +99,7 @@ Second, species-level identifications of some groups of macroinvertebrates are i
 Across the time span of the USGS and EPA macroinvertebrate datasets, the taxonomy of many macroinvertebrates changed, specifically membership of species within genera.
 `taxonFix` provides options to harmonize taxonomy through time, especially in instances in which membership of a given organism within a genus is not clear.
 In certain scenarios a given organism may have been identified to genus at the lab bench, yet when taxonomic updates occurred, only some species within the originally designated genus moved to a different genus.
-This scenario prevents confident identification of a given organism’s “true” genus because it is possible the organism in question might belong to the original genus or the new, updated genus.
+This scenario prevents confident identification of a given organism’s "true" genus because it is possible the organism in question might belong to the original genus or the new, updated genus.
 For instance, consider an organism identified with the hypothetical genus *Hereiam*.
 At the time of the identification, there were only two species within this genus: *Hereiam here* and *Hereiam there*.
 In the time since the identification in the lab, the taxonomy has been reorganized, and presently the genus *Hereiam* only contains one species *Hereiam here*, and a new genus has been created.
@@ -107,7 +107,7 @@ In the time since the identification in the lab, the taxonomy has been reorganiz
 So, it is unclear whether the organism, originally identified as *Hereiam* belongs to *Hereiam* or *Thereiam* because of the updates in taxonomy. This issue is especially difficult to overcome when attempting to harmonize samples that were identified before and after a taxonomic update occurred.
 
 The package provides three options for accounting for these changes in taxonomy through time using the parameter `taxonFix`.
-First, the default option, `taxonFix = “lump”`, creates complexes of genera by combining all possible genera for the given organism.
+First, the default option, `taxonFix = "lump"`, creates complexes of genera by combining all possible genera for the given organism.
 This approach prioritizes retaining observations of organisms by giving a unified name (e.g. genus1/genus2/genus3) to a complex of genera that have been linked through changes in taxonomy through time.
 With this approach, there is no temporal increase or decrease in the number of genera, given that individual genera (e.g. genus1) never appear outside of the unified genera name (e.g. genus1/genus2/genus3).
 Thus, in the hypothetical example above, *Hereiam* and *Thereiam* would occur as "*Hereiam/Thereiam*" throughout the generated dataset.
@@ -122,7 +122,7 @@ The authors, for instance, do not advise users evaluate temporal changes in dens
 <center>
 <a id="Figure2"></a>
 
-![**Figure 2.** Visualization of the relationships among genera linked by taxonomic reorganization through time. Each numbered circle represents an individual genus. Lines between genera pairs indicate that the taxonomic designation of at least one species from one of the genus pairs was updated to be in the other genus in the pair. Clusters (genera complexes) are formed by sets of these linked genera. See [Appendix Table A1](#TableA1) for table linking numbers in the above cluster to genera names.](https://github.com/mahonmb/Misc/blob/main/GenusClustersUpdate.jpg?raw=true){width="350"}
+![**Figure 2.** Visualization of the relationships among genera linked by taxonomic reorganization through time. Each numbered circle represents an individual genus. Lines between genera pairs indicate that the taxonomic designation of at least one species from one of the genus pairs was updated to be in the other genus in the pair. Clusters (genera complexes) are formed by sets of these linked genera. See [Appendix Table A1](#TableA1) for table linking numbers in the above cluster to genera names.](https://github.com/mahonmb/Misc/blob/main/GenusClusters.jpg?raw=true){width="350"}
 
 </center>
 <br>
@@ -178,7 +178,7 @@ The strength of the data in this package is its spatial coverage and extent, not
 
 `boatableStreams` provides the option to include data from large streams and rivers that are too deep to be sampled by wading.
 All USGS sampling locations are considered wadeable streams, while EPA samples both wadeable streams and boatable rivers.
-As such, `boatableStreams` should only be `TRUE` when `agency` is set to `“EPA”` only, to ensure the highest comparability between the two agency datasets. `boatableStreams` should be `FALSE` when users want to include WSA (EPA samples from 2000-2004) in analyses.
+As such, `boatableStreams` should only be `TRUE` when `agency` is set to `"EPA"` only, to ensure the highest comparability between the two agency datasets. `boatableStreams` should be `FALSE` when users want to include WSA (EPA samples from 2000-2004) in analyses.
 
 `rarefy` provides an option to randomly subsample samples to a user defined number of individuals.
 The target number of organisms identified within a sample varies across programs, agencies, time, and space, which introduces variation in output datasets.
@@ -246,13 +246,13 @@ For macroinvertebrates, density calculations are simply macroinvertebrate abunda
 Macroinvertebrate abundance is the number of individuals counted in a gridded tray in the lab multiplied by the inverse of the proportion of the sample collected in the field that was identified at the lab bench (`PropID`).
 The calculation of `PropID` differs by agency because of differences in splitting samples in the field.
 For USGS samples, a proportion of the homogenized field sample is seperated before specimen identification and enumeration in the lab.
-This proportion is the “field split ratio” ([Figure 6](#Figure6)).
+This proportion is the "field split ratio" ([Figure 6](#Figure6)).
 EPA field samples are not split. For both EPA and USGS the processing of samples in the lab is similar.
 In the lab, organisms in a sample are placed uniformly among the grids in a subsampling tray.
 Grids are randomly selected and organisms within a given grid are identified until a target organism count is reached.
-The proportion of grids used to identify macroinvertebrates at the lab bench is the “lab subsampling ratio”.
-For USGS samples, `PropID` is calculated by multiplying the “field split ratio” and the “lab subsampling ratio” ([Figure 6](#Figure6)).
-For EPA samples, `PropID` is equal to the “lab subsampling ratio” ([Figure 6](#Figure6)).
+The proportion of grids used to identify macroinvertebrates at the lab bench is the "lab subsampling ratio".
+For USGS samples, `PropID` is calculated by multiplying the "field split ratio" and the "lab subsampling ratio" ([Figure 6](#Figure6)).
+For EPA samples, `PropID` is equal to the "lab subsampling ratio" ([Figure 6](#Figure6)).
 
 Sampling effort is a source of variation and should be considered in the context of research questions because sampling effort can influence sample abundances and probability of detection of any given organism.
 For instance, sampling effort varies across sampling events and is also correlated with time in some cases, which could lead to biased interpretation in certain analyses.
@@ -337,7 +337,7 @@ The units of sampling effort cancel in the calculation of MSC~*ij*~.
 The function then sums the MSC~*ij*~ among gear types, resulting in a single row of data for each sampling event, regardless of the number of gear types used.
 See [Gibson-Reinemer et al. (2017)](https://doi.org/10.1139/cjfas-2016-0003) for more regarding the computation of MGMS.
 
-Users should set standardize to either “`CPUE`" or "`MGMS`" if they are interested in comparing abundance values across sites.
+Users should set standardize to either "`CPUE`" or "`MGMS`" if they are interested in comparing abundance values across sites.
 Note: some of the samples lacked information on either stream length sampled or sampling effort.
 Therefore, if a user is interested in occurrence (presence/absence) data only, then set `dataType = "occur"` and `standardize = "none"`, which provides an occurrence dataset that contains the samples that are dropped with standardization.
 
@@ -348,7 +348,7 @@ Because hybrids are difficult to identify in the field, users should keep the de
 Set `sharedTaxa = FALSE` when building a dataset with samples collected by only one agency.
 We recommend using `sharedTaxa = TRUE` when building a dataset with samples collected by both agencies, so that species pools are consistent.
 
-Finally, `boatableStreams` provides the option to include data from large streams and rivers that are too deep to sample by wading. Most USGS sampling locations are considered wadeable streams, while EPA samples both wadeable streams and boatable streams and rivers. Thus, set `boatableStreams` to `TRUE` when `agency` is set to “`EPA`” only, to ensure the highest comparability between the two agency datasets.
+Finally, `boatableStreams` provides the option to include data from large streams and rivers that are too deep to sample by wading. Most USGS sampling locations are considered wadeable streams, while EPA samples both wadeable streams and boatable streams and rivers. Thus, set `boatableStreams` to `TRUE` when `agency` is set to "`EPA`" only, to ensure the highest comparability between the two agency datasets.
 
 
 ```r
@@ -413,14 +413,14 @@ getNLCDData(data = dat,
 ```
 
 ```
-##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat
-## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11
-## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11
-## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11
-##   PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat PCTWDWET_Cat
-## 1         2.81       38.56          0         0         0            0         0.46         3.20         8.44
-## 2         2.64       38.56          0         0         0            0         0.46         3.10         8.44
-## 3         2.50       38.56          0         0         0            0         0.46         2.92         8.59
+##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat PCTHBWET_Cat
+## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11         2.81
+## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11         2.64
+## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11         2.50
+##   PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat PCTWDWET_Cat
+## 1       38.56          0         0         0            0         0.46         3.20         8.44
+## 2       38.56          0         0         0            0         0.46         3.10         8.44
+## 3       38.56          0         0         0            0         0.46         2.92         8.59
 ```
 
 ```r

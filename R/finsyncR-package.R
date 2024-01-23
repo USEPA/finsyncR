@@ -7,9 +7,9 @@
 #' rivers and streams. The package streamlines
 #' the process of retrieving and working with these data, making the process of
 #' utilizing these data  easier for researchers. The data resources used in this
-#' package are from United States Environmental Protection Agency’s National
+#' package are from United States Environmental Protection Agency's National
 #' Aquatic Resources Surveys, namely the National River and Streams Assessment,
-#' and United States Geological Survey’s BioData.
+#' and United States Geological Survey's BioData.
 #'
 #` The package provides abundance and occurrence data for fish and macroinvertebrates
 #` at a variety of levels of taxonomic resolution. The package provides flexibility

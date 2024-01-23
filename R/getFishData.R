@@ -38,6 +38,14 @@
 #'   include non-wadeable streams. Some information included in the EPA dataset
 #'   are not included in the USGS datasets, specifically observed wetted width of the stream or river.
 #'
+#'   \code{taxonLevel} refers to the taxonomic resolution (Species, Genus, Family, etc.)
+#'   for the sample by taxa matrix. The input values for this parameter are case
+#'   sensitive and must start with a capital letter. All observations taxonomically
+#'   coarser than the `taxonLevel` provided are dropped from the output community matrix.
+#'   For instance, if `taxonLevel = "Genus"`, then observations identified at
+#'   Subfamily, Family, Order, Class, or Phylum levels are dropped. "Species" is
+#'   the finest level of taxonomic resolution provided for fish.
+#'
 #'   To standardize fish abundance data (\code{standardize = "CPUE"}), abundances
 #'   are divided by the product of
 #'   sampling effort (minutes shocked, number of seine hauls, number of
@@ -193,7 +201,6 @@ getFishData <- function(dataType = "occur",
                "SPECIES",
                "SCIENTIFIC",
                "FINAL_NAME")
-    NRSA_FISH_wSite
     mycols <- mycols[!(mycols %in% (taxonLevel.nrsa))]
 
     NRSA_FISH_comm <- NRSA_FISH_wSite %>%
@@ -256,6 +263,7 @@ getFishData <- function(dataType = "occur",
              Agency = "USGS")%>%
       relocate(Agency, .after = SiteNumber) %>%
       dplyr::select(-StateFIPSCode, -CountyFIPSCode)  %>%
+      rename("SampleID" = "SIDNO") %>%
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
 
   } else if(any(grepl("EPA", agency)) & any(grepl("USGS", agency))) {
@@ -266,8 +274,9 @@ getFishData <- function(dataType = "occur",
                                     WettedWidth = NA,
                                     Agency = "USGS",
                                     FishCollection = "Fish Collected") %>%
+                             rename("SampleID" = "SIDNO") %>%
                              dplyr::select(-StateFIPSCode, -CountyFIPSCode, -MethodCode),
-                           NRSA_FISH_comm2 %>% mutate(Agency = "EPA")) %>%
+                           NRSA_FISH_comm2 %>% mutate(Agency = "EPA"))  %>%
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
   } else {}
 

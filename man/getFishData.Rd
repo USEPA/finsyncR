@@ -60,6 +60,14 @@ which is the default. Note that by default, only moving waters classified as
 include non-wadeable streams. Some information included in the EPA dataset
 are not included in the USGS datasets, specifically observed wetted width of the stream or river.
 
+\code{taxonLevel} refers to the taxonomic resolution (Species, Genus, Family, etc.)
+for the sample by taxa matrix. The input values for this parameter are case
+sensitive and must start with a capital letter. All observations taxonomically
+coarser than the \code{taxonLevel} provided are dropped from the output community matrix.
+For instance, if \code{taxonLevel = "Genus"}, then observations identified at
+Subfamily, Family, Order, Class, or Phylum levels are dropped. "Species" is
+the finest level of taxonomic resolution provided for fish.
+
 To standardize fish abundance data (\code{standardize = "CPUE"}), abundances
 are divided by the product of
 sampling effort (minutes shocked, number of seine hauls, number of

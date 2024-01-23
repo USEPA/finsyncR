@@ -93,8 +93,8 @@ especially in instances in which species have been reorganized into new genera.
 makes no adjustment. \code{taxonFix = "lump"} prioritizes retaining observations
 by giving a unified "slash" genera name to all species and genera that have been linked
 through changes in taxonomy through time (e.g. genera1/genera2/genera3). Note:
-of 98 problematic genera that exist throughout both datasets,
-\code{taxonFix = "lump"} results in 13 "lumped" genera. All but two complexes
+of 82 problematic genera that exist throughout both datasets,
+\code{taxonFix = "lump"} results in 11 "lumped" genera. All but two complexes
 of genera were composed of two individual genera. A single complex of genera
 within the Ephemeroptera order included 70 individual genera, and a second
 complex of Ephemeroptera genera included six individual genera. Because of

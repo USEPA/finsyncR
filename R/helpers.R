@@ -2134,7 +2134,7 @@ fishStandardization <- function(dataset,
                                             "NRSA1314",
                                             "NRSA1819")),
                CoordinateDatum = "NAD83") %>%
-        rename(NAWQA.SMCOD = UID,
+        rename(SampleID = UID,
                SiteNumber = SITE_ID,
                SiteName = SITENAME,
                CollectionDate = DATE_COL,
