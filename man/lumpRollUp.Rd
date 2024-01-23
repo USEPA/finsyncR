@@ -21,7 +21,7 @@ with \code{getInvertData(taxonLevel = "Mixed")}.
 }
 \details{
 In some instances, like when calculating MMIs for example, it may be useful
-to roll the "lumped" genera to their lowest common taxonomic resolution
+to roll the 11 "lumped" genera to their lowest common taxonomic resolution
 (Subfamily, Family, or Order). This function does not adjust "slash" taxa, or
 those organisms that were identified to a slash genus designation in the lab
 (see the Getting Started vignette for more details). This function gathers the lowest common

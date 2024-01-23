@@ -1,0 +1,108 @@
+---
+title: "Calculating Abundances, Raw Counts, and Rarefying Raw Counts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+In specific instances, users may want to generate datasets with abundances or raw counts of organisms.
+At this time, the `getInvertData()` function does not inherently provide for these types of data.
+However, sample abundances and raw counts can be back-calculated from density values (see Figure 2 in the "Getting Started" vignette).
+This vignette provides the code for this back calculation, as well as code to rarefy count data.
+
+
+Read in the necessary packages and generate the invertebrate density dataset.
+
+```{r Back calculation and rarefy count, eval = F}
+library(tidyverse); library(finsyncR)
+
+##Generate invertebrate dataset
+i2 <- getInvertData(  dataType = "density",
+                      taxonLevel = "Mixed",
+                      taxonFix = "lump",
+                      agency = c("USGS","EPA"),
+                      lifestage = FALSE,
+                      rarefy = F,
+                      sharedTaxa = F,
+                      seed = 0,
+                      boatableStreams = T)
+```
+
+
+Since density is sample abundance / Area sampled, we can calculate sample abundance by multiplying density values by the area sampled.
+
+```{r, eval = F}
+i2_Abundance <- i2 %>%
+  mutate(across(.cols = !(Agency:Gen_ID_Prop),
+                ~ . * AreaSampTot_m2))
+```
+
+
+Then, since sample abundance is Raw Count * (1 / Proportion of the sample identified [`PropID`]), we can calculate raw count values by multiplying sample abundance values by `PropID` (proportion of the sample identified).
+Here we include the `round()` function, because of rounding in the calculation of density, many raw count values are not integers. So, including `round()` provides the integer value of the raw counts.
+
+```{r, eval = F}
+i2_RawCount <- i2_Abundance %>%
+  mutate(across(.cols = !(Agency:Gen_ID_Prop),
+                ~ round(. * PropID,0)))
+```
+
+
+Following the generation of raw counts for the dataset, users can generate rarefies count data.
+Notes on specific portions of the code are provided.
+Two importance pieces of information to note:
+1) The following code should only be used when `taxonLevel = "Mixed"`, because this is the only way to ensure that no specimen are dropped within a sample.
+2) The following code will take considerable time to complete, as there are 16,579,059 rows of unique taxa within samples in the full dataset. It is estimated that for the full dataset, the code will take ~30 minutes to rarefy counts. 
+
+```{r, eval = F}
+##users can specify the rarefaction level
+rarefyCount = 300
+
+##set seed for consistent output
+set.seed(1)
+
+##run the code to rarefy raw counts to the "rarefyCount" level
+i2_RarefiedRawCount <- i2_RawCount %>%
+#change to long format for ease
+  pivot_longer(cols = !(Agency:Gen_ID_Prop),
+               values_to = "RawCount",
+               names_to = "Taxa") %>%
+  group_by(across(Agency:Gen_ID_Prop)) %>%
+#calculate sample specimen counts
+  mutate(SampleCount = sum(RawCount)) %>%
+  ungroup() %>%
+#remove all samples with few than rarefyCount specimen
+  filter(SampleCount >= rarefyCount) %>%
+  dplyr::select(-SampleCount) %>%
+  group_by(across(Agency:Taxa)) %>%
+#for each taxa within a sample, make RawCount number of replicate rows,
+#such that the number of specimen for a given taxa is represented by a row of data
+  dplyr::slice(rep(1:dplyr::n(), times=RawCount)) %>%
+  dplyr::ungroup() %>%
+  dplyr::group_by(across(Agency:Gen_ID_Prop)) %>%
+#for each sample, randomly select rarefyCount number of rows
+  dplyr::slice_sample(n = rarefyCount, replace = FALSE) %>%
+  dplyr::ungroup() %>%
+  group_by(across(Agency:Taxa)) %>%
+#for each taxa within a sample, generate the new rarefied counts (number of
+#rows after resampling)
+  dplyr::mutate(RawCount = n()) %>%
+#slice to just 1 row of data for each taxa within a sample, as the RawCounts
+#now contain the rarefied counts
+  dplyr::slice(1) %>%
+  dplyr::ungroup() %>%
+#pivot back to a wide format and fill in NAs with 0s
+  pivot_wider(id_cols = Agency:Gen_ID_Prop,
+              names_from = "Taxa",
+              values_from = "RawCount",
+              values_fill = 0)
+
+```
+
+
+

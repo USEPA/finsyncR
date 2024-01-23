@@ -85,7 +85,8 @@ Subfamily, Family, Order, Class, or Phylum levels are dropped. When
 \code{taxonLevel = "Subfamily"}, for taxa without subfamilies, the Family-level
 designation is returned. When \code{taxonLevel = "Subfamily"}, for taxa without subfamilies, the Family-level
 designation is returned. "Genus" is the finest level of taxonomic resolution
-provided for macroinvertebrates.
+provided for macroinvertebrates. The function also provides the option of returning
+the lowest level of taxonomic identification for all specimen (\code{taxonLevel = "Mixed"}).
 
 \code{taxonFix} provides options to account for changes in taxonomy across time,
 especially in instances in which species have been reorganized into new genera.
