@@ -28,6 +28,7 @@ National Rivers and Streams Assessment and USGS BioData."><meta property="og:ima
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/BackCalculation.html">Calculating Abundances, Raw Counts, and Rarefying Raw Counts</a>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting Started with finsyncR</a>
     <a class="dropdown-item" href="../articles/Metadata.html">Metadata</a>
   </div>
@@ -156,7 +157,8 @@ Subfamily, Family, Order, Class, or Phylum levels are dropped. When
 <code>taxonLevel = "Subfamily"</code>, for taxa without subfamilies, the Family-level
 designation is returned. When <code>taxonLevel = "Subfamily"</code>, for taxa without subfamilies, the Family-level
 designation is returned. "Genus" is the finest level of taxonomic resolution
-provided for macroinvertebrates.</p>
+provided for macroinvertebrates. The function also provides the option of returning
+the lowest level of taxonomic identification for all specimen (<code>taxonLevel = "Mixed"</code>).</p>
 <p><code>taxonFix</code> provides options to account for changes in taxonomy across time,
 especially in instances in which species have been reorganized into new genera.
 <code>taxonFix</code> operates on the genera level. <code>taxonFix = "none"</code>
