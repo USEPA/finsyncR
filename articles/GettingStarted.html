@@ -292,7 +292,7 @@ to harmonize samples that were identified before and after a taxonomic
 update occurred.</p>
 <p>The package provides three options for accounting for these changes
 in taxonomy through time using the parameter <code>taxonFix</code>.
-First, the default option, <code>taxonFix = “lump”</code>, creates
+First, the default option, <code>taxonFix = "lump"</code>, creates
 complexes of genera by combining all possible genera for the given
 organism. This approach prioritizes retaining observations of organisms
 by giving a unified name (e.g. genus1/genus2/genus3) to a complex of
@@ -318,7 +318,7 @@ obscure temporal patterns.</p>
 <br><center>
 <p><a id="Figure2"></a></p>
 <div class="figure">
-<img src="https://github.com/mahonmb/Misc/blob/main/GenusClustersUpdate.jpg?raw=true" width="350" alt=""><p class="caption"><strong>Figure 2.</strong> Visualization of the
+<img src="https://github.com/mahonmb/Misc/blob/main/GenusClusters.jpg?raw=true" width="350" alt=""><p class="caption"><strong>Figure 2.</strong> Visualization of the
 relationships among genera linked by taxonomic reorganization through
 time. Each numbered circle represents an individual genus. Lines between
 genera pairs indicate that the taxonomic designation of at least one
@@ -445,7 +445,7 @@ large streams and rivers that are too deep to be sampled by wading. All
 USGS sampling locations are considered wadeable streams, while EPA
 samples both wadeable streams and boatable rivers. As such,
 <code>boatableStreams</code> should only be <code>TRUE</code> when
-<code>agency</code> is set to <code>“EPA”</code> only, to ensure the
+<code>agency</code> is set to <code>"EPA"</code> only, to ensure the
 highest comparability between the two agency datasets.
 <code>boatableStreams</code> should be <code>FALSE</code> when users
 want to include WSA (EPA samples from 2000-2004) in analyses.</p>
@@ -814,14 +814,14 @@ and hay/pasture land covers), and “crop” (cultivated crop land use).</p>
 <span><span class="fu"><a href="../reference/getNLCDData.html">getNLCDData</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>,</span>
 <span>            scale <span class="op">=</span> <span class="st">"Cat"</span>,</span>
 <span>            group <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat</span></span>
-<span><span class="co">## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11</span></span>
-<span><span class="co">## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11</span></span>
-<span><span class="co">## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11</span></span>
-<span><span class="co">##   PCTHBWET_Cat PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat PCTWDWET_Cat</span></span>
-<span><span class="co">## 1         2.81       38.56          0         0         0            0         0.46         3.20         8.44</span></span>
-<span><span class="co">## 2         2.64       38.56          0         0         0            0         0.46         3.10         8.44</span></span>
-<span><span class="co">## 3         2.50       38.56          0         0         0            0         0.46         2.92         8.59</span></span></code></pre>
+<pre><code><span><span class="co">##      SiteNumber CollectionYear PCTURBMD_Cat PCTMXFST_Cat PCTHAY_Cat PCTURBLO_Cat PCTSHRB_Cat PCTURBHI_Cat PCTHBWET_Cat</span></span>
+<span><span class="co">## 1 USGS-05276005           2005         0.25         1.02      41.31         3.84           0         0.11         2.81</span></span>
+<span><span class="co">## 2 USGS-05276005           2007         0.35         1.02      41.48         3.84           0         0.11         2.64</span></span>
+<span><span class="co">## 3 USGS-05276005           2009         0.46         1.02      41.48         3.91           0         0.11         2.50</span></span>
+<span><span class="co">##   PCTCROP_Cat PCTGRS_Cat PCTOW_Cat PCTBL_Cat PCTCONIF_Cat PCTDECID_Cat PCTURBOP_Cat PCTWDWET_Cat</span></span>
+<span><span class="co">## 1       38.56          0         0         0            0         0.46         3.20         8.44</span></span>
+<span><span class="co">## 2       38.56          0         0         0            0         0.46         3.10         8.44</span></span>
+<span><span class="co">## 3       38.56          0         0         0            0         0.46         2.92         8.59</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">##select 10 random samples from the dataset to get LULC data for</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
