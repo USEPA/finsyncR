@@ -231,10 +231,10 @@ getFishData <- function(dataType = "occur",
         dplyr::relocate(tidyselect::contains("tax_"), .after = FishCollection)
     } else{
       NRSA_FISH_comm <- NRSA_FISH_comm  %>%
-        dplyr::mutate(`tax_No fish` = ifelse(`tax_No fish` == 0,
+        dplyr::mutate(`tax_No Fish` = ifelse(`tax_No Fish` == 0,
                                       "Fish Collected",
                                       "No Fish Collected")) %>%
-        dplyr::rename("FishCollection" = "tax_No fish")%>%
+        dplyr::rename("FishCollection" = "tax_No Fish")%>%
         dplyr::relocate(tidyselect::contains("tax_"), .after = FishCollection)
     }
 

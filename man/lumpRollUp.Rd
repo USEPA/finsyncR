@@ -46,3 +46,6 @@ InvertsUpdatedLump <- lumpRollUp(Inverts)
 }
 
 }
+\author{
+Michael Mahon
+}

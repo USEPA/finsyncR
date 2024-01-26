@@ -1914,8 +1914,7 @@ fishStandardization <- function(dataset,
                           .after = tidyselect::last_col())
 
       }
-      ####ISSUE HERE
-      ##For some reason there are some zeros for standardize method
+
       if (standardize == "CPUE"){
         fish_comm2 <- dataset %>%
           dplyr::filter(!is.na(NumberSeineHauls) | !is.na(SecondsShockTime) |
@@ -2077,9 +2076,8 @@ fishStandardization <- function(dataset,
                                                      NumberSnorkelingTransects))) %>%
         dplyr::relocate(tidyselect::contains("tax_"),
                         .after = tidyselect::last_col()) %>%
-        dplyr::select(-SecondsShockTime,
-                      -SIDNO) %>%
-        dplyr::relocate(tidyselect::any_of(.ReorderUSGSBioDataColNames))
+        dplyr::select(-SecondsShockTime) %>%
+        dplyr::relocate(SIDNO, tidyselect::any_of(.ReorderUSGSBioDataColNames))
     }
 
     return(fish_comm2)
