@@ -108,7 +108,6 @@
 <span></span>
 <span><span class="va">Fish</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/getFishData.html">getFishData</a></span><span class="op">(</span>taxonLevel <span class="op">=</span> <span class="st">"Species"</span>,</span>
 <span>                    agency <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USGS"</span>,<span class="st">"EPA"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Harmonizing USGS and EPA data                                      Finalizing data for output                           finsyncR data synchronization complete</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Fish</span><span class="op">)</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">36</span>,<span class="fl">90</span>,<span class="fl">400</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate</span></span>
@@ -154,8 +153,10 @@
 <p>All contributions to this project will be released under the CCO-1.0 license file dedication. By submitting a pull request or issue, you are agreeing to comply with this waiver of copyright interest.</p>
 </div>
 <div class="section level2">
-<h2 id="disclaimer">Disclaimer<a class="anchor" aria-label="anchor" href="#disclaimer"></a>
+<h2 id="disclaimers">Disclaimers<a class="anchor" aria-label="anchor" href="#disclaimers"></a>
 </h2>
+<p>The approaches provided in this package concerning the way the BioData and NRSA data are treated are not necessarily the same as the approaches used in other USGS and EPA publications or national assessments. So, replicating analyses using the processed data in this package may not produce identical results. For instance, multimetric indices produced from NRSA data from <code>finsyncR</code> may not match multimetric indices in EPA national assessment reports.</p>
+<p>The methods developed to join the EPA and USGS datasets described in this manuscript have not been designed with the intent of adding other fish and macroinvertebrate datasets. So, the appropriateness of these methods cannot be guaranteed for other datasets.</p>
 <p>The United States Environmental Protection Agency (EPA) GitHub project code is provided on an “as is” basis and the user assumes responsibility for its use. EPA has relinquished control of the information and no longer has responsibility to protect the integrity , confidentiality, or availability of the information. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by EPA. The EPA seal and logo shall not be used in any manner to imply endorsement of any commercial product or activity by EPA or the United States Government.</p>
 </div>
 </div>
