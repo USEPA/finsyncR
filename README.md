@@ -41,7 +41,6 @@ library(finsyncR)
 
 Fish <- getFishData(taxonLevel = "Species",
                     agency = c("USGS","EPA"))
-#>  Gathering and cleaning USGS raw data                     Applying taxonomic fixes to USGS data                     Applying count standardization to USGS data                     Gathering, joining, and cleaning EPA raw data                     Applying taxonomic fixes to EPA data                     Applying count standardization to EPA data                     Harmonizing USGS and EPA data                                      Finalizing data for output                           finsyncR data synchronization complete
 
 head(Fish)[,c(1:5,36,90,400)]
 #>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate
@@ -109,7 +108,19 @@ All contributions to this project will be released under the CCO-1.0
 license file dedication. By submitting a pull request or issue, you are
 agreeing to comply with this waiver of copyright interest.
 
-## Disclaimer
+## Disclaimers
+
+The approaches provided in this package concerning the way the BioData and
+NRSA data are treated are not necessarily the same as the approaches used in
+other USGS and EPA publications or national assessments. So, replicating
+analyses using the processed data in this package may not produce identical
+results. For instance, multimetric indices produced from NRSA data from
+`finsyncR` may not match multimetric indices in EPA national assessment reports.
+
+The methods developed to join the EPA and USGS datasets described in this
+manuscript have not been designed with the intent of adding other fish and
+macroinvertebrate datasets. So, the appropriateness of these methods cannot
+be guaranteed for other datasets.
 
 The United States Environmental Protection Agency (EPA) GitHub project
 code is provided on an “as is” basis and the user assumes responsibility

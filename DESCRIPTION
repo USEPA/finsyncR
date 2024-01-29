@@ -30,7 +30,7 @@ Authors@R:
       person(given = "Stefan",
            family = "Kunz",
            role = c("aut"),
-           email = "stkunz@uni-landau.de")
+           email = "Stefan.Kunz@bgr.de")
            )
 Maintainer: Michael Mahon <mahon.michael@epa.gov>
 Description:

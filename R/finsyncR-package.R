@@ -64,12 +64,26 @@
 #' datasets can be found in the "Getting Started"
 #' vignette: `vignette("GettingStarted", package = "finsyncR")`.
 #'
-#' **Of note**: The approach provided in this package concerning the way the
-#' USEPA National Rivers and Streams Assessment data are treated is not
-#' necessarily the same as the approach used in the National Rivers and
-#' Streams Assessment national reports.
+#' In addition, users may wish to calculate abundances and raw counts or to
+#' rarefy raw counts. This functionality is not inherently provided within
+#' the `getInvertData()` function, but code to make these calculations can be
+#' found in the "Calculating Abundances, Raw Counts, and Rarefying Raw Counts"
+#' vignette `vignette("BackCalculation", package = "finsyncR")`.
 #'
-#' **Disclaimer**: The United States Environmental Protection Agency (EPA) GitHub
+#' **Disclaimers**
+#' The approaches provided in this package concerning the way the BioData and
+#' NRSA data are treated are not necessarily the same as the approaches used in
+#' other USGS and EPA publications or national assessments. So, replicating
+#' analyses using the processed data in this package may not produce identical
+#' results. For instance, multimetric indices produced from NRSA data from
+#' `finsyncR` may not match multimetric indices in EPA national assessment reports.
+#'
+#' The methods developed to join the EPA and USGS datasets described in this
+#' manuscript have not been designed with the intent of adding other fish and
+#' macroinvertebrate datasets. So, the appropriateness of these methods cannot
+#' be guaranteed for other datasets.
+#'
+#' Finally, the United States Environmental Protection Agency (EPA) GitHub
 #' project code is provided on an "as is" basis and the user assumes
 #' responsibility for its use. EPA has relinquished control of the information
 #' and no longer has responsibility to protect the integrity , confidentiality,

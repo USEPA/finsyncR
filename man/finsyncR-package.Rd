@@ -50,12 +50,26 @@ A compendium on the correct use of the finsyncR package and its output
 datasets can be found in the "Getting Started"
 vignette: \code{vignette("GettingStarted", package = "finsyncR")}.
 
-\strong{Of note}: The approach provided in this package concerning the way the
-USEPA National Rivers and Streams Assessment data are treated is not
-necessarily the same as the approach used in the National Rivers and
-Streams Assessment national reports.
+In addition, users may wish to calculate abundances and raw counts or to
+rarefy raw counts. This functionality is not inherently provided within
+the \code{getInvertData()} function, but code to make these calculations can be
+found in the "Calculating Abundances, Raw Counts, and Rarefying Raw Counts"
+vignette \code{vignette("BackCalculation", package = "finsyncR")}.
 
-\strong{Disclaimer}: The United States Environmental Protection Agency (EPA) GitHub
+\strong{Disclaimers}
+The approaches provided in this package concerning the way the BioData and
+NRSA data are treated are not necessarily the same as the approaches used in
+other USGS and EPA publications or national assessments. So, replicating
+analyses using the processed data in this package may not produce identical
+results. For instance, multimetric indices produced from NRSA data from
+\code{finsyncR} may not match multimetric indices in EPA national assessment reports.
+
+The methods developed to join the EPA and USGS datasets described in this
+manuscript have not been designed with the intent of adding other fish and
+macroinvertebrate datasets. So, the appropriateness of these methods cannot
+be guaranteed for other datasets.
+
+Finally, the United States Environmental Protection Agency (EPA) GitHub
 project code is provided on an "as is" basis and the user assumes
 responsibility for its use. EPA has relinquished control of the information
 and no longer has responsibility to protect the integrity , confidentiality,
@@ -83,7 +97,7 @@ Authors:
   \item Ryan Hill \email{hill.ryan@epa.gov}
   \item Terry Brown \email{brown.terryn@epa.gov} [reviewer]
   \item Ethan Brown \email{ebrown23@nd.edu}
-  \item Stefan Kunz \email{stkunz@uni-landau.de}
+  \item Stefan Kunz \email{Stefan.Kunz@bgr.de}
 }
 
 }
