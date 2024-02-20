@@ -138,12 +138,12 @@ getFishData <- function(dataType = "occur",
   }
 
   if(any(grepl("USGS", agency))){
-    cat(" Gathering and cleaning USGS raw data                    ")
+    cat(" finsyncR is running: Gathering and cleaning USGS raw data                    ")
     fish_info <- acquireData("fishes",
                              "USGS",
                              "streams")
 
-    cat('\r',"Applying taxonomic fixes to USGS data                    ")
+    cat('\r',"finsyncR is running: Applying taxonomic fixes to USGS data                    ")
     fish_info <- fishTaxFix(fish_info,
                             "USGS")
 
@@ -170,7 +170,7 @@ getFishData <- function(dataType = "occur",
                          values_from = SumAbundance,
                          values_fill = 0)
 
-    cat('\r',"Applying count standardization to USGS data                    ")
+    cat('\r',"finsyncR is running: Applying count standardization to USGS data                    ")
     fish_comm2 <- fishStandardization(fish_comm,
                                       dataType,
                                       standardize,
@@ -179,12 +179,12 @@ getFishData <- function(dataType = "occur",
   }
 
   if(any(grepl("EPA", agency))){
-    cat('\r',"Gathering, joining, and cleaning EPA raw data                    ")
+    cat('\r',"finsyncR is running: Gathering, joining, and cleaning EPA raw data                    ")
     NRSA_FISH_wSite <- acquireData("fishes",
                                    "EPA",
                                    "streams")
 
-    cat('\r',"Applying taxonomic fixes to EPA data                    ")
+    cat('\r',"finsyncR is running: Applying taxonomic fixes to EPA data                    ")
     NRSA_FISH_wSite <- fishTaxFix(NRSA_FISH_wSite,
                                   "EPA")
 
@@ -240,7 +240,7 @@ getFishData <- function(dataType = "occur",
 
 
 
-    cat('\r',"Applying count standardization to EPA data                    ")
+    cat('\r',"finsyncR is running: Applying count standardization to EPA data                    ")
 
     NRSA_FISH_comm2 <- fishStandardization(NRSA_FISH_comm,
                                       dataType,
@@ -267,7 +267,7 @@ getFishData <- function(dataType = "occur",
       mutate(dplyr::across(tidyselect::starts_with("tax_"), ~tidyr::replace_na(.,0)))
 
   } else if(any(grepl("EPA", agency)) & any(grepl("USGS", agency))) {
-    cat("\r","Harmonizing USGS and EPA data                                     ")
+    cat("\r","finsyncR is running: Harmonizing USGS and EPA data                                     ")
     full_fish <- bind_rows(fish_comm2 %>%
                              mutate(SiteNumber = paste("USGS-",SiteNumber,sep = ""),
                                     # StandardMethod = as.character(StandardMethod),
@@ -286,7 +286,7 @@ getFishData <- function(dataType = "occur",
       dplyr::mutate(dplyr::across(tidyselect::starts_with("tax_"),
                                   ~replace(., . > 0, 1)))
   }
-  cat("\r","Finalizing data for output                          ")
+  cat("\r","finsyncR is running: Finalizing data for output                          ")
   ##Remove those observations with 0s in their StandardMethod
   full_fish <- full_fish %>%
     filter(StandardMethod != 0) %>%
@@ -337,7 +337,7 @@ getFishData <- function(dataType = "occur",
   ##shared Taxa code
   if(isTRUE(sharedTaxa) & any(grepl("EPA", agency)) & any(grepl("USGS", agency))){
     ##List of NAWQA taxa
-    cat('\r',"Removing taxa not in both USGS and EPA datasets                 ")
+    cat('\r',"finsyncR is running: Removing taxa not in both USGS and EPA datasets                 ")
 
     notbothfish <- colnames(full_fish %>%
                               dplyr::group_by(Agency) %>%

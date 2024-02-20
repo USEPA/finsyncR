@@ -35,6 +35,10 @@ You can install the released version of `finsyncR` from
 
 This is a basic example which shows you how to use the `getFishData()`
 function to generate the fish dataset for both USGS and USEPA datasets.
+Users should be aware that the `getFishData()` and `getInvertData()`
+functions take a fair amount of time to run. While running, the
+functions print statements updating the user on the progress of the
+workflow.
 
 ``` r
 library(finsyncR)
@@ -43,21 +47,36 @@ Fish <- getFishData(taxonLevel = "Species",
                     agency = c("USGS","EPA"))
 
 head(Fish)[,c(1:5,36,90,400)]
-#>   Agency ProjectLabel    SiteNumber      StudyReachName CollectionDate
-#> 1   USGS     MMSD Eco USGS-04086600 04086600-A-MMSD Eco     2007-09-10
-#> 2   USGS     MMSD Eco USGS-04087030 04087030-A-MMSD Eco     2007-09-05
-#> 3   USGS     MMSD Eco USGS-04087070 04087070-A-MMSD Eco     2007-09-05
-#> 4   USGS     MMSD Eco USGS-04087088 04087088-A-MMSD Eco     2007-09-04
-#> 5   USGS     MMSD Eco USGS-04087119 04087119-A-MMSD Eco     2007-09-12
-#> 6   USGS     MMSD Eco USGS-04087204 04087204-A-MMSD Eco     2007-09-07
-#>   Pimephales.notatus Pomoxis.nigromaculatus Astyanax.mexicanus
-#> 1                  0                      0                  0
-#> 2                  0                      0                  0
-#> 3                  0                      0                  0
-#> 4                  1                      0                  0
-#> 5                  0                      0                  0
-#> 6                  0                      0                  0
+#>   Agency      SampleID ProjectLabel    SiteNumber      StudyReachName
+#> 1   USGS BDB-000025003     MMSD Eco USGS-04086600 04086600-A-MMSD Eco
+#> 2   USGS BDB-000025011     MMSD Eco USGS-04087030 04087030-A-MMSD Eco
+#> 3   USGS BDB-000025015     MMSD Eco USGS-04087070 04087070-A-MMSD Eco
+#> 4   USGS BDB-000025019     MMSD Eco USGS-04087088 04087088-A-MMSD Eco
+#> 5   USGS BDB-000025023     MMSD Eco USGS-04087119 04087119-A-MMSD Eco
+#> 6   USGS BDB-000025034     MMSD Eco USGS-04087204 04087204-A-MMSD Eco
+#>   Percina.caprodes Notropis.telescopus Notropis.amabilis
+#> 1                0                   0                 0
+#> 2                0                   0                 0
+#> 3                0                   0                 0
+#> 4                0                   0                 0
+#> 5                0                   0                 0
+#> 6                0                   0                 0
 ```
+
+## Possible uses of finsyncR
+
+Potential uses of the finsyncR package and resulting data include
+studies of changes in fish and macroinvertebrate communities across
+space and time and the environmental causes and ecological consequences
+of those changes. The table below provides example code to generate
+macroinvertebrates and fish datasets given hypothetical research
+questions.
+
+| Research question                                                                                                            | Output dataset requested                                                                                                                               |                                                                                                                                                                                                                                                                         Macroinvertebrates |                                                                                                                                                                                                                        Fish |
+|:--------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| How does density/CPUE change through time across EPA and USGS samples?                                                       | Density/CPUE at sites for lowest taxonomic resolution, with shared taxa only, removing hybrid fish, and excluding boatable streams/rivers              |                                  `getInvertData(dataType = "density",` <br> `taxonLevel = "Genus",` <br> `taxonFix = "lump",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = FALSE,` <br> `sharedTaxa = TRUE,` <br> `seed = 0,` <br> `boatableStreams = FALSE)` |          `getFishData(dataType = "density",` <br> `taxonLevel = "Species",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "CPUE",` <br> `hybrids = FALSE,` <br> `sharedTaxa = TRUE,` <br> `boatableStreams = FALSE)` |
+| How does the composition of families differ between EPA and USGS samples?                                                    | Occurrence at sites for Family resolution, with all taxa, rarefying macroinvertebrate counts to 300 individuals, and excluding boatable streams/rivers |          `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = TRUE,`<br> `rarefyCount = 300,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = FALSE)` |                                    `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = FALSE)` |
+| What are spatial occupancy patterns within the Upper-Midwest Ecoregion using the randomized sampling design of the EPA NARS? | Occurrence for lowest taxonomic resolution for only EPA samples, then filtered to the UWM Ecoregion                                                    | `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("EPA"),` <br> `rarefy = TRUE,`<br> `rarefyCount = 500,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` | `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` |
 
 ## Metadata
 
@@ -75,6 +94,17 @@ datasets can be found in the “Getting Started” vignette:
 For information on how to contribute to the `finsyncR` package, please
 see the [contributing to finsyncR
 document](https://github.com/USEPA/finsyncR/blob/main/CONTRIBUTING.md).
+
+## Packages of interest
+
+Other R packages of potential interest to `finsyncR` users include
+[StreamCatTools](https://github.com/USEPA/StreamCatTools/) and
+[TADA](https://github.com/USEPA/tada). `StreamCatTools` is an R package
+for accessing StreamCat data via the StreamCat API and for working with
+site data in conjunction with StreamCat and NHDPlus. `TADA` is an R
+package can be used to compile and evaluate Water Quality Portal (WQP)
+data for samples collected from surface water monitoring sites on
+streams and lakes.
 
 ## Open-Source Code Policy
 
@@ -108,19 +138,20 @@ All contributions to this project will be released under the CCO-1.0
 license file dedication. By submitting a pull request or issue, you are
 agreeing to comply with this waiver of copyright interest.
 
-## Disclaimers
+## Disclaimer
 
-The approaches provided in this package concerning the way the BioData and
-NRSA data are treated are not necessarily the same as the approaches used in
-other USGS and EPA publications or national assessments. So, replicating
-analyses using the processed data in this package may not produce identical
-results. For instance, multimetric indices produced from NRSA data from
-`finsyncR` may not match multimetric indices in EPA national assessment reports.
+The approaches provided in this package concerning the way the BioData
+and NRSA data are treated are not necessarily the same as the approaches
+used in other USGS and EPA publications or national assessments. So,
+replicating analyses using the processed data in this package may not
+produce identical results. For instance, multimetric indices produced
+from NRSA data from `finsyncR` may not match multimetric indices in EPA
+national assessment reports.
 
-The methods developed to join the EPA and USGS datasets described in this
-manuscript have not been designed with the intent of adding other fish and
-macroinvertebrate datasets. So, the appropriateness of these methods cannot
-be guaranteed for other datasets.
+The methods developed to join the EPA and USGS datasets described in
+this manuscript have not been designed with the intent of adding other
+fish and macroinvertebrate datasets. So, the appropriateness of these
+methods cannot be guaranteed for other datasets.
 
 The United States Environmental Protection Agency (EPA) GitHub project
 code is provided on an “as is” basis and the user assumes responsibility

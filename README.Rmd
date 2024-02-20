@@ -36,8 +36,7 @@ devtools::install_github("USEPA/finsyncR",
 
 ## Example of function and output
 
-This is a basic example which shows you how to use the `getFishData()` function to generate the fish dataset for both USGS and USEPA datasets.
-
+This is a basic example which shows you how to use the `getFishData()` function to generate the fish dataset for both USGS and USEPA datasets. Users should be aware that the `getFishData()` and `getInvertData()` functions take a fair amount of time to run. While running, the functions print statements updating the user on the progress of the workflow.
 
 ```{r example}
 library(finsyncR)
@@ -48,6 +47,18 @@ Fish <- getFishData(taxonLevel = "Species",
 head(Fish)[,c(1:5,36,90,400)]
 ```
 
+## Possible uses of finsyncR
+
+Potential uses of the finsyncR package and resulting data include studies of changes in fish and macroinvertebrate communities across space and time and the environmental causes and ecological consequences of those changes. The table below provides example code to generate macroinvertebrates and fish datasets given hypothetical research questions.
+
+
+| Research question                                                                                                            | Output dataset requested                                                                                                                               |                                                                                                                                                                                                                                                                         Macroinvertebrates |                                                                                                                                                                                                                        Fish |
+|:-----------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| How does density/CPUE change through time across EPA and USGS samples?                                                       | Density/CPUE at sites for lowest taxonomic resolution, with shared taxa only, removing hybrid fish, and excluding boatable streams/rivers              |                                  `getInvertData(dataType = "density",` <br> `taxonLevel = "Genus",` <br> `taxonFix = "lump",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = FALSE,` <br> `sharedTaxa = TRUE,` <br> `seed = 0,` <br> `boatableStreams = FALSE)` |          `getFishData(dataType = "density",` <br> `taxonLevel = "Species",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "CPUE",` <br> `hybrids = FALSE,` <br> `sharedTaxa = TRUE,` <br> `boatableStreams = FALSE)` |
+| How does the composition of families differ between EPA and USGS samples?                                                    | Occurrence at sites for Family resolution, with all taxa, rarefying macroinvertebrate counts to 300 individuals, and excluding boatable streams/rivers |          `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("USGS","EPA"),` <br> `lifestage = FALSE,` <br> `rarefy = TRUE,`<br> `rarefyCount = 300,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = FALSE)` |                                    `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("USGS","EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = FALSE)` |
+| What are spatial occupancy patterns within the Upper-Midwest Ecoregion using the randomized sampling design of the EPA NARS? | Occurrence for lowest taxonomic resolution for only EPA samples, then filtered to the UWM Ecoregion                                                    | `getInvertData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `taxonFix = "none",` <br> `agency = c("EPA"),` <br> `rarefy = TRUE,`<br> `rarefyCount = 500,` <br> `sharedTaxa = FALSE,` <br> `seed = 1,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` | `getFishData(dataType = "occur",` <br> `taxonLevel = "Family",` <br> `agency = c("EPA"),` <br> `standardize = "none",` <br> `sharedTaxa = FALSE,` <br> `boatableStreams = TRUE) %>%` <br> `filter(NARS_Ecoregion == "UMW")` |
+
+
 ## Metadata
 Metadata can be found in the "Metadata" vignette: `vignette("Metadata", package = "finsyncR")`.
 
@@ -56,6 +67,9 @@ A compendium on the correct use of the finsyncR package and its output datasets 
 
 ## Contributing to finsyncR
 For information on how to contribute to the `finsyncR` package, please see the [contributing to finsyncR document](https://github.com/USEPA/finsyncR/blob/main/CONTRIBUTING.md).
+
+## Packages of interest
+Other R packages of potential interest to `finsyncR` users include [StreamCatTools](https://github.com/USEPA/StreamCatTools/) and [TADA](https://github.com/USEPA/tada). `StreamCatTools` is an R package for accessing StreamCat data via the StreamCat API and for working with site data in conjunction with StreamCat and NHDPlus. `TADA` is an R package can be used to compile and evaluate Water Quality Portal (WQP) data for samples collected from surface water monitoring sites on streams and lakes.
 
 ## Open-Source Code Policy
 

@@ -423,7 +423,7 @@ sysdata_filenames <- load("R/sysdata.rda")
 
 .slashgen_fin <- .slashgen_fin[-30]
 sysdata_filenames <- load("R/sysdata.rda")
-save(list = c(sysdata_filenames[-15], ".clust_labels"), file = "R/sysdata.rda",
+save(list = c(sysdata_filenames[-13], ".allsitesCOMID"), file = "R/sysdata.rda",
      compress = "xz")
 
 
