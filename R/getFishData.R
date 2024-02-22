@@ -351,7 +351,7 @@ getFishData <- function(dataType = "occur",
   } else {}
 
   colnames(full_fish) = sub("tax_", "", colnames(full_fish))
-  cat("\r","finsyncR data synchronization complete                          \n")
+  cat("\r","finsyncR data synchronization complete                                      \n")
   return(data.frame(full_fish))
 
 }

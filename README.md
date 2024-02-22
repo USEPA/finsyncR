@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# finsyncR <a href="https://didactic-carnival-mz54op5.pages.github.io/"><img src="man/figures/logo.png" align="right" height="138" /></a>
+# finsyncR <a href="https://usepa.github.io/finsyncR/"><img src="man/figures/logo.png" align="right" height="138" /></a>
 
 <!-- badges: start -->
 

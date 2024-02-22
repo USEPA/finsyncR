@@ -533,7 +533,7 @@ getInvertData <- function(dataType = "occur",
 
   ##Remove the "tax_" prefix
   colnames(invert_comms1) = sub("tax_", "", colnames(invert_comms1))
-  cat("\r","finsyncR data synchronization complete                          \n")
+  cat("\r","finsyncR data synchronization complete                                      \n")
 
   return(data.frame(invert_comms1))
 

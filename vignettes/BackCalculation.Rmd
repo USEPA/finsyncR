@@ -2,7 +2,7 @@
 title: "Calculating Abundances, Raw Counts, and Rarefying Raw Counts"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting Started}
+  %\VignetteIndexEntry{BackCalculation}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
