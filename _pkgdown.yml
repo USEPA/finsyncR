@@ -1,4 +1,14 @@
 url: https://usepa.github.io/finsyncR/
 template:
   bootstrap: 5
+    includes:
+      in_header: |
+       <!-- Global site tag (gtag.js) - Google Analytics -->
+       <script async src="https://www.googletagmanager.com/gtag/js?id=G-P48H117T55"></script>
+       <script>
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
 
+         gtag('config', 'G-P48H117T55');
+       </script>
